@@ -90,7 +90,7 @@ The run-level signals from brief 0002 §7, as `key: value` lines:
 | iterations per closed | iterations ÷ tasks closed, 2 decimals; `n/a` when zero closed |
 | gate failures | records with `outcome: gate_fail` |
 | review rejections | records with `outcome: review_fail` |
-| attempts burned | sum of `attempts` across records |
+| attempts burned | records whose `outcome` is not `done` — **not** the sum of the `attempts` field, which is a cumulative per-task counter and would double-count a task that appears in several records |
 | no-progress streak | trailing records whose `tasks_done` did not increase |
 | estimated spend | sum of `total_cost_usd` across all sessions |
 
