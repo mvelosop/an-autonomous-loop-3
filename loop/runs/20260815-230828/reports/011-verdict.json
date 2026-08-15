@@ -1,0 +1,14 @@
+{
+  "task": "T11",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "docs/runstat.md documents every field runstat reads from a session record and from an iterations record", "met": true, "evidence": "docs/runstat.md:27-40 tables phase, iteration, total_cost_usd, num_turns, duration_ms, is_error, permission_denials; docs/runstat.md:53-60 tables iteration, task, outcome, attempts, tasks_done, tasks_total"},
+    {"criterion": "Each of the eight signals has its derivation stated", "met": true, "evidence": "docs/runstat.md:83-92, a table row per signal (iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend)"},
+    {"criterion": "The attempts-burned derivation explicitly warns against summing the cumulative attempts field", "met": true, "evidence": "docs/runstat.md:94-101, 'The attempts-burned trap' subsection states it explicitly, plus a note in the iterations.jsonl field table at line 58"},
+    {"criterion": "The document states that loop/run.sh computes the same signals and that the two must agree", "met": true, "evidence": "docs/runstat.md:103-130, 'Cross-check against the driver' section names loop/run.sh's sig_* functions and print_signals and ties each to a runstat signal; verified against loop/run.sh:188-223 and the names match exactly"},
+    {"criterion": "Every signal label used in the document matches the label the CLI actually prints", "met": true, "evidence": "gate T11.log confirms: ran `runstat signals` on the fixture and checked all 8 printed labels appear in the doc verbatim -- passed with 'docs ok'"},
+    {"criterion": "No absolute paths appear anywhere in the document", "met": true, "evidence": "gate asserts '/Users/' not in text and passed; manual read of the full file found no absolute paths"}
+  ],
+  "findings": [],
+  "notes": "Scope is clean -- only docs/runstat.md was added, no code touched. Cross-referenced the sig_* function names and print_signals labels cited in the doc's cross-check section against the actual loop/run.sh source (lines 188-223) and they match exactly, so this isn't a vague claim of agreement."
+}

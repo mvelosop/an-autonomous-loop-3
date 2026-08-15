@@ -134,3 +134,10 @@ asked; the brief now asks.
 - **Summary:** Added README.md: what runstat is, install/run with uv, each of the three commands with a captured worked example, the exit-code contract, and the input layout it reads.
 - **Files:** README.md
 - **Notes for next iteration:** Every command example in the README was captured by actually running the installed `runstat` console script against tests.fixtures.write_fixture_run's output (and a compare variant with the last iterations.jsonl record dropped), then pasted verbatim -- not hand-typed -- so the gate's line-by-line check against `runstat signals` output passes. The signals block in the README is character-for-character the real stdout, including the trailing blank line inside the compare example's 'tasks closed' row (its delta column is blank, so that row's trailing whitespace matters if anyone diffs it, though the gate only checks substring containment). Did not add a table-of-contents or badges -- the brief's acceptance list is the whole scope here.
+
+## T11 — Document the telemetry contract and the cross-check against the driver
+
+- **Outcome:** done (review: PASS)
+- **Summary:** Added docs/runstat.md: the on-disk telemetry contract field by field, each of the eight signals' derivation, the attempts-burned trap, and a cross-check section tying each signal back to the matching sig_* function in loop/run.sh.
+- **Files:** docs/runstat.md
+- **Notes for next iteration:** Cross-referenced loop/run.sh's signals section (sig_iterations/sig_spend/sig_closed/sig_total/sig_gate_fails/sig_review_fails/sig_attempts/sig_per_closed/sig_streak, and print_signals) line by line against src/runstat/signals.py's compute_signals/format_signals to state each of the eight derivations in terms both implementations already agree on -- did not change either implementation, this task is documentation only. Repeated the attempts-burned warning (don't sum the cumulative `attempts` field) in both the field table and its own subsection, matching how loop/run.sh comments it inline, since the brief calls this out as the trap the doc must state explicitly. No absolute paths used anywhere in the doc.

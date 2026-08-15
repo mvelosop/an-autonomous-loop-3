@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **10/11 done** · iteration 10
+**Status:** running · **11/11 done** · iteration 11
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:27:25Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:28:53Z
 
 ## Progress
 
@@ -20,7 +20,7 @@
 - [x] **T8** — Enforce the exit-code and error-output contract across all commands
 - [x] **T9** — Add the end-to-end worked-example acceptance test
 - [x] **T10** — Write the README, with every documented example matching real output
-- [ ] **T11** — Document the telemetry contract and the cross-check against the driver
+- [x] **T11** — Document the telemetry contract and the cross-check against the driver
 
 ## Tasks
 
@@ -490,7 +490,7 @@ PY
 
 ### T11 — Document the telemetry contract and the cross-check against the driver
 
-`pending` · depends on: T9
+`done` · depends on: T9
 
 Write docs/runstat.md: the on-disk telemetry contract runstat consumes, field by field, and how each of the eight signals is derived. This is the document that keeps the loop driver and runstat from drifting apart — brief 0002 acceptance item 6 requires them to agree, and a derivation recorded in only one of the two implementations is how that agreement quietly breaks.
 

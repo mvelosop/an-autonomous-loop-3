@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 55454,
+  "num_turns": 14,
+  "stop_reason": "end_turn",
+  "session_id": "bf0defeb-6c49-4c57-9f60-7295e9b45efa",
+  "total_cost_usd": 0.5276738999999999,
+  "usage": {
+    "input_tokens": 4943,
+    "cache_creation_input_tokens": 44526,
+    "cache_read_input_tokens": 567513,
+    "output_tokens": 5029,
+    "output_tokens_details": {
+      "thinking_tokens": 279
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 44526,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 113,
+        "cache_read_input_tokens": 68120,
+        "cache_creation_input_tokens": 724,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 724
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 4943,
+      "outputTokens": 5029,
+      "cacheReadInputTokens": 567513,
+      "cacheCreationInputTokens": 44526,
+      "webSearchRequests": 0,
+      "costUSD": 0.5276738999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T11 done: added `docs/runstat.md` documenting the telemetry contract, all eight signal derivations, the attempts-burned trap, and the cross-check against `loop/run.sh`. Task's verify command and the full test suite (31 passed) both pass; `loop/proposal.json` is written and I've stopped here per scope discipline.",
+  "ttft_ms": 1677,
+  "ttft_stream_ms": 1080,
+  "time_to_request_ms": 14,
+  "type": "result",
+  "duration_ms": 56719,
+  "uuid": "41d543ac-fee3-4b69-8f74-0f82077d3f06",
+  "phase": "work",
+  "iteration": 11
+}

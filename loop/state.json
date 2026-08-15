@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 10,
+  "iteration": 11,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:27:25Z",
+  "updated": "2026-08-15T22:28:53Z",
   "tasks": [
     {
       "id": "T1",
@@ -273,7 +273,7 @@
         "No absolute paths appear anywhere in the document"
       ],
       "verify": "uv run python - <<'PY'\nimport pathlib, subprocess, sys, tempfile\nsys.path.insert(0, 'tests')\nfrom fixtures import write_fixture_run\n\nt = pathlib.Path('docs/runstat.md').read_text()\nfor k in ['sessions/', 'iterations.jsonl', 'phase', 'iteration', 'total_cost_usd',\n          'num_turns', 'duration_ms', 'is_error', 'permission_denials',\n          'outcome', 'attempts', 'tasks_done', 'tasks_total']:\n    assert k in t, k\nassert 'run.sh' in t, 'does not mention the driver it must agree with'\nassert '/Users/' not in t, 'absolute path in the document'\nr = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\np = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)\nassert p.returncode == 0, (p.returncode, p.stderr)\nlabels = [l.split(':', 1)[0].strip() for l in p.stdout.splitlines() if l.strip()]\nassert len(labels) == 8, labels\nfor lab in labels:\n    assert lab in t, 'label not documented: ' + lab\nprint('docs ok')\nPY",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     }
