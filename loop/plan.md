@@ -4,13 +4,13 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** max_iterations · **0/11 done** · iteration 0
+**Status:** running · **1/11 done** · iteration 1
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T19:45:00Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:10:18Z
 
 ## Progress
 
-- [ ] **T1** — Scaffold the runstat package with uv, src layout and pytest
+- [x] **T1** — Scaffold the runstat package with uv, src layout and pytest
 - [ ] **T2** — Write the fixture-run generator for the brief's worked example
 - [ ] **T3** — Load a run directory strictly, failing loudly on malformed input
 - [ ] **T4** — Compute the eight run-level signals as numbers, and format them separately
@@ -26,7 +26,7 @@
 
 ### T1 — Scaffold the runstat package with uv, src layout and pytest
 
-`pending` · depends on: none
+`done` · depends on: none
 
 Nothing can be built until there is a project uv can install and a test suite pytest can collect. This task creates the packaging skeleton — pyproject.toml, src/runstat/, and one real test — so that every later task can be verified by running the installed package rather than by poking at loose files. It also fixes the names later tasks depend on: the distribution is runstat and the console script points at runstat.cli:main.
 

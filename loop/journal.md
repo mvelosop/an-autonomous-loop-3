@@ -64,3 +64,10 @@ the plan itself is the operator's between them.
 The planner had declined a README, reading the brief's out-of-scope list as
 discouraging it. That was a defensible reading of a brief that simply never
 asked; the brief now asks.
+
+## T1 — Scaffold the runstat package with uv, src layout and pytest
+
+- **Outcome:** done (review: PASS)
+- **Summary:** Added the runstat packaging skeleton: pyproject.toml (hatchling src-layout build, console script runstat = runstat.cli:main, empty runtime deps, pytest as the sole dev dependency), src/runstat/__init__.py, and tests/test_smoke.py with one passing test.
+- **Files:** pyproject.toml, src/runstat/__init__.py, tests/test_smoke.py, uv.lock
+- **Notes for next iteration:** Used hatchling as the build backend with [tool.hatch.build.targets.wheel] packages = ["src/runstat"] so `uv sync` actually installs the src/ package rather than relying on a path hack. Dev dependency declared via [dependency-groups] dev = ["pytest"] (uv's current convention, PEP 735) rather than the older [tool.uv.dev-dependencies]. `uv sync` created uv.lock and .venv; .venv/__pycache__/.pytest_cache were already covered by .gitignore, uv.lock is new and untracked. The console script runstat is registered but runstat.cli does not exist yet, so `uv run runstat` currently raises ModuleNotFoundError for runstat.cli -- expected until T5 writes that module; import runstat and pytest both work now, which is all this task's acceptance requires.
