@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 4,
+  "iteration": 5,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:15:26Z",
+  "updated": "2026-08-15T22:17:53Z",
   "tasks": [
     {
       "id": "T1",
@@ -125,7 +125,7 @@
         "Tests drive the CLI over the fixture inside tmp_path and assert on content, not on column alignment."
       ],
       "verify": "uv run python -c \"\nimport sys,json,pathlib,tempfile,subprocess\nsys.path.insert(0,'tests')\nfrom fixtures import write_fixture_run\nr=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\np=subprocess.run(['runstat','summary',str(r)],capture_output=True,text=True)\nassert p.returncode==0, (p.returncode,p.stderr)\nlines=[l for l in p.stdout.splitlines() if l.strip()]\ndef toks(l):\n    return ''.join(ch if (ch.isdigit() or ch=='.') else ' ' for ch in l).split()\ndef row(name):\n    c=[l for l in lines if name in l.lower() and any(ch.isdigit() for ch in l)]\n    assert c, (name,p.stdout)\n    return set(toks(c[-1]))\nassert set(['1.98','12','141']) <= row('plan'), p.stdout\nassert set(['1.50','18','204']) <= row('work'), p.stdout\nassert set(['0.60','9','72']) <= row('review'), p.stdout\nassert set(['7','4.08','39','417']) <= row('total'), p.stdout\nassert 'estimat' in p.stdout.lower(), p.stdout\nv=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\na=v/'sessions'/'004-work.json'\nd=json.loads(a.read_text()); d['is_error']=True; a.write_text(json.dumps(d))\nb=v/'sessions'/'006-work.json'\nd=json.loads(b.read_text()); d['permission_denials']=[{'tool_name':'WebFetch'}]; b.write_text(json.dumps(d))\nq=subprocess.run(['runstat','summary',str(v)],capture_output=True,text=True)\nassert q.returncode==0, (q.returncode,q.stderr)\nassert '004-work.json' in q.stdout and '006-work.json' in q.stdout, q.stdout\nprint('summary ok')\n\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

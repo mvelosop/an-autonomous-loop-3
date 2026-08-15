@@ -1,0 +1,15 @@
+{
+  "task": "T5",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "Both `uv run runstat summary <run-dir>` and `uv run python -m runstat summary <run-dir>` work and produce the same output.", "met": true, "evidence": "src/runstat/cli.py builds a shared parser used by both entry points; __main__.py just calls cli.main(); test_summary_via_console_script (tests/test_summary.py:67) exercises the `runstat` console script and test_summary_matches_fixture_table exercises `python -m runstat`, both against the same fixture and assertions"},
+    {"criterion": "summary prints one row per phase present (plan, work, review) plus a total row, each carrying session count, total cost, total turns and total wall time.", "met": true, "evidence": "summary.py:22-37 compute_summary groups sessions by phase in plan/work/review order then appends a total row with the same four fields; verified by manual run below"},
+    {"criterion": "On the brief's fixture the rows pair up exactly as the brief's table does...", "met": true, "evidence": "Ran `uv run runstat summary` over tests/fixtures.write_fixture_run's output directly: plan 1/$1.98/12/141s, work 3/$1.50/18/204s, review 3/$0.60/9/72s, total 7/$4.08/39/417s -- byte-for-byte match with the brief's table"},
+    {"criterion": "Costs print to two decimals with a dollar sign; wall time prints as whole seconds with an s suffix (141s, not 141.0s and not 2m21s).", "met": true, "evidence": "summary.py:47 uses `${row['cost']:>8.2f}` and `{row['duration_s']:>6}s` with duration_s computed via round(ms/1000) in _row(); manual run shows '141s' not '141.0s'"},
+    {"criterion": "The output states somewhere that dollar figures are an estimate, not a bill.", "met": true, "evidence": "summary.py:50 appends 'Dollar figures are an estimate, not a bill.'"},
+    {"criterion": "Any session with is_error true, or with a non-empty permission_denials list, is called out in the output by its session file name; the command still exits 0.", "met": true, "evidence": "summary.py:33-35 builds `flagged`, format_summary:52-61 prints '  <path.name>: <reasons>'; cli.py's _cmd_summary always returns 0; test_summary_calls_out_error_and_denied_sessions (tests/test_summary.py:43) asserts both file names appear and returncode==0"},
+    {"criterion": "Tests drive the CLI over the fixture inside tmp_path and assert on content, not on column alignment.", "met": true, "evidence": "tests/test_summary.py uses tmp_path via write_fixture_run and asserts on digit-token sets extracted from lines (_digit_tokens/_row helpers), not on exact column positions"}
+  ],
+  "findings": [],
+  "notes": "Verified: uv run pytest -q -> 15 passed. Ran the actual fixture through `uv run runstat summary` and the output matched the brief's worked-example table exactly. No absolute paths in the new files. Scope stayed within the task's file list (cli.py only wires the summary subcommand; signals/compare are left for T6/T7 per the proposal's own notes, consistent with the brief's task list)."
+}

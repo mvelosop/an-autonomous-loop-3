@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **4/11 done** · iteration 4
+**Status:** running · **5/11 done** · iteration 5
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:15:26Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:17:53Z
 
 ## Progress
 
@@ -14,7 +14,7 @@
 - [x] **T2** — Write the fixture-run generator for the brief's worked example
 - [x] **T3** — Load a run directory strictly, failing loudly on malformed input
 - [x] **T4** — Compute the eight run-level signals as numbers, and format them separately
-- [ ] **T5** — Build the CLI entry points and the summary command
+- [x] **T5** — Build the CLI entry points and the summary command
 - [ ] **T6** — Add the signals command
 - [ ] **T7** — Add the compare command
 - [ ] **T8** — Enforce the exit-code and error-output contract across all commands
@@ -223,7 +223,7 @@ PY
 
 ### T5 — Build the CLI entry points and the summary command
 
-`pending` · depends on: T3
+`done` · depends on: T3
 
 This is the first thing an operator actually runs. It brings up the argument parser, the console script and python -m runstat, and implements summary: a per-phase rollup of sessions, cost, turns and wall time with a total row. The error and denial callouts are not decoration — a permission denial nobody sees is a fence in the wrong place, so a session with is_error true or a non-empty permission_denials list has to be named in the output.
 

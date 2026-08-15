@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 90496,
+  "num_turns": 17,
+  "stop_reason": "end_turn",
+  "session_id": "f8371caa-5cba-4c31-b241-8c591d03f31d",
+  "total_cost_usd": 0.6472496999999999,
+  "usage": {
+    "input_tokens": 3487,
+    "cache_creation_input_tokens": 44553,
+    "cache_read_input_tokens": 756119,
+    "output_tokens": 9509,
+    "output_tokens_details": {
+      "thinking_tokens": 3565
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 44553,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 205,
+        "cache_read_input_tokens": 68067,
+        "cache_creation_input_tokens": 804,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 804
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 3487,
+      "outputTokens": 9509,
+      "cacheReadInputTokens": 756119,
+      "cacheCreationInputTokens": 44553,
+      "webSearchRequests": 0,
+      "costUSD": 0.6472496999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T5 is done: added `src/runstat/cli.py`, `src/runstat/__main__.py`, `src/runstat/summary.py`, and `tests/test_summary.py`. The `summary` command works via both `runstat summary <run-dir>` and `python -m runstat summary <run-dir>`, matches the brief's per-phase table exactly, labels dollar figures as estimates, and calls out sessions with errors or permission denials by filename. The task's verify command passes and the full suite (`uv run pytest -q`) passes with 15 tests. Left state.json, journal.md, and committing to the driver as instructed.",
+  "ttft_ms": 1600,
+  "ttft_stream_ms": 1011,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 91297,
+  "uuid": "6939e17c-488d-4b07-a0d1-c5c4605f8fc9",
+  "phase": "work",
+  "iteration": 5
+}
