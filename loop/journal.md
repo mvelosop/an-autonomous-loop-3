@@ -141,3 +141,9 @@ asked; the brief now asks.
 - **Summary:** Added docs/runstat.md: the on-disk telemetry contract field by field, each of the eight signals' derivation, the attempts-burned trap, and a cross-check section tying each signal back to the matching sig_* function in loop/run.sh.
 - **Files:** docs/runstat.md
 - **Notes for next iteration:** Cross-referenced loop/run.sh's signals section (sig_iterations/sig_spend/sig_closed/sig_total/sig_gate_fails/sig_review_fails/sig_attempts/sig_per_closed/sig_streak, and print_signals) line by line against src/runstat/signals.py's compute_signals/format_signals to state each of the eight derivations in terms both implementations already agree on -- did not change either implementation, this task is documentation only. Repeated the attempts-burned warning (don't sum the cumulative `attempts` field) in both the field table and its own subsection, matching how loop/run.sh comments it inline, since the brief calls this out as the trap the doc must state explicitly. No absolute paths used anywhere in the doc.
+
+## Run ended — complete
+
+- **Run:** `20260815-230828` · 11 iteration(s) this run
+- **Plan:** 11/11 done, 0 blocked
+- **Signals:** 11 iterations · 1.00 per closed · 0 gate failure(s) · 0 review rejection(s) · 0 attempt(s) burned · streak 0 · ~$9.72

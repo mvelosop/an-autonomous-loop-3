@@ -177,3 +177,33 @@
 [36m[loop][0m cost=$0.34266810000000003 turns=9 dur=27s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T11 done
+[36m[loop][0m    committed 1142ae5
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            11
+[36m[loop][0m   tasks closed:          11/11
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         0
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       0
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $9.72 (estimate, not a bill)
+[36m[loop][0m 
+[36m[loop][0m ═══ complete ═══
+[36m[loop][0m run:    20260815-230828  (11 iteration(s) this run)
+[36m[loop][0m plan:   11/11 done, 0 blocked
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            11
+[36m[loop][0m   tasks closed:          11/11
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         0
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       0
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $9.72 (estimate, not a bill)
+[36m[loop][0m 
+[36m[loop][0m per-phase cost:
+[36m[loop][0m plan: 0 session(s), $0, 0 turns
+[36m[loop][0m work: 11 session(s), $5.77, 148 turns
+[36m[loop][0m review: 11 session(s), $3.95, 138 turns
+[36m[loop][0m 
+[36m[loop][0m plan complete. journal: loop/journal.md
