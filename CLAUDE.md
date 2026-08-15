@@ -55,5 +55,13 @@ standard library.
 
 ## Git
 
-Work happens on a `NNN-<slug>` branch, one per blog post. Commit locally only —
-**never push**. The per-iteration commits are the evidence the run happened.
+Work happens on a `NNN-<slug>` branch, one per blog post. Agents commit
+**locally only and never push** — pushing, opening PRs and merging are the
+operator's, and the driver makes every commit anyway (rule 5).
+
+A finished branch is **squash-merged** into `main`, so `main` reads as one
+commit per post. **The branch is never deleted.** It holds the loop's
+per-iteration commits, and those commits *are* the evidence the post is about —
+that each task was done by a separate, fresh session that could not see the
+others. A squash on `main` destroys the only record of that. Keep both: `main`
+for reading, the branch for proof.
