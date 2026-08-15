@@ -42,16 +42,18 @@ pass. Author around it — assert on the thing the task actually produces
 rather than on an empty suite. Do **not** solve this by adding a conftest hook
 that remaps exit 5 to 0; that puts a workaround for the loop inside the product.
 
-## Naming — an interim licence
+## Naming
 
-A pre-authored gate cannot reference an API that has no name yet, so **you may
-pin internal names** — modules, functions, exception classes, test helpers —
-where a verify command needs them. Say so in your report: it constrains
-structure and not just behaviour, which is a cost the operator should see.
+**Where the brief names something, use its name.** Modules, functions,
+exception classes, file paths, output labels — if it is written down, it is
+already decided and is not yours to improve on.
 
-This is interim. An `architect` skill will own naming and structure later; until
-it exists, define what you need in order to write the verifications, and no
-more. Do not pin a name a gate does not actually use.
+**Where the brief is silent, you may pin what a gate needs.** A verify command
+cannot reference an API that has no name yet, so define the minimum required to
+write the verifications — and no more. Do not pin a name that no gate uses.
+
+Report every name you pinned this way. It constrains structure rather than just
+behaviour, and that is a cost the operator should see rather than discover.
 
 ## Task shape
 
