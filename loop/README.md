@@ -101,6 +101,41 @@ Everything persisted passes through a mask that strips `$HOME` and the username.
 Transcripts are **not** archived unless `LOOP_ARCHIVE_TRANSCRIPTS=1`; they hold
 absolute paths and full file contents, and they never go inside the repo.
 
+## Tests
+
+```bash
+loop/tests/run-all.sh          # all 12 scenarios
+loop/tests/run-all.sh 03 07    # just the ones matching
+```
+
+**Run this before and after any change to `run.sh`.** Each scenario builds a
+throwaway repo with a scripted `claude` on `PATH` and a fake `HOME`, so the
+suite is free, offline and deterministic — no model is involved. A planted
+input and an expected exit code end an argument that a paragraph cannot
+(`docs/references/executable-loop-harness.md` Rule 1).
+
+| Scenario | What it pins |
+| --- | --- |
+| `01-happy-path` | plan → tasks → complete, exit 0 |
+| `02-review-fail` | FAIL reverts, charges an attempt, retries |
+| `03-gate-regression` | a later task breaking an earlier one is caught |
+| `04-attempt-ceiling` | a task that keeps failing is blocked, not retried forever |
+| `05-max-iterations-resumable` | stop at the budget, re-run, finish — no state edit |
+| `06-cost-ceiling-resumable` | same promise for spend |
+| `07-convergence-halt` | a run going nowhere stops itself |
+| `08-plan-validation` | a task with no verify command never reaches an iteration |
+| `09-dependency-order` | the driver picks the next *ready* task, not the first pending one |
+| `10-containment` | no tracked file names the machine; nothing written outside the repo |
+| `11-stall` | no recorded progress twice running stops the loop |
+| `12-signals-fixture` | the signal formulas against brief 0003's hand-computed fixture |
+
+Scenario 12 is the one that keeps the control plane and the analysis plane
+honest: the same fixture arbitrates `run.sh` and `runstat`.
+
+The suite is mutation-checked — reverting the blocked-path fix, narrowing the
+gate to the current task, disabling the mask, or freezing the attempt counter
+each turn it red.
+
 ## Tuning
 
 `LOOP_MAX_ITERATIONS` 30 · `LOOP_COST_CEILING` 40 · `LOOP_MAX_ATTEMPTS` 3 ·
