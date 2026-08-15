@@ -1,0 +1,14 @@
+[36m[loop][0m preflight
+[36m[loop][0m   [x] jq
+[36m[loop][0m   [x] claude
+[36m[loop][0m   [x] git
+[36m[loop][0m   [x] uv
+[36m[loop][0m   [x] workspace trusted
+[36m[loop][0m   [x] settings.json parses — 22 allow, 16 deny rules
+[36m[loop][0m   [x] masking active ($HOME and username)
+[36m[loop][0m   [x] telemetry dir loop/runs/20260815-191201
+[36m[loop][0m   [x] no state — will plan first
+[36m[loop][0m preflight ok
+[36m[loop][0m planning from docs/briefs/0003-runstat-cli.md using opus
+[36m[loop][0m cost=$1.9533750000000003 turns=16 dur=511s error=false
+[36m[loop][0m planned: 0003-runstat-cli — 9 tasks

@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 500311,
+  "num_turns": 16,
+  "stop_reason": "end_turn",
+  "session_id": "5fc5da19-ccd9-499c-92a9-08f0aa248dfe",
+  "total_cost_usd": 1.9533750000000003,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 60805,
+    "cache_read_input_tokens": 607460,
+    "output_tokens": 41659,
+    "output_tokens_details": {
+      "thinking_tokens": 25817
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 60805,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1802,
+        "cache_read_input_tokens": 75377,
+        "cache_creation_input_tokens": 1356,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1356
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-opus-5": {
+      "inputTokens": 24,
+      "outputTokens": 41659,
+      "cacheReadInputTokens": 607460,
+      "cacheCreationInputTokens": 60805,
+      "webSearchRequests": 0,
+      "costUSD": 1.9533750000000003,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-opus-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`loop/state.json` is written and validated.\n\n**Run:** `0003-runstat-cli` — **9 tasks**, dependencies forward-only.\n\n| | task | gate |\n| --- | --- | --- |\n| T1 | Scaffold package (uv, src layout, pytest) | `import runstat` + full suite passes (≥1 test, so never exit 5) |\n| T2 | Fixture-run generator for the worked example | asserts all seven sessions & three records against the brief's tables |\n| T3 | Strict run-directory loader | good fixture loads; bad session / bad jsonl line / missing dir each raise `RunError` naming the file |\n| T4 | The eight signals | exact `3, 2/8, 1.50, 1, 0, 1, 0, $4.08` + `n/a`, empty, and non-zero-streak cases |\n| T5 | CLI entry points + `summary` | per-phase pairing from the brief's table, estimate wording, error/denial callout |\n| T6 | `signals` command | exactly eight `key: value` lines, values asserted exactly |\n| T7 | `compare` command | fixture vs. variant: iterations `3 → 2` delta `-1`, per-closed `1.50 → 2.00` |\n| T8 | Exit-code & error contract | 0/1/2 across all commands, stdout empty on failure, no traceback |\n| T9 | End-to-end worked-example test | `test_summary`, `test_signals`, `test_compare` must all exist and pass |\n\n**First ready task: T1** (no dependencies).\n\nAll nine verify commands were run: each exits non-zero because its artifact doesn't exist, not because the command is malformed. Since a failing gate only exercises its first line, I also AST-parsed every embedded Python body in full and replayed T5/T6/T7's output-parsing logic against contract-compliant sample output — those three are satisfiable, not just currently failing.\n\n**What I interpreted rather than read** (your chance to correct before the run starts):\n\n1. **I pinned internal API names the brief leaves open** — `runstat.loader.load_run`/`RunError`, `runstat.signals.compute_signals`, `tests/fixtures.py::write_fixture_run(dest)`. Pre-authored gates need stable names before any code exists; the cost is that T3/T4 constrain structure, not just behaviour.\n2. **`compute_signals` returns display strings**, not numbers (`'1.50'`, `'$4.08'`). This makes T4's gate assert the exact printed values and forces agreement with `run.sh`'s jq formulas, which brief 0002 §6 requires.\n3. **Summary formats**: two-decimal dollars, whole-second wall times with an `s` suffix (`141s`). Taken from the brief's table; column order, padding and separators left free, per \"assert on content, not alignment\".\n4. **The error/denial callout names the offending session file.** The brief says \"called out\" without saying how; naming the file is what makes a denial actionable.\n5. **`compare` delta is run B minus run A.** The brief doesn't specify direction.\n6. **A missing `iterations.jsonl` is zero records, not an error** — only *malformed* input is a hard failure. Exit 1 is triggered specifically by no session files, and I treat exit 1 as a \"failure\" for the empty-stdout rule.\n7. **No README or docs task.** The brief doesn't ask for one, and adding it would be the scope-widening it warns about.",
+  "ttft_ms": 3439,
+  "ttft_stream_ms": 2696,
+  "time_to_request_ms": 22,
+  "type": "result",
+  "duration_ms": 510655,
+  "uuid": "fd987a61-f696-4fc9-8eeb-f450f081d33a",
+  "phase": "plan",
+  "iteration": 0
+}
