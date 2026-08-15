@@ -179,7 +179,7 @@ gate_ids() {
 # there — the fixture in brief 0003 is the arbiter.
 
 sig_iterations()  { [[ -f "$ITERATIONS" ]] && wc -l <"$ITERATIONS" | tr -d ' ' || echo 0; }
-sig_spend()       { jq -s '[.[].total_cost_usd // 0] | add // 0' "$SESSIONS"/*.json 2>/dev/null || echo 0; }
+sig_spend()       { jq -s '[.[] | .total_cost_usd // 0] | add // 0' "$SESSIONS"/*.json 2>/dev/null || echo 0; }
 sig_closed()      { jq -s 'if length == 0 then 0 else (.[-1].tasks_done // 0) end' "$ITERATIONS" 2>/dev/null || echo 0; }
 sig_total()       { jq -s 'if length == 0 then 0 else (.[-1].tasks_total // 0) end' "$ITERATIONS" 2>/dev/null || echo 0; }
 sig_gate_fails()  { jq -s '[.[]|select(.outcome=="gate_fail")]|length' "$ITERATIONS" 2>/dev/null || echo 0; }
@@ -198,7 +198,7 @@ sig_per_closed() {
 
 # Trailing iterations that closed nothing.
 sig_streak() {
-  jq -s '[.[].tasks_done // 0] as $d
+  jq -s '[.[] | .tasks_done // 0] as $d
          | ([0] + $d[:-1]) as $p
          | [range(0; ($d|length))] | map(if $d[.] > $p[.] then 1 else 0 end)
          | (reverse | index(1)) // length' "$ITERATIONS" 2>/dev/null || echo 0
