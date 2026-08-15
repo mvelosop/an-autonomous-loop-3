@@ -43,3 +43,24 @@ All nine verify commands were run: each exits non-zero because its artifact does
 - **Run:** `20260815-191201` · 0 iteration(s) this run
 - **Plan:** 0/9 done, 0 blocked
 - **Signals:** 0 iterations · n/a per closed · 0 gate failure(s) · 0 review rejection(s) · 0 attempt(s) burned · streak 0 · ~$1.95
+
+## Plan amended by the operator — 2026-08-15
+
+Between runs, before any iteration. Task status is the driver's during a run;
+the plan itself is the operator's between them.
+
+- **T4 now returns numbers, not display strings.** `compute_signals` returns
+  ints, floats and `None`; a separate `format_signals` produces the eight
+  `(label, display)` pairs. The planner's original choice coupled formatting
+  into the computation and forced `compare` to parse its own output back into
+  numbers to get a delta.
+- **T10 added — `README.md`.** Gated on truth, not existence: the gate replays
+  the tool and requires every printed line to appear verbatim in the document.
+- **T11 added — `docs/runstat.md`.** The telemetry contract and each signal's
+  derivation. This is what keeps the driver and runstat from drifting, which
+  brief 0002 acceptance item 6 requires.
+- Brief 0003 updated to match, so a re-run produces the documentation too.
+
+The planner had declined a README, reading the brief's out-of-scope list as
+discouraging it. That was a defensible reading of a brief that simply never
+asked; the brief now asks.

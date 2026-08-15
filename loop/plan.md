@@ -4,21 +4,23 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** max_iterations · **0/9 done** · iteration 0
+**Status:** max_iterations · **0/11 done** · iteration 0
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T18:20:35Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T19:45:00Z
 
 ## Progress
 
 - [ ] **T1** — Scaffold the runstat package with uv, src layout and pytest
 - [ ] **T2** — Write the fixture-run generator for the brief's worked example
 - [ ] **T3** — Load a run directory strictly, failing loudly on malformed input
-- [ ] **T4** — Compute the eight run-level signals
+- [ ] **T4** — Compute the eight run-level signals as numbers, and format them separately
 - [ ] **T5** — Build the CLI entry points and the summary command
 - [ ] **T6** — Add the signals command
 - [ ] **T7** — Add the compare command
 - [ ] **T8** — Enforce the exit-code and error-output contract across all commands
 - [ ] **T9** — Add the end-to-end worked-example acceptance test
+- [ ] **T10** — Write the README, with every documented example matching real output
+- [ ] **T11** — Document the telemetry contract and the cross-check against the driver
 
 ## Tasks
 
@@ -148,48 +150,73 @@ print('loader ok')
 
 </details>
 
-### T4 — Compute the eight run-level signals
+### T4 — Compute the eight run-level signals as numbers, and format them separately
 
 `pending` · depends on: T3
 
-These eight numbers are the point of the tool: they say whether a run was converging. loop/run.sh already computes the same signals inline in jq while a run is in flight, and brief 0002 requires the two to agree exactly on a completed run — so each derivation here is fixed by the brief, not a free choice. The two traps are attempts burned (count of records whose outcome is not done, never the sum of the cumulative attempts field) and no-progress streak (trailing records that did not raise tasks_done).
+Write runstat.signals.compute_signals(run), returning the eight signals as NUMBERS (ints, floats, and None for an undefined ratio) rather than display strings, plus format_signals(signals) returning the ordered (label, display) pairs the CLI prints. Keeping computation numeric is what lets compare do arithmetic on deltas instead of parsing its own output back into numbers; keeping formatting in one function is what keeps the printed values identical everywhere they appear.
 
 **Acceptance**
 
-- runstat.signals.compute_signals(run) takes a loaded run and returns a dict whose keys, in order, are exactly: iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend.
-- The values are display strings: a count as a plain integer, tasks closed as tasks_done/tasks_total from the last record, iterations per closed to two decimals, and estimated spend as a dollar figure to two decimals.
-- On the brief's fixture the values are exactly 3, 2/8, 1.50, 1, 0, 1, 0 and $4.08.
-- iterations per closed is the string n/a when zero tasks are closed; with no records at all, iterations is 0 and tasks closed is 0/0.
-- attempts burned counts records whose outcome is not done, and is not the sum of the attempts field.
-- no-progress streak counts trailing records whose tasks_done did not increase over the previous record; on a fixture ending with a record that closed nothing it is 1.
-- estimated spend sums total_cost_usd over all session files, not over the iteration records.
-- Tests cover the fixture values, the zero-closed n/a case, the empty-records case and a non-zero streak, all inside tmp_path.
+- compute_signals returns a mapping with numeric keys: iterations, tasks_done, tasks_total, iterations_per_closed, gate_failures, review_rejections, attempts_burned, no_progress_streak, estimated_spend
+- No value returned by compute_signals is a string
+- iterations_per_closed is None when no task has closed, and a float otherwise
+- attempts_burned counts records whose outcome is not 'done' — never the sum of the attempts field, which is a cumulative per-task counter
+- no_progress_streak counts trailing records that did not increase tasks_done, and is 0 for an empty run
+- format_signals returns exactly eight (label, display) pairs in the brief's order
+- format_signals renders the fixture as 3, 2/8, 1.50, 1, 0, 1, 0, $4.08
+- format_signals renders an undefined ratio as 'n/a' and money with two decimals and a leading $
 
 <details><summary>verify command</summary>
 
 ```sh
-uv run python -c "
-import sys,pathlib,tempfile
-sys.path.insert(0,'tests')
+uv run python - <<'PY'
+import sys, pathlib, tempfile
+sys.path.insert(0, 'tests')
 from fixtures import write_fixture_run
 from runstat.loader import load_run
-from runstat.signals import compute_signals
-r=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-s=compute_signals(load_run(r))
-assert list(s.items())==[('iterations','3'),('tasks closed','2/8'),('iterations per closed','1.50'),('gate failures','1'),('review rejections','0'),('attempts burned','1'),('no-progress streak','0'),('estimated spend','\$4.08')], s
-b=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-j=b/'iterations.jsonl'
-keep=[l for l in j.read_text().splitlines() if l.strip()][:-1]
-j.write_text(chr(10).join(keep)+chr(10))
-s2=compute_signals(load_run(b))
-assert s2['iterations']=='2' and s2['tasks closed']=='1/8' and s2['iterations per closed']=='2.00', s2
-assert s2['no-progress streak']=='1', s2
-c=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-(c/'iterations.jsonl').write_text('')
-s3=compute_signals(load_run(c))
-assert s3['iterations']=='0' and s3['tasks closed']=='0/0' and s3['iterations per closed']=='n/a', s3
+from runstat.signals import compute_signals, format_signals
+
+r = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
+s = compute_signals(load_run(r))
+assert s['iterations'] == 3, s
+assert s['tasks_done'] == 2 and s['tasks_total'] == 8, s
+assert abs(s['iterations_per_closed'] - 1.5) < 1e-9, s
+assert s['gate_failures'] == 1 and s['review_rejections'] == 0, s
+assert s['attempts_burned'] == 1 and s['no_progress_streak'] == 0, s
+assert abs(s['estimated_spend'] - 4.08) < 1e-9, s
+assert not any(isinstance(v, str) for v in s.values()), s
+
+assert format_signals(s) == [
+    ('iterations', '3'),
+    ('tasks closed', '2/8'),
+    ('iterations per closed', '1.50'),
+    ('gate failures', '1'),
+    ('review rejections', '0'),
+    ('attempts burned', '1'),
+    ('no-progress streak', '0'),
+    ('estimated spend', '$4.08'),
+], format_signals(s)
+
+b = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
+j = b / 'iterations.jsonl'
+keep = [l for l in j.read_text().splitlines() if l.strip()][:-1]
+j.write_text('\n'.join(keep) + '\n')
+s2 = compute_signals(load_run(b))
+assert s2['iterations'] == 2 and s2['tasks_done'] == 1, s2
+assert abs(s2['iterations_per_closed'] - 2.0) < 1e-9, s2
+assert s2['no_progress_streak'] == 1, s2
+assert dict(format_signals(s2))['iterations per closed'] == '2.00', s2
+
+c = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
+(c / 'iterations.jsonl').write_text('')
+s3 = compute_signals(load_run(c))
+assert s3['iterations'] == 0 and s3['tasks_done'] == 0 and s3['tasks_total'] == 0, s3
+assert s3['iterations_per_closed'] is None, s3
+assert s3['no_progress_streak'] == 0, s3
+assert dict(format_signals(s3))['iterations per closed'] == 'n/a', s3
 print('signals ok')
-"
+PY
 ```
 
 </details>
@@ -415,6 +442,91 @@ Each earlier task was verified in isolation, which is exactly how an implementat
 
 ```sh
 uv run pytest -q tests/test_worked_example.py::test_summary tests/test_worked_example.py::test_signals tests/test_worked_example.py::test_compare
+```
+
+</details>
+
+### T10 — Write the README, with every documented example matching real output
+
+`pending` · depends on: T9
+
+Write README.md covering what runstat is, how to install and run it, the three commands, the exit-code contract, and the input layout it reads. Every example must show output captured from the tool as it actually behaves. A README whose examples have drifted from the code is worse than none, so the gate replays what the tool prints and requires each line to appear verbatim in the document.
+
+**Acceptance**
+
+- README.md documents runstat summary, runstat signals and runstat compare, each with a worked example
+- Every line the signals command prints for the fixture run appears verbatim in the README
+- The exit-code contract (0 success, 1 no sessions, 2 usage or malformed) is documented
+- The input layout it reads (sessions/*.json and iterations.jsonl) is described
+- Install and run instructions use uv
+- Any dollar figure in the README is labelled an estimate
+
+<details><summary>verify command</summary>
+
+```sh
+uv run python - <<'PY'
+import pathlib, subprocess, sys, tempfile
+sys.path.insert(0, 'tests')
+from fixtures import write_fixture_run
+
+t = pathlib.Path('README.md').read_text()
+for cmd in ['runstat summary', 'runstat signals', 'runstat compare']:
+    assert cmd in t, cmd
+for token in ['sessions/', 'iterations.jsonl', 'uv']:
+    assert token in t, token
+assert 'estimate' in t.lower(), 'no estimate wording for money'
+for code in ['0', '1', '2']:
+    assert code in t
+r = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
+p = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)
+assert p.returncode == 0, (p.returncode, p.stderr)
+for line in [l.strip() for l in p.stdout.splitlines() if l.strip()]:
+    assert line in t, 'README does not match real output: ' + line
+print('readme ok')
+PY
+```
+
+</details>
+
+### T11 — Document the telemetry contract and the cross-check against the driver
+
+`pending` · depends on: T9
+
+Write docs/runstat.md: the on-disk telemetry contract runstat consumes, field by field, and how each of the eight signals is derived. This is the document that keeps the loop driver and runstat from drifting apart — brief 0002 acceptance item 6 requires them to agree, and a derivation recorded in only one of the two implementations is how that agreement quietly breaks.
+
+**Acceptance**
+
+- docs/runstat.md documents every field runstat reads from a session record and from an iterations record
+- Each of the eight signals has its derivation stated
+- The attempts-burned derivation explicitly warns against summing the cumulative attempts field
+- The document states that loop/run.sh computes the same signals and that the two must agree
+- Every signal label used in the document matches the label the CLI actually prints
+- No absolute paths appear anywhere in the document
+
+<details><summary>verify command</summary>
+
+```sh
+uv run python - <<'PY'
+import pathlib, subprocess, sys, tempfile
+sys.path.insert(0, 'tests')
+from fixtures import write_fixture_run
+
+t = pathlib.Path('docs/runstat.md').read_text()
+for k in ['sessions/', 'iterations.jsonl', 'phase', 'iteration', 'total_cost_usd',
+          'num_turns', 'duration_ms', 'is_error', 'permission_denials',
+          'outcome', 'attempts', 'tasks_done', 'tasks_total']:
+    assert k in t, k
+assert 'run.sh' in t, 'does not mention the driver it must agree with'
+assert '/Users/' not in t, 'absolute path in the document'
+r = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
+p = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)
+assert p.returncode == 0, (p.returncode, p.stderr)
+labels = [l.split(':', 1)[0].strip() for l in p.stdout.splitlines() if l.strip()]
+assert len(labels) == 8, labels
+for lab in labels:
+    assert lab in t, 'label not documented: ' + lab
+print('docs ok')
+PY
 ```
 
 </details>
