@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **5/11 done** · iteration 5
+**Status:** running · **6/11 done** · iteration 6
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:17:53Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:19:18Z
 
 ## Progress
 
@@ -15,7 +15,7 @@
 - [x] **T3** — Load a run directory strictly, failing loudly on malformed input
 - [x] **T4** — Compute the eight run-level signals as numbers, and format them separately
 - [x] **T5** — Build the CLI entry points and the summary command
-- [ ] **T6** — Add the signals command
+- [x] **T6** — Add the signals command
 - [ ] **T7** — Add the compare command
 - [ ] **T8** — Enforce the exit-code and error-output contract across all commands
 - [ ] **T9** — Add the end-to-end worked-example acceptance test
@@ -275,7 +275,7 @@ print('summary ok')
 
 ### T6 — Add the signals command
 
-`pending` · depends on: T4, T5
+`done` · depends on: T4, T5
 
 This is the command the operator reads after a run to decide whether it converged, and the one brief 0002 checks against the driver's own inline numbers. It is a thin printer over compute_signals: eight key: value lines, in the brief's order, with the brief's exact labels. The values are the contract; the padding between the colon and the value is not.
 

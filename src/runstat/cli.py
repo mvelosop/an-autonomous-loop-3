@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .loader import RunError, load_run
+from .signals import compute_signals, format_signals
 from .summary import compute_summary, format_summary
 
 
@@ -14,6 +15,13 @@ def _cmd_summary(args: argparse.Namespace) -> int:
     run = load_run(args.run_dir)
     for line in format_summary(compute_summary(run)):
         print(line)
+    return 0
+
+
+def _cmd_signals(args: argparse.Namespace) -> int:
+    run = load_run(args.run_dir)
+    for label, display in format_signals(compute_signals(run)):
+        print(f"{label}: {display}")
     return 0
 
 
@@ -26,6 +34,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     summary_parser.add_argument("run_dir", type=Path)
     summary_parser.set_defaults(func=_cmd_summary)
+
+    signals_parser = subparsers.add_parser(
+        "signals", help="the eight run-level convergence signals"
+    )
+    signals_parser.add_argument("run_dir", type=Path)
+    signals_parser.set_defaults(func=_cmd_signals)
 
     return parser
 

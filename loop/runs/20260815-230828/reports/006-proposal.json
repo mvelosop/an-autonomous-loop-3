@@ -1,0 +1,8 @@
+{
+  "task": "T6",
+  "outcome": "done",
+  "summary": "Added the `signals` subcommand: a thin printer over the existing compute_signals/format_signals that prints exactly eight `label: value` lines in the brief's order.",
+  "files": ["src/runstat/cli.py", "tests/test_signals_cmd.py"],
+  "verified": "uv run python -c \"...\" (the task's verify command) printed 'signals cmd ok'; uv run pytest -q ran 18 passed.",
+  "notes": "compute_signals/format_signals already existed from T4, so this task was pure CLI wiring: a _cmd_signals handler that loads the run, calls compute_signals then format_signals, and prints f'{label}: {display}' for each pair -- no header, no footer, no blank-line separators (unlike summary's output), matching the 'exactly eight lines and nothing else' acceptance criterion. Registered a new 'signals' subparser in build_parser() next to 'summary'. Did not touch src/runstat/signals.py -- it was already complete and correct for this task's needs."
+}

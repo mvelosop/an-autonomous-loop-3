@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 40542,
+  "num_turns": 12,
+  "stop_reason": "end_turn",
+  "session_id": "84f01bfa-bae7-4612-baad-06153f47f849",
+  "total_cost_usd": 0.45782849999999997,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 35886,
+    "cache_read_input_tokens": 620785,
+    "output_tokens": 3747,
+    "output_tokens_details": {
+      "thinking_tokens": 282
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 35886,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 116,
+        "cache_read_input_tokens": 59637,
+        "cache_creation_input_tokens": 567,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 567
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 24,
+      "outputTokens": 3747,
+      "cacheReadInputTokens": 620785,
+      "cacheCreationInputTokens": 35886,
+      "webSearchRequests": 0,
+      "costUSD": 0.45782849999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T6 is done: added the `signals` subcommand to `src/runstat/cli.py` (wiring only — `compute_signals`/`format_signals` already existed from T4) plus `tests/test_signals_cmd.py`. The task's verify command and the full suite (18 tests) both pass. Reported via `loop/proposal.json` as instructed.",
+  "ttft_ms": 1744,
+  "ttft_stream_ms": 1221,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 41871,
+  "uuid": "12895f4d-fcf6-41df-a62c-dca7d4923ef6",
+  "phase": "work",
+  "iteration": 6
+}

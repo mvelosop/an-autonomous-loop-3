@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 35371,
+  "num_turns": 13,
+  "stop_reason": "end_turn",
+  "session_id": "cbee0b64-82aa-4d0f-bc1f-ffb11c8c830a",
+  "total_cost_usd": 0.268065,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 21156,
+    "cache_read_input_tokens": 312570,
+    "output_tokens": 3154,
+    "output_tokens_details": {
+      "thinking_tokens": 965
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 21156,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 101,
+        "cache_read_input_tokens": 44350,
+        "cache_creation_input_tokens": 1124,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1124
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 16,
+      "outputTokens": 3154,
+      "cacheReadInputTokens": 312570,
+      "cacheCreationInputTokens": 21156,
+      "webSearchRequests": 0,
+      "costUSD": 0.268065,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**PASS** — T6 correctly stays scoped to CLI wiring (`_cmd_signals` + subparser) and a CLI-level test; `compute_signals`/`format_signals` were already correct from T4 and untouched. Gate and full test suite (18 passed) both confirmed. No findings.",
+  "ttft_ms": 1644,
+  "ttft_stream_ms": 1063,
+  "time_to_request_ms": 14,
+  "type": "result",
+  "duration_ms": 40307,
+  "uuid": "23008c2e-c398-403b-8733-cdef98f6f6a2",
+  "phase": "review",
+  "iteration": 6
+}

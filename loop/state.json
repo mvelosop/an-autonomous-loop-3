@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 5,
+  "iteration": 6,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:17:53Z",
+  "updated": "2026-08-15T22:19:18Z",
   "tasks": [
     {
       "id": "T1",
@@ -151,7 +151,7 @@
         "A test drives the command over the fixture in tmp_path and asserts all eight values exactly."
       ],
       "verify": "uv run python -c \"\nimport sys,pathlib,tempfile,subprocess\nsys.path.insert(0,'tests')\nfrom fixtures import write_fixture_run\nr=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\np=subprocess.run(['runstat','signals',str(r)],capture_output=True,text=True)\nassert p.returncode==0, (p.returncode,p.stderr)\nlines=[l for l in p.stdout.splitlines() if l.strip()]\npairs=[(l.split(':',1)[0].strip(),l.split(':',1)[1].strip()) for l in lines]\nassert pairs==[('iterations','3'),('tasks closed','2/8'),('iterations per closed','1.50'),('gate failures','1'),('review rejections','0'),('attempts burned','1'),('no-progress streak','0'),('estimated spend','\\$4.08')], pairs\nprint('signals cmd ok')\n\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },
