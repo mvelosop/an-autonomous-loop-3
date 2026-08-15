@@ -122,7 +122,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-loop/tests/run-all.sh          # all 12 scenarios
+loop/tests/run-all.sh          # all 19 scenarios
 loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 
@@ -146,6 +146,13 @@ input and an expected exit code end an argument that a paragraph cannot
 | `10-containment` | no tracked file names the machine; nothing written outside the repo |
 | `11-stall` | no recorded progress twice running stops the loop |
 | `12-signals-fixture` | the signal formulas against brief 0003's hand-computed fixture |
+| `13-empty-run-signals` | a run with no iterations reports zeros, not phantoms |
+| `14-rendered-views` | `plan.md` tracks state; `journal.md` carries the narrative |
+| `15-telemetry-contract` | the driver emits exactly the shape `runstat` reads |
+| `16-review-fails-closed` | an unusable review verdict fails, never passes |
+| `17-stale-handoff` | a silent work session cannot inherit the previous report |
+| `18-preflight-untrusted` | an untrusted workspace is refused before any spend |
+| `19-session-error` | a dead session is an infrastructure failure, not a task's |
 
 Scenario 12 is the one that keeps the control plane and the analysis plane
 honest: the same fixture arbitrates `run.sh` and `runstat`.

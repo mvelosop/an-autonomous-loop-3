@@ -198,3 +198,11 @@ PLAN_ONE='{"run_id":"fixture","brief":"docs/briefs/0003-runstat-cli.md","status"
  "created":"2026-08-15T00:00:00Z","updated":"2026-08-15T00:00:00Z","tasks":[
  {"id":"T1","title":"Only","goal":"g","files":[],"depends_on":[],
   "acceptance":["T1.out exists"],"verify":"test -f T1.out","status":"pending","attempts":0,"notes":""}]}'
+
+# Preflight's trust check, from the other side: a workspace the operator has
+# not accepted. This is the failure that silently voided all permission rules
+# in a prior experiment.
+fixture_untrust() {
+  jq -n --arg p "$FX_REPO" '{projects: {($p): {hasTrustDialogAccepted: false}}}' \
+    >"$FX/testuser/.claude.json"
+}
