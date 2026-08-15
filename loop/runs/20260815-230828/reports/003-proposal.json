@@ -1,0 +1,8 @@
+{
+  "task": "T3",
+  "outcome": "done",
+  "summary": "Added src/runstat/loader.py with load_run(path) and RunError: a strict loader that reads sessions/*.json and iterations.jsonl into a Run object, raising RunError naming the offending file for a missing run directory, a malformed session file, or a malformed iterations.jsonl line.",
+  "files": ["src/runstat/loader.py", "tests/test_loader.py"],
+  "verified": "uv run python -c \"...\" (the task's verify command, inline) printed 'loader ok'; uv run pytest -q ran 9 passed in 0.02s.",
+  "notes": "Session and Run are frozen dataclasses; Session carries the fields the acceptance criteria list plus `path` (the pathlib.Path it was read from), used by the CLI's error callouts in later tasks. A missing sessions/ directory (not just an empty one) also yields sessions == [], since only the run directory itself is required to exist. Blank lines in iterations.jsonl are skipped before JSON-parsing, matching T2's fixture writer which trailing-newlines the file. RunError messages: 'run directory not found: <path>', 'malformed session file: <name>', 'malformed record in iterations.jsonl: <line!r>' -- all contain the substring the later CLI-contract task (T8) needs on stderr."
+}

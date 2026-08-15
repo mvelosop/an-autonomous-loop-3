@@ -4,15 +4,15 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **2/11 done** · iteration 2
+**Status:** running · **3/11 done** · iteration 3
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:11:35Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:13:26Z
 
 ## Progress
 
 - [x] **T1** — Scaffold the runstat package with uv, src layout and pytest
 - [x] **T2** — Write the fixture-run generator for the brief's worked example
-- [ ] **T3** — Load a run directory strictly, failing loudly on malformed input
+- [x] **T3** — Load a run directory strictly, failing loudly on malformed input
 - [ ] **T4** — Compute the eight run-level signals as numbers, and format them separately
 - [ ] **T5** — Build the CLI entry points and the summary command
 - [ ] **T6** — Add the signals command
@@ -88,7 +88,7 @@ print('fixture ok')
 
 ### T3 — Load a run directory strictly, failing loudly on malformed input
 
-`pending` · depends on: T1, T2
+`done` · depends on: T1, T2
 
 Both reports read the same two things off disk: sessions/*.json and iterations.jsonl. Putting that in one loader gives the commands a single definition of what a run is, and — more importantly — a single place where a malformed file becomes a hard error instead of a silent skip. The brief is explicit that undercounting silently is worse than refusing loudly, so the loader raises with the offending path rather than dropping a record.
 

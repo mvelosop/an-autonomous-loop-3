@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 2,
+  "iteration": 3,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:11:35Z",
+  "updated": "2026-08-15T22:13:26Z",
   "tasks": [
     {
       "id": "T1",
@@ -72,7 +72,7 @@
         "Tests cover the good fixture and each malformed case, writing only inside tmp_path."
       ],
       "verify": "uv run python -c \"\nimport sys,pathlib,tempfile\nsys.path.insert(0,'tests')\nfrom fixtures import write_fixture_run\nfrom runstat.loader import load_run, RunError\nr=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nrun=load_run(r)\nassert len(run.sessions)==7 and len(run.iterations)==3, (len(run.sessions),len(run.iterations))\nassert [s.phase for s in run.sessions]==['plan','work','review','work','review','work','review']\nassert [s.iteration for s in run.sessions]==[0,1,1,2,2,3,3]\nassert [s.num_turns for s in run.sessions]==[12,6,3,7,3,5,3]\nassert [s.duration_ms for s in run.sessions]==[141000,68000,24000,72000,24000,64000,24000]\nassert round(sum(s.total_cost_usd for s in run.sessions),2)==4.08\nassert all(s.is_error is False and s.permission_denials==[] for s in run.sessions)\nassert [i['outcome'] for i in run.iterations]==['done','gate_fail','done']\nassert run.iterations[2]['tasks_done']==2 and run.iterations[2]['tasks_total']==8\nb=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\np=sorted((b/'sessions').glob('*.json'))[2]\np.write_text('{ not json')\ntry:\n    load_run(b)\nexcept RunError as e:\n    assert p.name in str(e), e\nelse:\n    raise AssertionError('malformed session file did not raise RunError')\nc=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nj=c/'iterations.jsonl'\nj.write_text(j.read_text()+'oops'+chr(10))\ntry:\n    load_run(c)\nexcept RunError as e:\n    assert 'iterations.jsonl' in str(e), e\nelse:\n    raise AssertionError('malformed iterations.jsonl line did not raise RunError')\ntry:\n    load_run(pathlib.Path(tempfile.mkdtemp())/'nope')\nexcept RunError:\n    pass\nelse:\n    raise AssertionError('missing run directory did not raise RunError')\nprint('loader ok')\n\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

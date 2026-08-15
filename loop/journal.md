@@ -78,3 +78,10 @@ asked; the brief now asks.
 - **Summary:** Added tests/fixtures.py with write_fixture_run(dest), which materializes the brief's worked-example run directory (20260814-101500, seven sessions, three iterations.jsonl records) under any given path, plus tests/test_fixtures.py exercising it via tmp_path.
 - **Files:** tests/fixtures.py, tests/test_fixtures.py
 - **Notes for next iteration:** write_fixture_run creates dest with parents=True/exist_ok=True before writing, so it works whether dest already exists (pytest's tmp_path) or not. No conftest.py or pytest.ini exists in the repo; pytest's default 'prepend' import mode adds tests/ to sys.path automatically because tests/ has no __init__.py, so tests/test_fixtures.py imports fixtures directly with `from fixtures import write_fixture_run` -- no sys.path hack needed inside the test file itself (the verify command's own inline script still does sys.path.insert(0,'tests') since it runs from outside pytest).
+
+## T3 — Load a run directory strictly, failing loudly on malformed input
+
+- **Outcome:** done (review: PASS)
+- **Summary:** Added src/runstat/loader.py with load_run(path) and RunError: a strict loader that reads sessions/*.json and iterations.jsonl into a Run object, raising RunError naming the offending file for a missing run directory, a malformed session file, or a malformed iterations.jsonl line.
+- **Files:** src/runstat/loader.py, tests/test_loader.py
+- **Notes for next iteration:** Session and Run are frozen dataclasses; Session carries the fields the acceptance criteria list plus `path` (the pathlib.Path it was read from), used by the CLI's error callouts in later tasks. A missing sessions/ directory (not just an empty one) also yields sessions == [], since only the run directory itself is required to exist. Blank lines in iterations.jsonl are skipped before JSON-parsing, matching T2's fixture writer which trailing-newlines the file. RunError messages: 'run directory not found: <path>', 'malformed session file: <name>', 'malformed record in iterations.jsonl: <line!r>' -- all contain the substring the later CLI-contract task (T8) needs on stderr.

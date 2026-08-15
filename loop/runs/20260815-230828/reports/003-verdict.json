@@ -1,0 +1,38 @@
+{
+  "task": "T3",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "runstat.loader.load_run(path) returns an object exposing run_id (the run directory's own name), sessions (session records sorted by file name) and iterations (the iterations.jsonl records as dicts, in file order).",
+      "met": true,
+      "evidence": "src/runstat/loader.py:76 returns Run(run_id=path.name, sessions=sessions, iterations=iterations); sessions built from sorted(sessions_dir.glob('*.json')) (line 45); iterations appended in read order (line 70). Confirmed by test_loads_good_fixture asserting exact phase/iteration ordering."
+    },
+    {
+      "criterion": "Each session record exposes phase, iteration, total_cost_usd, num_turns, duration_ms, is_error, permission_denials and the path it was read from.",
+      "met": true,
+      "evidence": "Session dataclass at loader.py:18-27 has all seven fields; constructed at loader.py:50-61 including path=session_path."
+    },
+    {
+      "criterion": "runstat.loader.RunError is raised when the run directory does not exist, when any sessions/*.json file is not valid JSON, and when any non-blank line of iterations.jsonl is not valid JSON.",
+      "met": true,
+      "evidence": "loader.py:40 (missing dir), :49 (bad session JSON), :74 (bad iterations line, guarded by blank-line skip at :67-68). All three exercised by tests and the inline verify command, which passed."
+    },
+    {
+      "criterion": "The RunError message names the offending file — the session file's name for a bad session, iterations.jsonl for a bad record line.",
+      "met": true,
+      "evidence": "loader.py:49 'malformed session file: {session_path.name}'; loader.py:72-74 'malformed record in iterations.jsonl: {line!r}'. test_malformed_session_file_names_the_file and test_malformed_iterations_line_names_the_file check substring presence."
+    },
+    {
+      "criterion": "A run directory that exists but has no session files loads successfully with an empty sessions list; deciding what that means is the CLI's job, not the loader's. A missing iterations.jsonl is treated as zero records.",
+      "met": true,
+      "evidence": "loader.py:44 guards sessions_dir.is_dir() (handles both absent and empty sessions/); loader.py:65 guards iterations_path.is_file(). test_no_session_files_loads_empty and test_missing_iterations_file_is_zero_records cover both."
+    },
+    {
+      "criterion": "Tests cover the good fixture and each malformed case, writing only inside tmp_path.",
+      "met": true,
+      "evidence": "All six tests in tests/test_loader.py take tmp_path and write only under it (via write_fixture_run(tmp_path) or run_dir = tmp_path / ...)."
+    }
+  ],
+  "findings": [],
+  "notes": "Only src/runstat/loader.py and tests/test_loader.py were touched by the work session (per git diff), matching the task's file list exactly. tests/fixtures.py predates this task (from T1/T2) and was reused, not modified. No absolute paths in new files."
+}
