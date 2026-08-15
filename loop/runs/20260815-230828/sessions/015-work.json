@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 84245,
+  "num_turns": 17,
+  "stop_reason": "end_turn",
+  "session_id": "80ce5d97-01b8-470f-95e4-f0b72218c6cd",
+  "total_cost_usd": 0.6163182,
+  "usage": {
+    "input_tokens": 6205,
+    "cache_creation_input_tokens": 45666,
+    "cache_read_input_tokens": 639324,
+    "output_tokens": 8794,
+    "output_tokens_details": {
+      "thinking_tokens": 3607
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 45666,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 141,
+        "cache_read_input_tokens": 69259,
+        "cache_creation_input_tokens": 725,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 725
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 6205,
+      "outputTokens": 8794,
+      "cacheReadInputTokens": 639324,
+      "cacheCreationInputTokens": 45666,
+      "webSearchRequests": 0,
+      "costUSD": 0.6163182,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T8 is done: added `src/runstat/errors.py::EmptyRunError` and wired exit-1 checks into the three CLI commands (the exit-2 paths for missing/malformed input and usage errors were already correct from earlier tasks). Verify command passes, and the full suite is 28/28 green. Left `loop/state.json` and journal untouched per the driver's rules — proposal is written for the gate/review to pick up.",
+  "ttft_ms": 1509,
+  "ttft_stream_ms": 922,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 85945,
+  "uuid": "8a22861d-1f34-4b31-a7eb-52fdb057845c",
+  "phase": "work",
+  "iteration": 8
+}

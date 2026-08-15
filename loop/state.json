@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 7,
+  "iteration": 8,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:21:33Z",
+  "updated": "2026-08-15T22:24:06Z",
   "tasks": [
     {
       "id": "T1",
@@ -204,7 +204,7 @@
         "Tests cover each exit code for each command where it applies, driving the CLI as a subprocess inside tmp_path."
       ],
       "verify": "uv run python -c \"\nimport sys,pathlib,tempfile,subprocess\nsys.path.insert(0,'tests')\nfrom fixtures import write_fixture_run\nbase=pathlib.Path(tempfile.mkdtemp())\ndef cli(*a):\n    return subprocess.run([sys.executable,'-m','runstat']+list(a),capture_output=True,text=True)\ndef bad(p,code):\n    assert p.returncode==code, (p.returncode,code,p.stdout,p.stderr)\n    assert p.stdout=='', p.stdout\n    assert p.stderr.strip(), 'error path wrote nothing to stderr'\n    assert 'Traceback' not in p.stderr, p.stderr\nmissing=str(base/'nope')\nbad(cli('summary',missing),2)\nbad(cli('signals',missing),2)\nbad(cli('compare',missing,missing),2)\nempty=base/'empty-run'\n(empty/'sessions').mkdir(parents=True)\n(empty/'iterations.jsonl').write_text('')\nbad(cli('summary',str(empty)),1)\nbad(cli('signals',str(empty)),1)\nm=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nf=m/'sessions'/'003-review.json'\nf.write_text('{ not json')\np=cli('summary',str(m))\nbad(p,2)\nassert '003-review.json' in p.stderr, p.stderr\nn=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nj=n/'iterations.jsonl'\nj.write_text(j.read_text()+'oops'+chr(10))\nq=cli('signals',str(n))\nbad(q,2)\nassert 'iterations.jsonl' in q.stderr, q.stderr\nbad(cli(),2)\nbad(cli('bogus',str(m)),2)\nbad(cli('summary'),2)\nok=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nz=cli('signals',str(ok))\nassert z.returncode==0 and z.stdout.strip(), (z.returncode,z.stderr)\nprint('contract ok')\n\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

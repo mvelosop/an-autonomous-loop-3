@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **7/11 done** · iteration 7
+**Status:** running · **8/11 done** · iteration 8
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:21:33Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:24:06Z
 
 ## Progress
 
@@ -17,7 +17,7 @@
 - [x] **T5** — Build the CLI entry points and the summary command
 - [x] **T6** — Add the signals command
 - [x] **T7** — Add the compare command
-- [ ] **T8** — Enforce the exit-code and error-output contract across all commands
+- [x] **T8** — Enforce the exit-code and error-output contract across all commands
 - [ ] **T9** — Add the end-to-end worked-example acceptance test
 - [ ] **T10** — Write the README, with every documented example matching real output
 - [ ] **T11** — Document the telemetry contract and the cross-check against the driver
@@ -361,7 +361,7 @@ print('compare ok')
 
 ### T8 — Enforce the exit-code and error-output contract across all commands
 
-`pending` · depends on: T5, T6, T7
+`done` · depends on: T5, T6, T7
 
 The three commands exist by now, but their behaviour on bad input is what decides whether a report can be trusted: 0 on success, 1 for a valid run directory with no sessions, 2 for a usage error, a missing directory or malformed input. A partial result that looks complete is the exact failure this brief was written against, so a bad file is a hard stop naming the offending path. No traceback ever reaches the user and stdout stays empty whenever the command fails.
 

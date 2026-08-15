@@ -7,13 +7,20 @@ import sys
 from pathlib import Path
 
 from .compare import compute_compare, format_compare
+from .errors import EmptyRunError
 from .loader import RunError, load_run
 from .signals import compute_signals, format_signals
 from .summary import compute_summary, format_summary
 
 
+def _require_sessions(run, run_dir) -> None:
+    if not run.sessions:
+        raise EmptyRunError(f"no session files: {run_dir}")
+
+
 def _cmd_summary(args: argparse.Namespace) -> int:
     run = load_run(args.run_dir)
+    _require_sessions(run, args.run_dir)
     for line in format_summary(compute_summary(run)):
         print(line)
     return 0
@@ -21,6 +28,7 @@ def _cmd_summary(args: argparse.Namespace) -> int:
 
 def _cmd_signals(args: argparse.Namespace) -> int:
     run = load_run(args.run_dir)
+    _require_sessions(run, args.run_dir)
     for label, display in format_signals(compute_signals(run)):
         print(f"{label}: {display}")
     return 0
@@ -29,6 +37,8 @@ def _cmd_signals(args: argparse.Namespace) -> int:
 def _cmd_compare(args: argparse.Namespace) -> int:
     run_a = load_run(args.run_dir_a)
     run_b = load_run(args.run_dir_b)
+    _require_sessions(run_a, args.run_dir_a)
+    _require_sessions(run_b, args.run_dir_b)
     for line in format_compare(compute_compare(run_a, run_b)):
         print(line)
     return 0
@@ -73,6 +83,9 @@ def main(argv: list | None = None) -> int:
     except RunError as exc:
         print(str(exc), file=sys.stderr)
         return 2
+    except EmptyRunError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
