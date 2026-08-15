@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 3,
+  "iteration": 4,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:13:26Z",
+  "updated": "2026-08-15T22:15:26Z",
   "tasks": [
     {
       "id": "T1",
@@ -98,7 +98,7 @@
         "format_signals renders an undefined ratio as 'n/a' and money with two decimals and a leading $"
       ],
       "verify": "uv run python - <<'PY'\nimport sys, pathlib, tempfile\nsys.path.insert(0, 'tests')\nfrom fixtures import write_fixture_run\nfrom runstat.loader import load_run\nfrom runstat.signals import compute_signals, format_signals\n\nr = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\ns = compute_signals(load_run(r))\nassert s['iterations'] == 3, s\nassert s['tasks_done'] == 2 and s['tasks_total'] == 8, s\nassert abs(s['iterations_per_closed'] - 1.5) < 1e-9, s\nassert s['gate_failures'] == 1 and s['review_rejections'] == 0, s\nassert s['attempts_burned'] == 1 and s['no_progress_streak'] == 0, s\nassert abs(s['estimated_spend'] - 4.08) < 1e-9, s\nassert not any(isinstance(v, str) for v in s.values()), s\n\nassert format_signals(s) == [\n    ('iterations', '3'),\n    ('tasks closed', '2/8'),\n    ('iterations per closed', '1.50'),\n    ('gate failures', '1'),\n    ('review rejections', '0'),\n    ('attempts burned', '1'),\n    ('no-progress streak', '0'),\n    ('estimated spend', '$4.08'),\n], format_signals(s)\n\nb = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nj = b / 'iterations.jsonl'\nkeep = [l for l in j.read_text().splitlines() if l.strip()][:-1]\nj.write_text('\\n'.join(keep) + '\\n')\ns2 = compute_signals(load_run(b))\nassert s2['iterations'] == 2 and s2['tasks_done'] == 1, s2\nassert abs(s2['iterations_per_closed'] - 2.0) < 1e-9, s2\nassert s2['no_progress_streak'] == 1, s2\nassert dict(format_signals(s2))['iterations per closed'] == '2.00', s2\n\nc = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\n(c / 'iterations.jsonl').write_text('')\ns3 = compute_signals(load_run(c))\nassert s3['iterations'] == 0 and s3['tasks_done'] == 0 and s3['tasks_total'] == 0, s3\nassert s3['iterations_per_closed'] is None, s3\nassert s3['no_progress_streak'] == 0, s3\nassert dict(format_signals(s3))['iterations per closed'] == 'n/a', s3\nprint('signals ok')\nPY",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

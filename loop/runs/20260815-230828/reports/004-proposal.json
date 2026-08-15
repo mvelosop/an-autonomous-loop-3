@@ -1,0 +1,8 @@
+{
+  "task": "T4",
+  "outcome": "done",
+  "summary": "Added src/runstat/signals.py with compute_signals(run), returning the eight signals as numbers (ints, floats, None for an undefined ratio), and format_signals(signals), returning the eight (label, display) pairs the CLI will print.",
+  "files": ["src/runstat/signals.py", "tests/test_signals.py"],
+  "verified": "uv run python - <<verify script from state.json T4>> printed 'signals ok'; uv run pytest -q ran 12 passed.",
+  "notes": "no_progress_streak walks iterations.jsonl records in file order with a synthetic baseline of tasks_done=0 before the first record, flags each record as 'increased' if its tasks_done exceeds the immediately preceding value (baseline for the first record), then counts trailing non-increased records from the end. This baseline is what makes the empty-run case 0 and the two-record case (tasks_done 1,1) come out to 1, not 2 -- the very first record still counts as an increase over nothing. estimated_spend sums total_cost_usd across run.sessions, not iterations.jsonl. tasks_done/tasks_total come from the last iterations.jsonl record only (0/0 when there are no records)."
+}

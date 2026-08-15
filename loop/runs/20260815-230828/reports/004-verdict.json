@@ -1,0 +1,16 @@
+{
+  "task": "T4",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "compute_signals returns a mapping with numeric keys: iterations, tasks_done, tasks_total, iterations_per_closed, gate_failures, review_rejections, attempts_burned, no_progress_streak, estimated_spend", "met": true, "evidence": "src/runstat/signals.py:42-52 returns exactly these nine keys"},
+    {"criterion": "No value returned by compute_signals is a string", "met": true, "evidence": "all values are int/float/None (signals.py:42-52); asserted by tests/test_signals.py:20 and the gate"},
+    {"criterion": "iterations_per_closed is None when no task has closed, and a float otherwise", "met": true, "evidence": "signals.py:23 `(iterations / tasks_done) if tasks_done else None`; test_signals.py:58"},
+    {"criterion": "attempts_burned counts records whose outcome is not 'done' — never the sum of the attempts field", "met": true, "evidence": "signals.py:27 `sum(1 for rec in run.iterations if rec[\"outcome\"] != \"done\")`; matches loop/run.sh sig_attempts()"},
+    {"criterion": "no_progress_streak counts trailing records that did not increase tasks_done, and is 0 for an empty run", "met": true, "evidence": "signals.py:29-38; empty run gives increased_flags=[] so streak stays 0 (test_signals.py:55-59); baseline-of-0-before-first-record logic matches loop/run.sh sig_streak()'s `[0] + $d[:-1]` exactly"},
+    {"criterion": "format_signals returns exactly eight (label, display) pairs in the brief's order", "met": true, "evidence": "signals.py:59-68, list literal with 8 tuples in brief order"},
+    {"criterion": "format_signals renders the fixture as 3, 2/8, 1.50, 1, 0, 1, 0, $4.08", "met": true, "evidence": "verified by gate T4.log and test_signals.py:22-31"},
+    {"criterion": "format_signals renders an undefined ratio as 'n/a' and money with two decimals and a leading $", "met": true, "evidence": "signals.py:57 `\"n/a\" if per_closed is None`; signals.py:67 `f\"${signals['estimated_spend']:.2f}\"`; test_signals.py:60"}
+  ],
+  "findings": [],
+  "notes": "Implementation's no_progress_streak and other formulas match loop/run.sh's existing sig_* shell functions field-for-field (same 0-baseline, same attempts/spend derivations), which is a good early sign for brief 0002 acceptance item 6 (driver and runstat must agree) even though that cross-check isn't formally due until a later task. Scope stayed within the two files listed for T4; other modified/untracked files in git status are driver-generated telemetry from running this iteration, not work-session changes."
+}

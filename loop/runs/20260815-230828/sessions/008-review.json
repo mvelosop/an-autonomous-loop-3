@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 59766,
+  "num_turns": 12,
+  "stop_reason": "end_turn",
+  "session_id": "1743e10f-4fda-4124-bff4-f41b81f7549c",
+  "total_cost_usd": 0.4567854,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 39136,
+    "cache_read_input_tokens": 464168,
+    "output_tokens": 5511,
+    "output_tokens_details": {
+      "thinking_tokens": 3157
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 39136,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 135,
+        "cache_read_input_tokens": 62121,
+        "cache_creation_input_tokens": 1333,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1333
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 18,
+      "outputTokens": 5511,
+      "cacheReadInputTokens": 464168,
+      "cacheCreationInputTokens": 39136,
+      "webSearchRequests": 0,
+      "costUSD": 0.4567854,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**PASS** — all eight acceptance criteria for T4 are met: `compute_signals` returns purely numeric values with correct `iterations_per_closed`/`attempts_burned`/`no_progress_streak` derivations (matching `loop/run.sh`'s existing shell formulas exactly), and `format_signals` produces the eight labeled pairs in brief order, matching the fixture output. No findings.",
+  "ttft_ms": 1507,
+  "ttft_stream_ms": 956,
+  "time_to_request_ms": 14,
+  "type": "result",
+  "duration_ms": 60134,
+  "uuid": "0657d236-0590-4de0-be80-f341e8889719",
+  "phase": "review",
+  "iteration": 4
+}

@@ -4,16 +4,16 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **3/11 done** · iteration 3
+**Status:** running · **4/11 done** · iteration 4
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:13:26Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:15:26Z
 
 ## Progress
 
 - [x] **T1** — Scaffold the runstat package with uv, src layout and pytest
 - [x] **T2** — Write the fixture-run generator for the brief's worked example
 - [x] **T3** — Load a run directory strictly, failing loudly on malformed input
-- [ ] **T4** — Compute the eight run-level signals as numbers, and format them separately
+- [x] **T4** — Compute the eight run-level signals as numbers, and format them separately
 - [ ] **T5** — Build the CLI entry points and the summary command
 - [ ] **T6** — Add the signals command
 - [ ] **T7** — Add the compare command
@@ -152,7 +152,7 @@ print('loader ok')
 
 ### T4 — Compute the eight run-level signals as numbers, and format them separately
 
-`pending` · depends on: T3
+`done` · depends on: T3
 
 Write runstat.signals.compute_signals(run), returning the eight signals as NUMBERS (ints, floats, and None for an undefined ratio) rather than display strings, plus format_signals(signals) returning the ordered (label, display) pairs the CLI prints. Keeping computation numeric is what lets compare do arithmetic on deltas instead of parsing its own output back into numbers; keeping formatting in one function is what keeps the printed values identical everywhere they appear.
 
