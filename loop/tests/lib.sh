@@ -206,3 +206,13 @@ fixture_untrust() {
   jq -n --arg p "$FX_REPO" '{projects: {($p): {hasTrustDialogAccepted: false}}}' \
     >"$FX/testuser/.claude.json"
 }
+
+# A tool erroring mid-run is never harmless: awk exiting 2 on a malformed value
+# makes an `if awk ...` budget check silently false, so the budget stops being
+# enforced while everything still looks fine.
+assert_no_tool_errors() {
+  local hits
+  hits="$(grep -nE '^(awk|jq|sed|grep|bash): ' "$FX/out.log" | head -3 || true)"
+  [[ -z "$hits" ]] && ok "no tool errors leaked into the run" \
+    || bad "tool error in run output: $hits"
+}

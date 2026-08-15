@@ -11,9 +11,13 @@ assert_exit 4
 assert_run_status max_iterations
 assert_status T1 done
 assert_status T2 pending
+assert_no_tool_errors
 note "re-running with no state edit"
 fixture_run
 assert_exit 0
+# The resumed run starts with an empty sessions dir, so its first budget check
+# runs against an unmatched glob — the case that broke sig_spend.
+assert_no_tool_errors
 assert_run_status complete
 assert_status T2 done
 finish

@@ -186,7 +186,14 @@ gate_ids() {
 # there — the fixture in brief 0003 is the arbiter.
 
 sig_iterations()  { [[ -f "$ITERATIONS" ]] && wc -l <"$ITERATIONS" | tr -d ' ' || echo 0; }
-sig_spend()       { jq -s '[.[] | .total_cost_usd // 0] | add // 0' "$SESSIONS"/*.json 2>/dev/null || echo 0; }
+# `jq -s` on an unmatched glob BOTH prints 0 and exits non-zero, so a bare
+# `jq ... || echo 0` emits "0\n0" — which awk then rejects, silently disabling
+# the cost-ceiling comparison. Check the glob matched instead of relying on ||.
+sig_spend() {
+  local f=("$SESSIONS"/*.json)
+  [[ -e "${f[0]}" ]] || { echo 0; return 0; }
+  jq -s '[.[] | .total_cost_usd // 0] | add // 0' "${f[@]}" 2>/dev/null || echo 0
+}
 sig_closed()      { jq -s 'if length == 0 then 0 else (.[-1].tasks_done // 0) end' "$ITERATIONS" 2>/dev/null || echo 0; }
 sig_total()       { jq -s 'if length == 0 then 0 else (.[-1].tasks_total // 0) end' "$ITERATIONS" 2>/dev/null || echo 0; }
 sig_gate_fails()  { jq -s '[.[]|select(.outcome=="gate_fail")]|length' "$ITERATIONS" 2>/dev/null || echo 0; }
