@@ -4,14 +4,14 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **1/11 done** · iteration 1
+**Status:** running · **2/11 done** · iteration 2
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:10:18Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:11:35Z
 
 ## Progress
 
 - [x] **T1** — Scaffold the runstat package with uv, src layout and pytest
-- [ ] **T2** — Write the fixture-run generator for the brief's worked example
+- [x] **T2** — Write the fixture-run generator for the brief's worked example
 - [ ] **T3** — Load a run directory strictly, failing loudly on malformed input
 - [ ] **T4** — Compute the eight run-level signals as numbers, and format them separately
 - [ ] **T5** — Build the CLI entry points and the summary command
@@ -48,7 +48,7 @@ uv run python -c "import runstat; print(runstat.__name__)" && uv run pytest -q
 
 ### T2 — Write the fixture-run generator for the brief's worked example
 
-`pending` · depends on: T1
+`done` · depends on: T1
 
 Every later task is verified against the worked example in docs/briefs/0003-runstat-cli.md: seven sessions and three iterations.jsonl records with exact costs, turns and durations. Building that run directory once, as a reusable test helper, is what keeps the tests hermetic (nothing ever reads a real loop/runs/ directory) and what lets each later verify command construct the same input. The numbers here are the arbiter for the whole run, so they must match the brief's table exactly.
 

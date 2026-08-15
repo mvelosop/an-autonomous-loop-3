@@ -1,0 +1,33 @@
+{
+  "task": "T2",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "tests/fixtures.py defines write_fixture_run(dest) taking a directory path, creating <dest>/20260814-101500/ with sessions/ and iterations.jsonl inside it, and returning the path to that run directory.",
+      "met": true,
+      "evidence": "tests/fixtures.py:31-52 — write_fixture_run(dest) builds run_dir = dest / RUN_ID (RUN_ID='20260814-101500'), creates run_dir/sessions/, writes run_dir/iterations.jsonl, returns run_dir."
+    },
+    {
+      "criterion": "The seven session files are named 001-plan.json .. 007-review.json, sorting into phase order.",
+      "met": true,
+      "evidence": "tests/fixtures.py:14-22, _SESSIONS list has exactly those seven names in that order; confirmed by verify command output 'fixture ok'."
+    },
+    {
+      "criterion": "Each session file is a JSON object carrying at least phase, iteration, total_cost_usd, num_turns, duration_ms, is_error and permission_denials, with the brief's values; all seven is_error false and empty permission_denials.",
+      "met": true,
+      "evidence": "tests/fixtures.py:38-46 builds each record with those exact keys; values in _SESSIONS (lines 15-21) match the brief's table (docs/briefs/0003-runstat-cli.md:141-149) exactly, including durations and costs."
+    },
+    {
+      "criterion": "iterations.jsonl holds exactly the brief's three records, one JSON object per line, in iteration order.",
+      "met": true,
+      "evidence": "tests/fixtures.py:24-28 _ITERATIONS matches brief lines 156-158 verbatim (task, outcome, attempts, tasks_done, tasks_total); written one JSON object per line at fixtures.py:49-50."
+    },
+    {
+      "criterion": "The helper writes only under the directory it is given and creates it if needed; a test in tests/test_fixtures.py exercises it via pytest's tmp_path and nothing else.",
+      "met": true,
+      "evidence": "fixtures.py:35 uses sessions_dir.mkdir(parents=True, exist_ok=True) so it creates dest if missing (test_fixtures.py:51-56 test_write_fixture_run_creates_destination covers this); both tests in test_fixtures.py take tmp_path as their only fixture and never touch loop/runs/ or any other path."
+    }
+  ],
+  "findings": [],
+  "notes": "Re-ran the task's exact verify script and `uv run pytest -q` (3 passed); numbers cross-checked line-by-line against docs/briefs/0003-runstat-cli.md's worked-example table and match exactly. No absolute paths in the new files. Scope matches the task's file list (tests/fixtures.py, tests/test_fixtures.py) exactly, nothing else touched by the work session."
+}

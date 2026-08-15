@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 1,
+  "iteration": 2,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:10:18Z",
+  "updated": "2026-08-15T22:11:35Z",
   "tasks": [
     {
       "id": "T1",
@@ -47,7 +47,7 @@
         "The helper writes only under the directory it is given and creates it if needed; a test in tests/test_fixtures.py exercises it via pytest's tmp_path and nothing else."
       ],
       "verify": "uv run python -c \"\nimport sys,json,pathlib,tempfile\nsys.path.insert(0,'tests')\nfrom fixtures import write_fixture_run\nr=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nassert r.name=='20260814-101500', r\nf=sorted((r/'sessions').glob('*.json'))\nassert [p.name for p in f]==['001-plan.json','002-work.json','003-review.json','004-work.json','005-review.json','006-work.json','007-review.json'], f\no=[json.loads(p.read_text()) for p in f]\nassert [x['phase'] for x in o]==['plan','work','review','work','review','work','review']\nassert [x['iteration'] for x in o]==[0,1,1,2,2,3,3]\nassert [round(x['total_cost_usd'],2) for x in o]==[1.98,0.5,0.2,0.52,0.2,0.48,0.2]\nassert [x['num_turns'] for x in o]==[12,6,3,7,3,5,3]\nassert [x['duration_ms'] for x in o]==[141000,68000,24000,72000,24000,64000,24000]\nassert all(x['is_error'] is False and x['permission_denials']==[] for x in o), o\nrec=[json.loads(l) for l in (r/'iterations.jsonl').read_text().splitlines() if l.strip()]\nassert [(x['iteration'],x['task'],x['outcome'],x['attempts'],x['tasks_done'],x['tasks_total']) for x in rec]==[(1,'T1','done',0,1,8),(2,'T2','gate_fail',1,1,8),(3,'T2','done',1,2,8)], rec\nprint('fixture ok')\n\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },
