@@ -448,7 +448,7 @@ while true; do
   # A task that has burned its attempts is blocked, not retried forever.
   n_new="$(state_get --argjson m "$MAX_ATTEMPTS" '[.tasks[]|select(.status=="pending" and .attempts>=$m)]|length')"
   if [[ "$n_new" -gt 0 ]]; then
-    state_edit --argjson m "$MAX_ATTEMPTS" '(.tasks[]|select(.status=="pending" and .attempts>=$m)) |= .status="blocked"'
+    state_edit --argjson m "$MAX_ATTEMPTS" '(.tasks[]|select(.status=="pending" and .attempts>=$m)) |= (.status="blocked")'
     warn "   $n_new task(s) hit the attempt ceiling — blocked"
   fi
 
