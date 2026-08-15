@@ -1,0 +1,38 @@
+{
+  "task": "T9",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "tests/test_worked_example.py defines test_summary, test_signals and test_compare, each invoking the installed CLI as a subprocess rather than calling Python functions directly.",
+      "met": true,
+      "evidence": "tests/test_worked_example.py:11-12 defines _run() as subprocess.run(['runstat', *args], ...); all three tests call it exclusively."
+    },
+    {
+      "criterion": "test_summary asserts the brief's per-phase pairing — plan $1.98/12/141s, work $1.50/18/204s, review $0.60/9/72s, total 7/$4.08/39/417s — on content, not on column alignment, and asserts the estimate wording is present.",
+      "met": true,
+      "evidence": "tests/test_worked_example.py:44-48 asserts digit-token sets per row via _row()/_digit_tokens() (content-based, alignment-agnostic) and asserts 'estimat' in stdout.lower(). Manually ran `uv run runstat summary` against the fixture and confirmed the printed numbers match exactly."
+    },
+    {
+      "criterion": "test_signals asserts all eight key: value lines exactly, values included.",
+      "met": true,
+      "evidence": "tests/test_worked_example.py:60-69 asserts the full ordered list of 8 (label, value) pairs from split(':', 1); confirmed by manually running `uv run runstat signals` against the fixture — output matches exactly."
+    },
+    {
+      "criterion": "test_compare builds a variant of the fixture and asserts at least one numeric delta.",
+      "met": true,
+      "evidence": "tests/test_worked_example.py:72-96 builds run_b via _drop_last_iteration and asserts the iterations line contains '3', '2' and '-1', plus the iterations-per-closed line contains '1.50' and '2.00'. Manually reproduced this compare and confirmed both deltas appear as asserted."
+    },
+    {
+      "criterion": "Every test writes only inside pytest's tmp_path; no test reads loop/runs/ or any other real run directory.",
+      "met": true,
+      "evidence": "All three tests call write_fixture_run(tmp_path, ...) or a subdirectory of it; no reference to loop/runs anywhere in the file."
+    },
+    {
+      "criterion": "The full suite `uv run pytest -q` passes.",
+      "met": true,
+      "evidence": "Ran `uv run pytest -q`: 31 passed."
+    }
+  ],
+  "findings": [],
+  "notes": "The fixture builder (tests/fixtures.py) already existed from an earlier task and is shared by test_summary.py/test_compare.py; T9 correctly imports it rather than duplicating it, despite the proposal's notes text implying duplication of helpers — the actual code (_run, _digit_tokens, _row, _drop_last_iteration) is small and local to this file, which is reasonable for a standalone whole-system check."
+}

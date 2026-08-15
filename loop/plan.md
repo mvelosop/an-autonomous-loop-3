@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **8/11 done** · iteration 8
+**Status:** running · **9/11 done** · iteration 9
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:24:06Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:25:54Z
 
 ## Progress
 
@@ -18,7 +18,7 @@
 - [x] **T6** — Add the signals command
 - [x] **T7** — Add the compare command
 - [x] **T8** — Enforce the exit-code and error-output contract across all commands
-- [ ] **T9** — Add the end-to-end worked-example acceptance test
+- [x] **T9** — Add the end-to-end worked-example acceptance test
 - [ ] **T10** — Write the README, with every documented example matching real output
 - [ ] **T11** — Document the telemetry contract and the cross-check against the driver
 
@@ -425,7 +425,7 @@ print('contract ok')
 
 ### T9 — Add the end-to-end worked-example acceptance test
 
-`pending` · depends on: T8
+`done` · depends on: T8
 
 Each earlier task was verified in isolation, which is exactly how an implementation drifts from the documented behaviour while every part still passes. This test replays the brief's transcript end to end against the installed CLI — summary, signals and compare over one fixture — so the whole is checked, not the pieces. The brief calls this the one test that catches that drift.
 

@@ -1,0 +1,78 @@
+{
+  "is_error": false,
+  "duration_api_ms": 57523,
+  "num_turns": 16,
+  "stop_reason": "end_turn",
+  "session_id": "948262b5-655b-479a-8f1d-fa2c09c69dbb",
+  "total_cost_usd": 0.4150119,
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 27275,
+    "cache_read_input_tokens": 572713,
+    "output_tokens": 5298,
+    "output_tokens_details": {
+      "thinking_tokens": 1504
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 27275,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 118,
+        "cache_read_input_tokens": 50267,
+        "cache_creation_input_tokens": 1326,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1326
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 26,
+      "outputTokens": 5298,
+      "cacheReadInputTokens": 572713,
+      "cacheCreationInputTokens": 27275,
+      "webSearchRequests": 0,
+      "costUSD": 0.4150119,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Ajn9e12idbUFgLnFceRNhb",
+      "tool_input": {
+        "command": "cd /tmp && rm -rf runstat_cmp && mkdir runstat_cmp && cd ~/source/personal/blog-posts/an-autonomous-loop-3\npython3 -c \"\nimport sys\nsys.path.insert(0, 'tests')\nfrom pathlib import Path\nfrom fixtures import write_fixture_run\na = write_fixture_run(Path('/tmp/runstat_cmp/a'))\nb = write_fixture_run(Path('/tmp/runstat_cmp/b'))\niterations_path = b / 'iterations.jsonl'\nlines = [l for l in iterations_path.read_text().splitlines() if l.strip()]\niterations_path.write_text('\\n'.join(lines[:-1]) + '\\n')\nprint(a)\nprint(b)\n\"\nuv run runstat compare /tmp/runstat_cmp/a/20260814-101500 /tmp/runstat_cmp/b/20260814-101500"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**PASS** — all six acceptance criteria are met and verified independently (re-ran the CLI against the fixture and confirmed the exact numbers asserted). The test correctly exercises the installed `runstat` CLI via subprocess, stays scoped to `tests/test_worked_example.py`, and touches nothing outside `tmp_path`. No findings.",
+  "ttft_ms": 1599,
+  "ttft_stream_ms": 1072,
+  "time_to_request_ms": 14,
+  "type": "result",
+  "duration_ms": 64167,
+  "uuid": "3da00e80-0876-4d1d-820a-addaa43af1ca",
+  "phase": "review",
+  "iteration": 9
+}
