@@ -84,6 +84,24 @@ acceptance item 6 requires the two to agree. **If you change a formula in
 `run.sh`, change it in `runstat` too** — the fixture in brief 0003 is the
 arbiter for both.
 
+## Reading a run
+
+JSON is what the driver computes over; markdown is what a human reads. Two
+files, both generated, neither ever parsed back:
+
+| File | What it answers |
+| --- | --- |
+| `loop/plan.md` | **Where are we?** Every task with status, attempts, goal, acceptance criteria and its verify command (collapsed). Re-rendered from `state.json` after every state change by `loop/render-plan.sh`. |
+| `loop/journal.md` | **What happened?** The planner's report — including its "what I interpreted rather than read" list — then one entry per iteration, then the run's outcome and signals. |
+
+**Never hand-edit either.** `plan.md` is regenerated on every state change and
+your edits will be lost; `state.json` is the source of truth. This is the
+design note's own prescription — "markdown rendered from state for human and
+mobile reading, never edited as the source of truth"
+(`docs/references/executable-loop-harness.md`).
+
+Render on demand without a run: `loop/render-plan.sh`.
+
 ## Evidence
 
 ```

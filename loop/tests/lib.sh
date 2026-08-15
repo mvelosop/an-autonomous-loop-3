@@ -41,7 +41,7 @@ fixture_new() {
   cp -R "$REPO_ROOT/.claude" "$FX/repo/"
   cp "$REPO_ROOT/CLAUDE.md" "$REPO_ROOT/.gitignore" "$FX/repo/"
   mkdir -p "$FX/repo/loop" "$FX/repo/docs/briefs"
-  cp "$REPO_ROOT/loop/run.sh" "$FX/repo/loop/"
+  cp "$REPO_ROOT/loop/run.sh" "$REPO_ROOT/loop/render-plan.sh" "$FX/repo/loop/"
   echo "# fixture brief" >"$FX/repo/docs/briefs/0003-runstat-cli.md"
 
   # Preflight's trust check is real; give it a real file that says yes, rather
