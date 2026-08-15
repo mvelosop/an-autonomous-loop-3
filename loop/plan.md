@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **6/11 done** · iteration 6
+**Status:** running · **7/11 done** · iteration 7
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:19:18Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:21:33Z
 
 ## Progress
 
@@ -16,7 +16,7 @@
 - [x] **T4** — Compute the eight run-level signals as numbers, and format them separately
 - [x] **T5** — Build the CLI entry points and the summary command
 - [x] **T6** — Add the signals command
-- [ ] **T7** — Add the compare command
+- [x] **T7** — Add the compare command
 - [ ] **T8** — Enforce the exit-code and error-output contract across all commands
 - [ ] **T9** — Add the end-to-end worked-example acceptance test
 - [ ] **T10** — Write the README, with every documented example matching real output
@@ -309,7 +309,7 @@ print('signals cmd ok')
 
 ### T7 — Add the compare command
 
-`pending` · depends on: T6
+`done` · depends on: T6
 
 This is the repeatability check: two runs of the same plan side by side, so a large divergence in cost or iterations is visible as the finding it is. It reuses the same eight signals rather than inventing a second set, and adds a delta column. Only signals that are numbers get a delta — tasks closed is a pair like 2/8 and subtracting it would be meaningless, so its delta stays blank.
 

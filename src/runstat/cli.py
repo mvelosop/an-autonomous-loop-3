@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .compare import compute_compare, format_compare
 from .loader import RunError, load_run
 from .signals import compute_signals, format_signals
 from .summary import compute_summary, format_summary
@@ -25,6 +26,14 @@ def _cmd_signals(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_compare(args: argparse.Namespace) -> int:
+    run_a = load_run(args.run_dir_a)
+    run_b = load_run(args.run_dir_b)
+    for line in format_compare(compute_compare(run_a, run_b)):
+        print(line)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="runstat")
     subparsers = parser.add_subparsers(dest="command")
@@ -40,6 +49,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     signals_parser.add_argument("run_dir", type=Path)
     signals_parser.set_defaults(func=_cmd_signals)
+
+    compare_parser = subparsers.add_parser(
+        "compare", help="side-by-side signals for two runs, with a delta"
+    )
+    compare_parser.add_argument("run_dir_a", type=Path)
+    compare_parser.add_argument("run_dir_b", type=Path)
+    compare_parser.set_defaults(func=_cmd_compare)
 
     return parser
 

@@ -106,3 +106,10 @@ asked; the brief now asks.
 - **Summary:** Added the `signals` subcommand: a thin printer over the existing compute_signals/format_signals that prints exactly eight `label: value` lines in the brief's order.
 - **Files:** src/runstat/cli.py, tests/test_signals_cmd.py
 - **Notes for next iteration:** compute_signals/format_signals already existed from T4, so this task was pure CLI wiring: a _cmd_signals handler that loads the run, calls compute_signals then format_signals, and prints f'{label}: {display}' for each pair -- no header, no footer, no blank-line separators (unlike summary's output), matching the 'exactly eight lines and nothing else' acceptance criterion. Registered a new 'signals' subparser in build_parser() next to 'summary'. Did not touch src/runstat/signals.py -- it was already complete and correct for this task's needs.
+
+## T7 — Add the compare command
+
+- **Outcome:** done (review: PASS)
+- **Summary:** Added the `compare` command: src/runstat/compare.py computes all eight signals for two runs via the existing compute_signals and pairs each with a run-B-minus-run-A delta, wired into cli.py as a new subparser taking two run directories.
+- **Files:** src/runstat/cli.py, src/runstat/compare.py, tests/test_compare.py
+- **Notes for next iteration:** compare.py mirrors the compute/format split of signals.py and summary.py: compute_compare(run_a, run_b) returns {'rows': [(label, a_display, b_display, delta_display), ...]} in the brief's eight-signal order; format_compare renders it as a table plus the 'estimate, not a bill' line (kept for consistency with the brief's general money-labelling contract, not just T5's summary-specific acceptance item). Delta is blank only for 'tasks closed' (a pair) and for 'iterations per closed' when either side is None (undefined ratio) -- every other signal, including estimated spend, gets a signed delta ('+d', '+.2f', or '+$x.xx'/'-$x.xx' for money). Did not touch signals.py or summary.py; compute_compare calls compute_signals directly rather than parsing format_signals output, per the acceptance criterion that compare does not define its own derivations.

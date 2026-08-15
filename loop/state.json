@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 6,
+  "iteration": 7,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:19:18Z",
+  "updated": "2026-08-15T22:21:33Z",
   "tasks": [
     {
       "id": "T1",
@@ -176,7 +176,7 @@
         "A test compares the fixture with a variant it builds inside tmp_path and asserts at least one numeric delta."
       ],
       "verify": "uv run python -c \"\nimport sys,pathlib,tempfile,subprocess\nsys.path.insert(0,'tests')\nfrom fixtures import write_fixture_run\na=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nb=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nj=b/'iterations.jsonl'\nkeep=[l for l in j.read_text().splitlines() if l.strip()][:-1]\nj.write_text(chr(10).join(keep)+chr(10))\np=subprocess.run(['runstat','compare',str(a),str(b)],capture_output=True,text=True)\nassert p.returncode==0, (p.returncode,p.stderr)\nout=p.stdout\nlow=out.lower()\nfor k in ['iterations','tasks closed','iterations per closed','gate failures','review rejections','attempts burned','no-progress streak','estimated spend']:\n    assert k in low, (k,out)\nlines=[l for l in out.splitlines() if l.strip()]\ndef toks(l):\n    return ''.join(ch if (ch.isdigit() or ch=='.' or ch=='-' or ch=='+') else ' ' for ch in l).split()\nit=[l for l in lines if l.strip().lower().startswith('iterations') and not l.strip().lower().startswith('iterations per')]\nassert it, out\nt=toks(it[-1])\nassert '3' in t and '2' in t and any(x.startswith('-1') for x in t), (t,out)\npc=[l for l in lines if l.strip().lower().startswith('iterations per')]\nassert pc, out\nt2=toks(pc[-1])\nassert '1.50' in t2 and '2.00' in t2, (t2,out)\ntc=[l for l in lines if l.strip().lower().startswith('tasks closed')]\nassert tc and '2/8' in tc[-1] and '1/8' in tc[-1], (tc,out)\nprint('compare ok')\n\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

@@ -1,0 +1,8 @@
+{
+  "task": "T7",
+  "outcome": "done",
+  "summary": "Added the `compare` command: src/runstat/compare.py computes all eight signals for two runs via the existing compute_signals and pairs each with a run-B-minus-run-A delta, wired into cli.py as a new subparser taking two run directories.",
+  "files": ["src/runstat/cli.py", "src/runstat/compare.py", "tests/test_compare.py"],
+  "verified": "Ran the task's verify command inline (constructs the fixture and a variant with the last iteration record dropped, asserts iterations 3/2/-1, iterations-per-closed 1.50/2.00, tasks-closed 2/8 and 1/8) -- printed 'compare ok'. Also ran `uv run pytest -q`: 20 passed.",
+  "notes": "compare.py mirrors the compute/format split of signals.py and summary.py: compute_compare(run_a, run_b) returns {'rows': [(label, a_display, b_display, delta_display), ...]} in the brief's eight-signal order; format_compare renders it as a table plus the 'estimate, not a bill' line (kept for consistency with the brief's general money-labelling contract, not just T5's summary-specific acceptance item). Delta is blank only for 'tasks closed' (a pair) and for 'iterations per closed' when either side is None (undefined ratio) -- every other signal, including estimated spend, gets a signed delta ('+d', '+.2f', or '+$x.xx'/'-$x.xx' for money). Did not touch signals.py or summary.py; compute_compare calls compute_signals directly rather than parsing format_signals output, per the acceptance criterion that compare does not define its own derivations."
+}
