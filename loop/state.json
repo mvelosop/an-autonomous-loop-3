@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 9,
+  "iteration": 10,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:25:54Z",
+  "updated": "2026-08-15T22:27:25Z",
   "tasks": [
     {
       "id": "T1",
@@ -250,7 +250,7 @@
         "Any dollar figure in the README is labelled an estimate"
       ],
       "verify": "uv run python - <<'PY'\nimport pathlib, subprocess, sys, tempfile\nsys.path.insert(0, 'tests')\nfrom fixtures import write_fixture_run\n\nt = pathlib.Path('README.md').read_text()\nfor cmd in ['runstat summary', 'runstat signals', 'runstat compare']:\n    assert cmd in t, cmd\nfor token in ['sessions/', 'iterations.jsonl', 'uv']:\n    assert token in t, token\nassert 'estimate' in t.lower(), 'no estimate wording for money'\nfor code in ['0', '1', '2']:\n    assert code in t\nr = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\np = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)\nassert p.returncode == 0, (p.returncode, p.stderr)\nfor line in [l.strip() for l in p.stdout.splitlines() if l.strip()]:\n    assert line in t, 'README does not match real output: ' + line\nprint('readme ok')\nPY",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

@@ -1,0 +1,8 @@
+{
+  "task": "T10",
+  "outcome": "done",
+  "summary": "Added README.md: what runstat is, install/run with uv, each of the three commands with a captured worked example, the exit-code contract, and the input layout it reads.",
+  "files": ["README.md"],
+  "verified": "uv run python - <<'PY' ... (the task's verify script, asserting each printed signals line appears verbatim in README.md and the summary/signals/compare/token/estimate/exit-code checks) -> printed 'readme ok'; full suite: uv run pytest -q -> 31 passed.",
+  "notes": "Every command example in the README was captured by actually running the installed `runstat` console script against tests.fixtures.write_fixture_run's output (and a compare variant with the last iterations.jsonl record dropped), then pasted verbatim -- not hand-typed -- so the gate's line-by-line check against `runstat signals` output passes. The signals block in the README is character-for-character the real stdout, including the trailing blank line inside the compare example's 'tasks closed' row (its delta column is blank, so that row's trailing whitespace matters if anyone diffs it, though the gate only checks substring containment). Did not add a table-of-contents or badges -- the brief's acceptance list is the whole scope here."
+}

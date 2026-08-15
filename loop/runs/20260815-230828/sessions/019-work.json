@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 45592,
+  "num_turns": 11,
+  "stop_reason": "end_turn",
+  "session_id": "69fd81cd-5e87-4389-b608-4a5a3d246d7e",
+  "total_cost_usd": 0.46547009999999994,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 38375,
+    "cache_read_input_tokens": 581847,
+    "output_tokens": 4040,
+    "output_tokens_details": {
+      "thinking_tokens": 198
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 38375,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 128,
+        "cache_read_input_tokens": 62064,
+        "cache_creation_input_tokens": 629,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 629
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 22,
+      "outputTokens": 4040,
+      "cacheReadInputTokens": 581847,
+      "cacheCreationInputTokens": 38375,
+      "webSearchRequests": 0,
+      "costUSD": 0.46547009999999994,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T10 done: added `README.md` with install/run instructions, worked examples for all three commands (captured verbatim from the actual CLI output), the exit-code contract, and the input layout. The task's verify command and the full test suite (`uv run pytest -q`, 31 passed) both pass. Reported via `loop/proposal.json` per the skill's rules — no state/journal edits, no commit.",
+  "ttft_ms": 1883,
+  "ttft_stream_ms": 1347,
+  "time_to_request_ms": 20,
+  "type": "result",
+  "duration_ms": 47605,
+  "uuid": "0a07aa64-23a6-456b-aea2-acbc80747da7",
+  "phase": "work",
+  "iteration": 10
+}

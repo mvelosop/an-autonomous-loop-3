@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **9/11 done** · iteration 9
+**Status:** running · **10/11 done** · iteration 10
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:25:54Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:27:25Z
 
 ## Progress
 
@@ -19,7 +19,7 @@
 - [x] **T7** — Add the compare command
 - [x] **T8** — Enforce the exit-code and error-output contract across all commands
 - [x] **T9** — Add the end-to-end worked-example acceptance test
-- [ ] **T10** — Write the README, with every documented example matching real output
+- [x] **T10** — Write the README, with every documented example matching real output
 - [ ] **T11** — Document the telemetry contract and the cross-check against the driver
 
 ## Tasks
@@ -448,7 +448,7 @@ uv run pytest -q tests/test_worked_example.py::test_summary tests/test_worked_ex
 
 ### T10 — Write the README, with every documented example matching real output
 
-`pending` · depends on: T9
+`done` · depends on: T9
 
 Write README.md covering what runstat is, how to install and run it, the three commands, the exit-code contract, and the input layout it reads. Every example must show output captured from the tool as it actually behaves. A README whose examples have drifted from the code is worse than none, so the gate replays what the tool prints and requires each line to appear verbatim in the document.
 
