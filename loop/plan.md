@@ -4,15 +4,15 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **2/10 done** · iteration 2
+**Status:** running · **3/10 done** · iteration 3
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:34:02Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:36:25Z
 
 ## Progress
 
 - [x] **T1** — Scaffold the runstat package with both entry points
 - [x] **T2** — Check in the two fixture run directories the gates read
-- [ ] **T3** — Implement runstat summary — the per-phase rollup
+- [x] **T3** — Implement runstat summary — the per-phase rollup
 - [ ] **T4** — Call out error sessions and permission denials in summary
 - [ ] **T5** — Implement runstat signals — the eight run-level signals
 - [ ] **T6** — Implement runstat compare — two runs side by side with deltas
@@ -85,7 +85,7 @@ print('fixtures ok')
 
 ### T3 — Implement runstat summary — the per-phase rollup
 
-`pending` · depends on: T1, T2
+`done` · depends on: T1, T2
 
 This is the first command that reads telemetry off disk, so it also brings in whatever loading and parsing the rest of the tool will share. It reports one row per phase — session count, total cost, total turns, total wall time — plus a total row, over the run directory it is given. The brief's worked-example table is the exact expected output; column widths and padding are yours to choose, the numbers, labels and their pairing are not.
 

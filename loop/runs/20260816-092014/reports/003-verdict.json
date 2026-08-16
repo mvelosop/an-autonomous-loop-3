@@ -1,0 +1,38 @@
+{
+  "task": "T3",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "`runstat summary tests/fixtures/runs/20260814-101500` exits 0 and prints rows for plan (1 session, $1.98, 12 turns, 141s), work (3, $1.50, 18, 204s), review (3, $0.60, 9, 72s) and a total row (7, $4.08, 39, 417s).",
+      "met": true,
+      "evidence": "Manually ran the command; output is exactly `plan 1 $1.98 12 141s`, `work 3 $1.50 18 204s`, `review 3 $0.60 9 72s`, `total 7 $4.08 39 417s`, matching the brief's table. summary.py:6-17 groups by phase and sums cost/turns/wall_ms correctly."
+    },
+    {
+      "criterion": "Rows appear in the column order the brief's table uses: phase, sessions, cost, turns, wall.",
+      "met": true,
+      "evidence": "summary.py:22 `_format_row` emits label, sessions, cost, turns, wall_s in that order."
+    },
+    {
+      "criterion": "Costs print as dollars to two decimals; wall time prints as whole seconds with an `s` suffix.",
+      "met": true,
+      "evidence": "summary.py:21-22: `round(wall_ms/1000)` with `s` suffix, `${cost:.2f}`."
+    },
+    {
+      "criterion": "The output says somewhere that the dollar figures are an estimate.",
+      "met": true,
+      "evidence": "summary.py:42 appends 'Dollar figures are an estimate, not a bill.'"
+    },
+    {
+      "criterion": "Sessions are grouped by their `phase` key; a run directory is read from `sessions/*.json` under the directory given on the command line.",
+      "met": true,
+      "evidence": "loader.py:16-18 globs `<run_dir>/sessions/*.json`; summary.py:9-10 groups by `session[\"phase\"]`."
+    },
+    {
+      "criterion": "The tool imports nothing outside the standard library.",
+      "met": true,
+      "evidence": "loader.py imports only `json` and `pathlib.Path`; summary.py has no imports."
+    }
+  ],
+  "findings": [],
+  "notes": "Diff is scoped to exactly the task's declared files (loader.py, summary.py, __main__.py wiring). loader.py deliberately does no error handling for malformed files/missing dirs, per T7's separate error-contract task -- reasonable division of labor, not a gap in T3. pytest still collects zero tests, expected until T8. No absolute paths in any changed file. Untracked loop/runs/... telemetry files (gates/T3.log, session JSON, stderr logs) are driver-produced, not agent-authored, and out of scope for this review."
+}

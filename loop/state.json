@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 2,
+  "iteration": 3,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:34:02Z",
+  "updated": "2026-08-16T08:36:25Z",
   "tasks": [
     {
       "id": "T1",
@@ -74,7 +74,7 @@
         "The tool imports nothing outside the standard library."
       ],
       "verify": "o=\"$(uv run runstat summary tests/fixtures/runs/20260814-101500)\" || exit 1; printf '%s\\n' \"$o\" | grep -qE '^plan[[:space:]|]+1[[:space:]|]+\\$1\\.98[[:space:]|]+12[[:space:]|]+141s[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^work[[:space:]|]+3[[:space:]|]+\\$1\\.50[[:space:]|]+18[[:space:]|]+204s[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^review[[:space:]|]+3[[:space:]|]+\\$0\\.60[[:space:]|]+9[[:space:]|]+72s[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^[Tt]otal[[:space:]|]+7[[:space:]|]+\\$4\\.08[[:space:]|]+39[[:space:]|]+417s[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qi estimat",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

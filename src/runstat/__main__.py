@@ -3,6 +3,9 @@
 import argparse
 import sys
 
+from runstat.loader import load_sessions
+from runstat.summary import format_summary
+
 
 def _build_parser():
     parser = argparse.ArgumentParser(
@@ -37,6 +40,11 @@ def main(argv=None):
     if args.command is None:
         parser.print_usage(sys.stderr)
         return 2
+
+    if args.command == "summary":
+        sessions = load_sessions(args.run_dir)
+        print(format_summary(sessions))
+        return 0
 
     # Stub: implemented by later tasks in the plan.
     return 0
