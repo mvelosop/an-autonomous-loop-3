@@ -1,0 +1,33 @@
+{
+  "task": "T2",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "tests/fixtures/runs/20260814-101500/sessions/ holds exactly the seven files named in the brief's worked example, each with the phase, iteration, total_cost_usd, num_turns and duration_ms from that table, is_error false and an empty permission_denials list.",
+      "met": true,
+      "evidence": "All seven session files present with values matching the brief's table exactly (docs/briefs/0003-runstat-cli.md:141-149); all have is_error: false and permission_denials: []."
+    },
+    {
+      "criterion": "tests/fixtures/runs/20260814-101500/iterations.jsonl holds exactly the three records printed in the brief, in that order.",
+      "met": true,
+      "evidence": "File content matches docs/briefs/0003-runstat-cli.md:156-158 verbatim, same order."
+    },
+    {
+      "criterion": "tests/fixtures/runs/20260815-090000/ is a second, valid run with the five specified sessions.",
+      "met": true,
+      "evidence": "All five session files present with exactly the phase/iteration/cost/turns/duration values specified in state.json's T2 acceptance, is_error false, permission_denials empty."
+    },
+    {
+      "criterion": "tests/fixtures/runs/20260815-090000/iterations.jsonl holds exactly the two specified records.",
+      "met": true,
+      "evidence": "File content matches state.json's T2 acceptance verbatim: iteration 1 done, iteration 2 review_fail."
+    },
+    {
+      "criterion": "Session files may carry additional keys from a real result JSON but nothing holding message content beyond result, and no absolute paths.",
+      "met": true,
+      "evidence": "Extra keys are type, subtype, duration_api_ms, result (short strings), session_id, usage — no transcript/message content. grep for /Users and $HOME (USER) across tests/ returned nothing."
+    }
+  ],
+  "findings": [],
+  "notes": "Gate (loop/runs/20260816-092014/gates/T2.log) already prints 'fixtures ok'. Fixture data was checked field-by-field against the brief's worked example (docs/briefs/0003-runstat-cli.md:139-159) independently of loop/proposal.json's summary, and matches exactly. Only files in scope (tests/fixtures/runs/...) were touched; no other files modified in the diff."
+}

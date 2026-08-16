@@ -1,0 +1,18 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "duration_ms": 70000,
+  "duration_api_ms": 63000,
+  "num_turns": 6,
+  "result": "T2 attempt.",
+  "session_id": "b1000004",
+  "total_cost_usd": 0.55,
+  "usage": {
+    "input_tokens": 7200,
+    "output_tokens": 1800
+  },
+  "permission_denials": [],
+  "phase": "work",
+  "iteration": 2
+}

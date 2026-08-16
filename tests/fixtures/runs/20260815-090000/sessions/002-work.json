@@ -1,0 +1,18 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "duration_ms": 80000,
+  "duration_api_ms": 72000,
+  "num_turns": 8,
+  "result": "T1 done.",
+  "session_id": "b1000002",
+  "total_cost_usd": 0.6,
+  "usage": {
+    "input_tokens": 9600,
+    "output_tokens": 2400
+  },
+  "permission_denials": [],
+  "phase": "work",
+  "iteration": 1
+}

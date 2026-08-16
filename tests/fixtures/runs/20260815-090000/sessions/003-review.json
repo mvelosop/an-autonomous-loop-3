@@ -1,0 +1,18 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "duration_ms": 25000,
+  "duration_api_ms": 22500,
+  "num_turns": 3,
+  "result": "T1 verdict: PASS.",
+  "session_id": "b1000003",
+  "total_cost_usd": 0.2,
+  "usage": {
+    "input_tokens": 3600,
+    "output_tokens": 900
+  },
+  "permission_denials": [],
+  "phase": "review",
+  "iteration": 1
+}

@@ -1,0 +1,18 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "duration_ms": 150000,
+  "duration_api_ms": 135000,
+  "num_turns": 14,
+  "result": "Plan written: 8 tasks.",
+  "session_id": "b1000001",
+  "total_cost_usd": 2.1,
+  "usage": {
+    "input_tokens": 16800,
+    "output_tokens": 4200
+  },
+  "permission_denials": [],
+  "phase": "plan",
+  "iteration": 0
+}

@@ -1,0 +1,23 @@
+{
+  "task": "T2",
+  "outcome": "done",
+  "summary": "Checked in tests/fixtures/runs/20260814-101500 (the brief's worked example, 7 sessions + 3 iteration records) and tests/fixtures/runs/20260815-090000 (a 5-session, 2-record comparison variant), matching the exact values state.json's T2 acceptance criteria specify.",
+  "files": [
+    "tests/fixtures/runs/20260814-101500/sessions/001-plan.json",
+    "tests/fixtures/runs/20260814-101500/sessions/002-work.json",
+    "tests/fixtures/runs/20260814-101500/sessions/003-review.json",
+    "tests/fixtures/runs/20260814-101500/sessions/004-work.json",
+    "tests/fixtures/runs/20260814-101500/sessions/005-review.json",
+    "tests/fixtures/runs/20260814-101500/sessions/006-work.json",
+    "tests/fixtures/runs/20260814-101500/sessions/007-review.json",
+    "tests/fixtures/runs/20260814-101500/iterations.jsonl",
+    "tests/fixtures/runs/20260815-090000/sessions/001-plan.json",
+    "tests/fixtures/runs/20260815-090000/sessions/002-work.json",
+    "tests/fixtures/runs/20260815-090000/sessions/003-review.json",
+    "tests/fixtures/runs/20260815-090000/sessions/004-work.json",
+    "tests/fixtures/runs/20260815-090000/sessions/005-review.json",
+    "tests/fixtures/runs/20260815-090000/iterations.jsonl"
+  ],
+  "verified": "Ran T2's verify command from loop/state.json (python3 field-by-field check of both fixture runs' sessions and iterations.jsonl) — printed 'fixtures ok'. Also re-ran T1's verify command to confirm no regression, and `uv run pytest -q` still exits 5 (no tests collected), matching the expected pre-T8 state.",
+  "notes": "Session files are shaped like a real `claude -p --output-format json` result (type, subtype, duration_ms, duration_api_ms, num_turns, result, session_id, total_cost_usd, usage, permission_denials) plus the driver-added phase/iteration keys, per the brief's input-format section — this is illustrative detail beyond what T2's acceptance pins, so later tasks should only rely on the fields the brief lists (phase, iteration, total_cost_usd, num_turns, duration_ms, is_error, permission_denials). No absolute paths anywhere (checked with grep for $HOME and /Users). Did not touch loop/state.json or any other task's scope."
+}

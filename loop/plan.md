@@ -4,14 +4,14 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **1/10 done** · iteration 1
+**Status:** running · **2/10 done** · iteration 2
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:32:22Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:34:02Z
 
 ## Progress
 
 - [x] **T1** — Scaffold the runstat package with both entry points
-- [ ] **T2** — Check in the two fixture run directories the gates read
+- [x] **T2** — Check in the two fixture run directories the gates read
 - [ ] **T3** — Implement runstat summary — the per-phase rollup
 - [ ] **T4** — Call out error sessions and permission denials in summary
 - [ ] **T5** — Implement runstat signals — the eight run-level signals
@@ -47,7 +47,7 @@ uv run python -c 'import runstat' && uv run python -m runstat --help >/dev/null 
 
 ### T2 — Check in the two fixture run directories the gates read
 
-`pending` · depends on: none
+`done` · depends on: none
 
 Every later gate needs a run directory with known-correct numbers, and the brief's worked example is the arbiter for all of them. This task lays that data on disk: run 20260814-101500 exactly as the brief's table specifies, plus a second, smaller run 20260815-090000 used as the comparison variant so `compare` and the README examples are reproducible. These are read-only inputs; pytest tests must still build their own runs inside tmp_path and must never write into these directories or into loop/runs.
 

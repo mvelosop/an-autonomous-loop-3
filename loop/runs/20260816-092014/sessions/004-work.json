@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 57501,
+  "num_turns": 11,
+  "stop_reason": "end_turn",
+  "session_id": "fad4f19e-dbe9-428d-b29b-6bcb2c06ed67",
+  "total_cost_usd": 0.4503555,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 35091,
+    "cache_read_input_tokens": 503815,
+    "output_tokens": 5907,
+    "output_tokens_details": {
+      "thinking_tokens": 1286
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 35091,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 109,
+        "cache_read_input_tokens": 58265,
+        "cache_creation_input_tokens": 1144,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1144
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 20,
+      "outputTokens": 5907,
+      "cacheReadInputTokens": 503815,
+      "cacheCreationInputTokens": 35091,
+      "webSearchRequests": 0,
+      "costUSD": 0.4503555,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T2 is done: both fixture run directories are checked in (`tests/fixtures/runs/20260814-101500` and `.../20260815-090000`), the task's verify command passes, T1's verify still passes, and `loop/proposal.json` is written with outcome `done`. Stopping here per the one-task-per-iteration rule.",
+  "ttft_ms": 2241,
+  "ttft_stream_ms": 1090,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 64960,
+  "uuid": "3c205872-a527-41f8-87e3-18d68e3f76e5",
+  "phase": "work",
+  "iteration": 2
+}

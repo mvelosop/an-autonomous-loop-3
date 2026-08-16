@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 1,
+  "iteration": 2,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:32:22Z",
+  "updated": "2026-08-16T08:34:02Z",
   "tasks": [
     {
       "id": "T1",
@@ -49,7 +49,7 @@
         "Session files may carry additional keys from a real result JSON (session_id, usage, result and so on), but nothing that holds message content beyond the result field, and no absolute paths."
       ],
       "verify": "python3 -c \"\nimport json,pathlib\nA='tests/fixtures/runs/20260814-101500'\nB='tests/fixtures/runs/20260815-090000'\nexp={A:[('001-plan.json','plan',0,1.98,12,141000),('002-work.json','work',1,0.5,6,68000),('003-review.json','review',1,0.2,3,24000),('004-work.json','work',2,0.52,7,72000),('005-review.json','review',2,0.2,3,24000),('006-work.json','work',3,0.48,5,64000),('007-review.json','review',3,0.2,3,24000)],B:[('001-plan.json','plan',0,2.1,14,150000),('002-work.json','work',1,0.6,8,80000),('003-review.json','review',1,0.2,3,25000),('004-work.json','work',2,0.55,6,70000),('005-review.json','review',2,0.2,3,25000)]}\nrecs={A:[{'iteration':1,'task':'T1','outcome':'done','attempts':0,'tasks_done':1,'tasks_total':8},{'iteration':2,'task':'T2','outcome':'gate_fail','attempts':1,'tasks_done':1,'tasks_total':8},{'iteration':3,'task':'T2','outcome':'done','attempts':1,'tasks_done':2,'tasks_total':8}],B:[{'iteration':1,'task':'T1','outcome':'done','attempts':0,'tasks_done':1,'tasks_total':8},{'iteration':2,'task':'T2','outcome':'review_fail','attempts':1,'tasks_done':1,'tasks_total':8}]}\nfor run,rows in exp.items():\n    d=pathlib.Path(run)\n    assert sorted(p.name for p in (d/'sessions').glob('*.json'))==[r[0] for r in rows], run\n    for name,phase,it,cost,turns,dur in rows:\n        s=json.loads((d/'sessions'/name).read_text())\n        assert (s['phase'],s['iteration'],round(float(s['total_cost_usd']),2),s['num_turns'],s['duration_ms'])==(phase,it,cost,turns,dur), (run,name)\n        assert s['is_error'] is False and s['permission_denials']==[], (run,name)\n    got=[json.loads(x) for x in (d/'iterations.jsonl').read_text().splitlines() if x.strip()]\n    assert got==recs[run], (run,got)\nprint('fixtures ok')\n\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

@@ -1,0 +1,18 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "duration_ms": 24000,
+  "duration_api_ms": 21600,
+  "num_turns": 3,
+  "result": "T2 verdict: FAIL (gate).",
+  "session_id": "a1000005",
+  "total_cost_usd": 0.2,
+  "usage": {
+    "input_tokens": 3600,
+    "output_tokens": 900
+  },
+  "permission_denials": [],
+  "phase": "review",
+  "iteration": 2
+}
