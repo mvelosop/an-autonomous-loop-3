@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 37750,
+  "num_turns": 13,
+  "stop_reason": "end_turn",
+  "session_id": "506933b1-a97a-4c93-81d0-fe15ddb5a61d",
+  "total_cost_usd": 0.2884257,
+  "usage": {
+    "input_tokens": 1597,
+    "cache_creation_input_tokens": 24928,
+    "cache_read_input_tokens": 273689,
+    "output_tokens": 3464,
+    "output_tokens_details": {
+      "thinking_tokens": 1071
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24928,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 97,
+        "cache_read_input_tokens": 46816,
+        "cache_creation_input_tokens": 2430,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2430
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 1597,
+      "outputTokens": 3464,
+      "cacheReadInputTokens": 273689,
+      "cacheCreationInputTokens": 24928,
+      "webSearchRequests": 0,
+      "costUSD": 0.2884257,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**T7: PASS** — the `compare` command reuses `compute_signals` for both runs, builds correctly signed deltas (blank for non-numeric \"tasks closed\"), matches the fixture's expected -1/+0.50 deltas, exits 0, and stayed within scope. No findings.",
+  "ttft_ms": 2068,
+  "ttft_stream_ms": 987,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 41625,
+  "uuid": "9d804817-d4d6-4b1b-a4ea-79f14332e870",
+  "phase": "review",
+  "iteration": 7
+}

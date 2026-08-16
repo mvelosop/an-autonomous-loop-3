@@ -1,0 +1,14 @@
+{
+  "task": "T6",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "`uv run runstat signals <run-dir>` prints exactly eight lines and nothing else, one per signal, in the brief's order.", "met": true, "evidence": "src/runstat/cli.py _cmd_signals prints one f\"{label}: {display}\" line per pair from format_signals(), no header/footer; test_signals_prints_exactly_eight_lines asserts len(lines) == 8."},
+    {"criterion": "Each line is `<label>: <value>` using the labels iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend.", "met": true, "evidence": "signals.py format_signals() returns those exact eight labels in that order (src/runstat/signals.py:59-67)."},
+    {"criterion": "On the brief's fixture the values are exactly 3, 2/8, 1.50, 1, 0, 1, 0 and $4.08.", "met": true, "evidence": "tests/test_signals_cmd.py:23-32 asserts exactly those pairs; gate log loop/runs/20260815-230828/gates/T6.log shows 'signals cmd ok' for the equivalent verify command; reran pytest -q locally, 18 passed."},
+    {"criterion": "The values come from compute_signals — the command formats and prints, it does not recompute any derivation.", "met": true, "evidence": "_cmd_signals (cli.py) only calls compute_signals(run) then format_signals(...) and prints; no arithmetic in cli.py."},
+    {"criterion": "The label estimated spend is what marks the money as an estimate; the command exits 0 on a readable run.", "met": true, "evidence": "format_signals uses label 'estimated spend'; _cmd_signals returns 0."},
+    {"criterion": "A test drives the command over the fixture in tmp_path and asserts all eight values exactly.", "met": true, "evidence": "tests/test_signals_cmd.py:9-32, test_signals_matches_fixture_exactly uses tmp_path and asserts the full 8-pair list."}
+  ],
+  "findings": [],
+  "notes": "compute_signals/format_signals were already implemented in T4 (git log confirms signals.py last touched at T4's commit); this task correctly stayed scoped to CLI wiring plus tests, matching proposal.json's account. No absolute paths in diff or new test file."
+}

@@ -84,6 +84,24 @@ acceptance item 6 requires the two to agree. **If you change a formula in
 `run.sh`, change it in `runstat` too** — the fixture in brief 0003 is the
 arbiter for both.
 
+## Reading a run
+
+JSON is what the driver computes over; markdown is what a human reads. Two
+files, both generated, neither ever parsed back:
+
+| File | What it answers |
+| --- | --- |
+| `loop/plan.md` | **Where are we?** Every task with status, attempts, goal, acceptance criteria and its verify command (collapsed). Re-rendered from `state.json` after every state change by `loop/render-plan.sh`. |
+| `loop/journal.md` | **What happened?** The planner's report — including its "what I interpreted rather than read" list — then one entry per iteration, then the run's outcome and signals. |
+
+**Never hand-edit either.** `plan.md` is regenerated on every state change and
+your edits will be lost; `state.json` is the source of truth. This is the
+design note's own prescription — "markdown rendered from state for human and
+mobile reading, never edited as the source of truth"
+(`docs/references/executable-loop-harness.md`).
+
+Render on demand without a run: `loop/render-plan.sh`.
+
 ## Evidence
 
 ```
@@ -104,7 +122,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-loop/tests/run-all.sh          # all 12 scenarios
+loop/tests/run-all.sh          # all 19 scenarios
 loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 
@@ -128,6 +146,13 @@ input and an expected exit code end an argument that a paragraph cannot
 | `10-containment` | no tracked file names the machine; nothing written outside the repo |
 | `11-stall` | no recorded progress twice running stops the loop |
 | `12-signals-fixture` | the signal formulas against brief 0003's hand-computed fixture |
+| `13-empty-run-signals` | a run with no iterations reports zeros, not phantoms |
+| `14-rendered-views` | `plan.md` tracks state; `journal.md` carries the narrative |
+| `15-telemetry-contract` | the driver emits exactly the shape `runstat` reads |
+| `16-review-fails-closed` | an unusable review verdict fails, never passes |
+| `17-stale-handoff` | a silent work session cannot inherit the previous report |
+| `18-preflight-untrusted` | an untrusted workspace is refused before any spend |
+| `19-session-error` | a dead session is an infrastructure failure, not a task's |
 
 Scenario 12 is the one that keeps the control plane and the analysis plane
 honest: the same fixture arbitrates `run.sh` and `runstat`.

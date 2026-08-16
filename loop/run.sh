@@ -93,6 +93,13 @@ state_edit() {
   fi
 }
 
+# state.json is what the driver computes over; plan.md is what a human reads.
+# Rendered after every state change, one direction only, never parsed back.
+render_plan() {
+  "$LOOP_DIR/render-plan.sh" "$STATE" "$LOOP_DIR/plan.md" \
+    || warn "plan render failed — loop/plan.md may be stale"
+}
+
 # One `claude -p` session, fully contained: project settings only, no MCP
 # servers, no memory of anything else. Its result JSON is stamped with the phase
 # and iteration that produced it, masked, and kept as telemetry.
@@ -179,7 +186,14 @@ gate_ids() {
 # there — the fixture in brief 0003 is the arbiter.
 
 sig_iterations()  { [[ -f "$ITERATIONS" ]] && wc -l <"$ITERATIONS" | tr -d ' ' || echo 0; }
-sig_spend()       { jq -s '[.[].total_cost_usd // 0] | add // 0' "$SESSIONS"/*.json 2>/dev/null || echo 0; }
+# `jq -s` on an unmatched glob BOTH prints 0 and exits non-zero, so a bare
+# `jq ... || echo 0` emits "0\n0" — which awk then rejects, silently disabling
+# the cost-ceiling comparison. Check the glob matched instead of relying on ||.
+sig_spend() {
+  local f=("$SESSIONS"/*.json)
+  [[ -e "${f[0]}" ]] || { echo 0; return 0; }
+  jq -s '[.[] | .total_cost_usd // 0] | add // 0' "${f[@]}" 2>/dev/null || echo 0
+}
 sig_closed()      { jq -s 'if length == 0 then 0 else (.[-1].tasks_done // 0) end' "$ITERATIONS" 2>/dev/null || echo 0; }
 sig_total()       { jq -s 'if length == 0 then 0 else (.[-1].tasks_total // 0) end' "$ITERATIONS" 2>/dev/null || echo 0; }
 sig_gate_fails()  { jq -s '[.[]|select(.outcome=="gate_fail")]|length' "$ITERATIONS" 2>/dev/null || echo 0; }
@@ -198,7 +212,7 @@ sig_per_closed() {
 
 # Trailing iterations that closed nothing.
 sig_streak() {
-  jq -s '[.[].tasks_done // 0] as $d
+  jq -s '[.[] | .tasks_done // 0] as $d
          | ([0] + $d[:-1]) as $p
          | [range(0; ($d|length))] | map(if $d[.] > $p[.] then 1 else 0 end)
          | (reverse | index(1)) // length' "$ITERATIONS" 2>/dev/null || echo 0
@@ -275,6 +289,8 @@ preflight
 
 # --- plan phase (once) ---
 
+[[ -f "$JOURNAL" ]] || printf '# Journal\n\nAppend-only narrative of this plan. Rendered state lives in loop/plan.md.\n' >"$JOURNAL"
+
 if [[ ! -f "$STATE" ]]; then
   if [[ -z "$BRIEF" ]]; then
     BRIEF="$(ls -1 docs/briefs/*.md 2>/dev/null | tail -1)"
@@ -298,13 +314,25 @@ if [[ ! -f "$STATE" ]]; then
   [[ "$bad_dep" -eq 0 ]] || die "$bad_dep dependency reference(s) name a task that does not exist"
 
   say "planned: $(state_get '"\(.run_id) — \(.tasks|length) tasks"')"
+
+  # The plan phase's report carries the planner's "what I interpreted rather
+  # than read" list — the operator's one cheap chance to catch a misreading
+  # before every iteration inherits it. It is otherwise reachable only as a
+  # long string inside a session JSON blob, which nobody reads on a phone.
+  {
+    printf '\n## Plan — %s\n\n' "$(state_get .run_id)"
+    printf -- '- **Brief:** `%s`\n' "$BRIEF"
+    printf -- '- **Tasks:** %s\n\n' "$(state_get '.tasks|length')"
+    jq -r '.result // ""' "$SESSIONS"/*-plan.json 2>/dev/null | mask
+    printf '\n'
+  } >>"$JOURNAL"
+
+  render_plan
   git add -A && git commit -q -m "[loop] plan $(state_get .run_id)" && say "committed the plan"
 else
   say "resuming $(state_get .run_id) — $(state_get '[.tasks[]|select(.status=="done")]|length')/$(state_get '.tasks|length') done"
   state_edit --arg t "$(ts)" '.status="running" | .updated=$t'
 fi
-
-[[ -f "$JOURNAL" ]] || printf '# Journal — %s\n\nAppend-only. One entry per iteration. This is the loop'"'"'s only memory\nacross sessions.\n' "$(state_get .run_id)" >"$JOURNAL"
 
 # --- iterate ---
 
@@ -475,6 +503,8 @@ while true; do
     printf -- '- **Notes for next iteration:** %s\n' "${notes:-none}"
   } >>"$JOURNAL"
 
+  render_plan
+
   # 6. commit — one per iteration, driver-owned, covering code + state +
   # journal + telemetry together. Agents never commit, so the history is a
   # record of what the loop decided rather than of what an agent claimed.
@@ -521,6 +551,19 @@ case "$status" in
   not_converging) say "iterations-per-closed-task exceeded $CONVERGENCE_MAX — the run is not converging." ;;
   session_error)  say "a claude session failed. see loop/runs/$RUN_ID/" ;;
 esac
+render_plan
+{
+  printf '\n## Run ended — %s\n\n' "$status"
+  printf -- '- **Run:** `%s` · %s iteration(s) this run\n' "$RUN_ID" "$run_iters"
+  printf -- '- **Plan:** %s/%s done, %s blocked\n' \
+    "$(state_get '[.tasks[]|select(.status=="done")]|length')" \
+    "$(state_get '.tasks|length')" \
+    "$(state_get '[.tasks[]|select(.status=="blocked")]|length')"
+  printf -- '- **Signals:** %s iterations · %s per closed · %s gate failure(s) · %s review rejection(s) · %s attempt(s) burned · streak %s · ~$%s\n' \
+    "$(sig_iterations)" "$(sig_per_closed)" "$(sig_gate_fails)" "$(sig_review_fails)" \
+    "$(sig_attempts)" "$(sig_streak)" "$(printf '%.2f' "$(sig_spend)")"
+} >>"$JOURNAL"
+
 git add -A >/dev/null 2>&1
 git diff --cached --quiet 2>/dev/null || git commit -q -m "[loop] run $RUN_ID: $status"
 

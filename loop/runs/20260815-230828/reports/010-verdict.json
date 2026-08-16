@@ -1,0 +1,14 @@
+{
+  "task": "T10",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "README.md documents runstat summary, runstat signals and runstat compare, each with a worked example", "met": true, "evidence": "README.md lines 46-98, three ### sections each with a $ ... example block"},
+    {"criterion": "Every line the signals command prints for the fixture run appears verbatim in the README", "met": true, "evidence": "Independently re-ran write_fixture_run + `runstat signals` and confirmed every stdout line is a verbatim substring of README.md (matches the signals example block, README.md lines 68-77)"},
+    {"criterion": "The exit-code contract (0 success, 1 no sessions, 2 usage or malformed) is documented", "met": true, "evidence": "README.md lines 103-113 table; matches src/runstat/cli.py return values (0 on success, 1 EmptyRunError, 2 RunError/no func)"},
+    {"criterion": "The input layout it reads (sessions/*.json and iterations.jsonl) is described", "met": true, "evidence": "README.md lines 23-42"},
+    {"criterion": "Install and run instructions use uv", "met": true, "evidence": "README.md lines 12-21, uv sync / uv run runstat ... / uv run python -m runstat ..."},
+    {"criterion": "Any dollar figure in the README is labelled an estimate", "met": true, "evidence": "README.md lines 60, 97, 115-118 ('Dollar figures are an estimate, not a bill.' and the Money section)"}
+  ],
+  "findings": [],
+  "notes": "docs/runstat.md (the telemetry contract, also required by the brief) is correctly out of scope for T10, whose files list is only README.md -- no scope creep. No absolute paths found."
+}

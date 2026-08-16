@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 88292,
+  "num_turns": 17,
+  "stop_reason": "end_turn",
+  "session_id": "784fb8a1-2c75-4382-8550-324d0b67fa1a",
+  "total_cost_usd": 0.6612246,
+  "usage": {
+    "input_tokens": 28,
+    "cache_creation_input_tokens": 46125,
+    "cache_read_input_tokens": 829952,
+    "output_tokens": 9027,
+    "output_tokens_details": {
+      "thinking_tokens": 3260
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 46125,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 68,
+        "cache_read_input_tokens": 69660,
+        "cache_creation_input_tokens": 783,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 783
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 28,
+      "outputTokens": 9027,
+      "cacheReadInputTokens": 829952,
+      "cacheCreationInputTokens": 46125,
+      "webSearchRequests": 0,
+      "costUSD": 0.6612246,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T7 is done: added `runstat compare`, its verify command passes, and the full suite (20 tests) is green. Report written to `loop/proposal.json`; leaving state/journal/commit to the driver.",
+  "ttft_ms": 1619,
+  "ttft_stream_ms": 1051,
+  "time_to_request_ms": 17,
+  "type": "result",
+  "duration_ms": 90609,
+  "uuid": "98f87074-5e34-4d7c-99c3-23dfbc6f75d2",
+  "phase": "work",
+  "iteration": 7
+}

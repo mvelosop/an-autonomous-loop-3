@@ -1,0 +1,33 @@
+{
+  "task": "T1",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "pyproject.toml declares a project named runstat, requires-python >=3.13, an empty runtime dependency list, and pytest as the only dev dependency.",
+      "met": true,
+      "evidence": "pyproject.toml: name = \"runstat\", requires-python = \">=3.13\", dependencies = [], [dependency-groups] dev = [\"pytest\"]"
+    },
+    {
+      "criterion": "The build is configured so that `uv run python -c \"import runstat\"` imports the package from src/runstat/ — an src/ layout that is actually installed, not a path hack.",
+      "met": true,
+      "evidence": "[tool.hatch.build.targets.wheel] packages = [\"src/runstat\"]; ran `uv run python -c \"import runstat; print(runstat.__file__)\"` and it resolved to src/runstat/__init__.py via the editable install (`uv pip list` shows runstat 0.1.0 installed from this project path); no conftest.py or sys.path hack anywhere in the tree"
+    },
+    {
+      "criterion": "pyproject.toml declares the console script entry point `runstat = \"runstat.cli:main\"` (the module it names is written in a later task).",
+      "met": true,
+      "evidence": "pyproject.toml [project.scripts] runstat = \"runstat.cli:main\""
+    },
+    {
+      "criterion": "tests/test_smoke.py contains at least one test that passes, so `uv run pytest -q` exits 0 rather than 5 for an empty suite.",
+      "met": true,
+      "evidence": "tests/test_smoke.py::test_package_imports asserts runstat.__name__ == \"runstat\"; `uv run pytest -q` -> '1 passed in 0.01s', exit 0"
+    },
+    {
+      "criterion": "No runtime dependency outside the standard library is added anywhere.",
+      "met": true,
+      "evidence": "dependencies = [] in pyproject.toml; uv.lock lists only pytest and its own dev-only transitive deps (iniconfig, packaging, pluggy, pygments, colorama) plus the runstat package itself"
+    }
+  ],
+  "findings": [],
+  "notes": "Scope matches the task's file list exactly (pyproject.toml, src/runstat/__init__.py, tests/test_smoke.py, plus the necessarily-generated uv.lock). loop/state.json's uncommitted diff (status field, unicode dash normalization) predates this work session and is driver bookkeeping, not something T1 touched."
+}

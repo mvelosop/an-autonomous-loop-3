@@ -1,0 +1,38 @@
+{
+  "task": "T7",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "`uv run runstat compare <run-a> <run-b>` prints all eight signals as rows, each showing the value for run A, the value for run B, and a delta.",
+      "met": true,
+      "evidence": "compare.py's compute_compare builds all eight rows (iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend), format_compare renders each as label/a/b/delta; gate log shows 'compare ok' from the verify script asserting all eight labels present."
+    },
+    {
+      "criterion": "The delta is run B minus run A, signed, for signals whose values are numeric (including the dollar figure); it is blank for non-numeric signals such as tasks closed.",
+      "met": true,
+      "evidence": "compare.py: `_signed_int(b[...] - a[...])` for int signals, `_signed_ratio(pc_b - pc_a)` for iterations_per_closed, `_signed_money(b['estimated_spend'] - a['estimated_spend'])` for spend; 'tasks closed' row has delta \"\" (compare.py, rows list, second tuple)."
+    },
+    {
+      "criterion": "Comparing the brief's fixture against a variant with its last iteration record removed shows iterations 3 then 2 with a delta of -1, and iterations per closed 1.50 then 2.00 with a positive delta.",
+      "met": true,
+      "evidence": "test_compare.py's test_compare_shows_all_signals_and_a_numeric_delta asserts '3' and '2' and '-1' in the iterations line, and '1.50'/'2.00' in the per-closed line; gate log (loop/runs/20260815-230828/gates/T7.log) shows 'compare ok' for the equivalent inline verify script."
+    },
+    {
+      "criterion": "The command exits 0 when both run directories are readable.",
+      "met": true,
+      "evidence": "_cmd_compare returns 0 unconditionally on success (cli.py); test_compare_exits_zero_on_two_readable_runs asserts returncode == 0."
+    },
+    {
+      "criterion": "Both runs' signals are the ones compute_signals produces — compare does not define its own derivations.",
+      "met": true,
+      "evidence": "compare.py imports and calls `compute_signals` from `.signals` for both run_a and run_b; all row values are read from those two dicts, no re-derivation of counts/ratios from raw run data."
+    },
+    {
+      "criterion": "A test compares the fixture with a variant it builds inside tmp_path and asserts at least one numeric delta.",
+      "met": true,
+      "evidence": "test_compare.py: run_a = write_fixture_run(tmp_path / 'a'), run_b = _drop_last_iteration(write_fixture_run(tmp_path / 'b')); asserts '-1' in iterations_lines[-1]."
+    }
+  ],
+  "findings": [],
+  "notes": "Change stayed within the task's declared files (cli.py, compare.py, test_compare.py); no edits to signals.py/summary.py. No absolute paths observed. Gate log matches expected verify output exactly."
+}

@@ -1,0 +1,8 @@
+{
+  "task": "T9",
+  "outcome": "done",
+  "summary": "Added tests/test_worked_example.py with test_summary, test_signals and test_compare, replaying the brief's worked example end to end against the installed runstat CLI as subprocesses.",
+  "files": ["tests/test_worked_example.py"],
+  "verified": "uv run pytest -q tests/test_worked_example.py::test_summary tests/test_worked_example.py::test_signals tests/test_worked_example.py::test_compare -> 3 passed; full suite uv run pytest -q -> 31 passed",
+  "notes": "Each test invokes the console script ('runstat', not python -m runstat) via subprocess.run, per the acceptance criterion that this is the installed CLI rather than Python functions. test_summary and test_compare reuse the same digit-token/row-matching helpers already present in tests/test_summary.py and tests/test_compare.py (duplicated locally rather than imported, since those helpers are private to their modules and this file's job is to stand alone as the whole-system check). test_signals asserts the exact eight (label, value) pairs. test_compare builds its variant by dropping the last iterations.jsonl record, same as tests/test_compare.py, and asserts the iterations delta (-1) and the iterations-per-closed values (1.50 -> 2.00); it does not re-assert every signal label or the tasks-closed pairing since test_compare.py already covers that in isolation -- this file's job is the cross-command worked-example replay, not re-deriving every existing unit test."
+}

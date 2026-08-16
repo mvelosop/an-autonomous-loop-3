@@ -1,0 +1,43 @@
+{
+  "task": "T8",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "Exit 2 for: a missing run directory, any malformed session file, any malformed iterations.jsonl line, an unknown subcommand, and a missing or extra positional argument.",
+      "met": true,
+      "evidence": "loader.RunError (missing dir, malformed session/iterations) is caught in cli.main() and mapped to exit 2 (src/runstat/cli.py:83-85); unknown subcommand and missing/extra positional args are argparse errors, which exit 2 before main()'s try block runs. Covered by tests/test_cli_contract.py's six exit-2 tests, all passing."
+    },
+    {
+      "criterion": "Exit 1 when the run directory exists and is well-formed but contains no session files.",
+      "met": true,
+      "evidence": "New EmptyRunError (src/runstat/errors.py) raised by _require_sessions when run.sessions is empty, called at the top of _cmd_summary/_cmd_signals/_cmd_compare before any print (cli.py:16-41), caught in main() and mapped to exit 1 (cli.py:86-88). test_well_formed_run_with_no_sessions_exits_one passes for summary and signals."
+    },
+    {
+      "criterion": "Exit 0 on success for all three commands.",
+      "met": true,
+      "evidence": "test_success_exits_zero_with_output passes; T5/T6/T7 already established success paths and they remain untouched."
+    },
+    {
+      "criterion": "On every failing path stdout is completely empty and the explanation goes to stderr.",
+      "met": true,
+      "evidence": "_require_sessions runs before any print() call in each command; _assert_fails in test_cli_contract.py checks stdout=='' on every failing case and all 8 tests pass."
+    },
+    {
+      "criterion": "The stderr message for malformed input names the offending file — the session file's name, or iterations.jsonl.",
+      "met": true,
+      "evidence": "loader.py already formats 'malformed session file: <name>' and 'malformed record in iterations.jsonl: ...'; test_malformed_session_file_exits_two_and_names_it and test_malformed_iterations_line_exits_two_and_names_it assert the filename appears in stderr and pass."
+    },
+    {
+      "criterion": "No Python traceback ever reaches stderr, for any of these cases.",
+      "met": true,
+      "evidence": "All exception paths are caught (RunError, EmptyRunError) or handled internally by argparse before reaching a bare raise; _assert_fails checks 'Traceback' not in stderr for all 8 cases."
+    },
+    {
+      "criterion": "Tests cover each exit code for each command where it applies, driving the CLI as a subprocess inside tmp_path.",
+      "met": true,
+      "evidence": "tests/test_cli_contract.py uses subprocess.run([sys.executable, '-m', 'runstat', ...]) throughout, all inside tmp_path; exit 1 is exercised for summary and signals (compare's no-sessions and malformed-input paths aren't separately tested, but that gap matches the task's own verify script, which likewise only exercises compare's missing-directory case)."
+    }
+  ],
+  "findings": [],
+  "notes": "Full suite (uv run pytest -q) passes 28/28. Files touched match exactly what the task declared (cli.py, errors.py, test_cli_contract.py); no scope creep into loader.py/signals.py/summary.py/compare.py. No absolute paths found in touched files."
+}

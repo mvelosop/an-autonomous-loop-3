@@ -1,0 +1,8 @@
+{
+  "task": "T8",
+  "outcome": "done",
+  "summary": "Enforced the exit-code contract (0 success, 1 well-formed-but-empty run, 2 usage/malformed input) across summary, signals and compare, with stdout empty and no traceback on every failing path.",
+  "files": ["src/runstat/cli.py", "src/runstat/errors.py", "tests/test_cli_contract.py"],
+  "verified": "Ran the task's own inline verify script (prints 'contract ok') and `uv run pytest -q`, which passes 28/28 including the 8 new tests in tests/test_cli_contract.py.",
+  "notes": "Missing run directory, malformed session file, malformed iterations.jsonl line, missing/unknown subcommand and missing/extra positional args were already exit 2 before this task -- load_run already raised loader.RunError (caught in cli.main and turned into exit 2 with the offending filename), and argparse's own error() already writes usage+message to stderr and exits 2 without ever touching stdout. The only real gap was exit 1 for a well-formed run with zero session files: added src/runstat/errors.py::EmptyRunError and a _require_sessions(run, run_dir) check called at the top of _cmd_summary/_cmd_signals/_cmd_compare (both run dirs, for compare), before any print, so stdout stays empty; cli.main() catches EmptyRunError alongside RunError and maps it to exit 1. Did not touch loader.py, signals.py, summary.py or compare.py."
+}

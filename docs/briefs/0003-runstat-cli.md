@@ -191,6 +191,22 @@ numeric signal must be asserted.
 
 ---
 
+## Documentation
+
+Two documents, both gated on being true rather than on existing:
+
+- **`README.md`** — what runstat is, install and run with `uv`, each of the three
+  commands with a worked example, the exit-code contract, and the input layout
+  it reads. **Every documented example must show output the tool actually
+  produces**, and the gate replays the tool and requires each printed line to
+  appear verbatim. A README whose examples have drifted is worse than none,
+  because a reader trusts it.
+- **`docs/runstat.md`** — the telemetry contract, field by field, and each
+  signal's derivation. This is the document that keeps the loop driver and
+  `runstat` from drifting: brief 0002 acceptance item 6 requires the two to
+  agree, and a derivation recorded in only one implementation is how that
+  agreement quietly breaks. It must state the attempts-burned trap explicitly.
+
 ## Out of scope
 
 Deliberately excluded. A plan that adds any of these has widened its own scope,
@@ -213,7 +229,7 @@ which is itself worth knowing:
 
 ## Shape
 
-This should decompose into roughly seven to nine tasks, each independently
+This should decompose into roughly nine to eleven tasks, each independently
 verifiable by a single command. The decomposition itself is the planning phase's
 job and is not prescribed here — how well it does that is part of what this run
 is testing.

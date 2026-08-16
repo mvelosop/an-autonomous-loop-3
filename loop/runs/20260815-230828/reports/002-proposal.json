@@ -1,0 +1,8 @@
+{
+  "task": "T2",
+  "outcome": "done",
+  "summary": "Added tests/fixtures.py with write_fixture_run(dest), which materializes the brief's worked-example run directory (20260814-101500, seven sessions, three iterations.jsonl records) under any given path, plus tests/test_fixtures.py exercising it via tmp_path.",
+  "files": ["tests/fixtures.py", "tests/test_fixtures.py"],
+  "verified": "uv run python -c \"...\" (the task's exact verify script) printed 'fixture ok'; uv run pytest -q ran 3 passed (the two new fixture tests plus T1's smoke test).",
+  "notes": "write_fixture_run creates dest with parents=True/exist_ok=True before writing, so it works whether dest already exists (pytest's tmp_path) or not. No conftest.py or pytest.ini exists in the repo; pytest's default 'prepend' import mode adds tests/ to sys.path automatically because tests/ has no __init__.py, so tests/test_fixtures.py imports fixtures directly with `from fixtures import write_fixture_run` -- no sys.path hack needed inside the test file itself (the verify command's own inline script still does sys.path.insert(0,'tests') since it runs from outside pytest)."
+}

@@ -1,0 +1,11 @@
+[36m[loop][0m preflight
+[36m[loop][0m   [x] jq
+[36m[loop][0m   [x] claude
+[36m[loop][0m   [x] git
+[36m[loop][0m   [x] uv
+[36m[loop][0m   [ ] workspace NOT trusted — settings.json permissions would be silently ignored
+[36m[loop][0m       fix: run `claude` interactively here once and accept the trust dialog
+[36m[loop][0m   [x] settings.json parses — 22 allow, 16 deny rules
+[36m[loop][0m   [x] masking active ($HOME and username)
+[36m[loop][0m   [x] telemetry dir loop/runs/20260815-164556
+[36m[loop][0m   [x] no state — will plan first

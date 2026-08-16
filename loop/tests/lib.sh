@@ -41,7 +41,7 @@ fixture_new() {
   cp -R "$REPO_ROOT/.claude" "$FX/repo/"
   cp "$REPO_ROOT/CLAUDE.md" "$REPO_ROOT/.gitignore" "$FX/repo/"
   mkdir -p "$FX/repo/loop" "$FX/repo/docs/briefs"
-  cp "$REPO_ROOT/loop/run.sh" "$FX/repo/loop/"
+  cp "$REPO_ROOT/loop/run.sh" "$REPO_ROOT/loop/render-plan.sh" "$FX/repo/loop/"
   echo "# fixture brief" >"$FX/repo/docs/briefs/0003-runstat-cli.md"
 
   # Preflight's trust check is real; give it a real file that says yes, rather
@@ -198,3 +198,21 @@ PLAN_ONE='{"run_id":"fixture","brief":"docs/briefs/0003-runstat-cli.md","status"
  "created":"2026-08-15T00:00:00Z","updated":"2026-08-15T00:00:00Z","tasks":[
  {"id":"T1","title":"Only","goal":"g","files":[],"depends_on":[],
   "acceptance":["T1.out exists"],"verify":"test -f T1.out","status":"pending","attempts":0,"notes":""}]}'
+
+# Preflight's trust check, from the other side: a workspace the operator has
+# not accepted. This is the failure that silently voided all permission rules
+# in a prior experiment.
+fixture_untrust() {
+  jq -n --arg p "$FX_REPO" '{projects: {($p): {hasTrustDialogAccepted: false}}}' \
+    >"$FX/testuser/.claude.json"
+}
+
+# A tool erroring mid-run is never harmless: awk exiting 2 on a malformed value
+# makes an `if awk ...` budget check silently false, so the budget stops being
+# enforced while everything still looks fine.
+assert_no_tool_errors() {
+  local hits
+  hits="$(grep -nE '^(awk|jq|sed|grep|bash): ' "$FX/out.log" | head -3 || true)"
+  [[ -z "$hits" ]] && ok "no tool errors leaked into the run" \
+    || bad "tool error in run output: $hits"
+}
