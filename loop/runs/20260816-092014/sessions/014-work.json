@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 127252,
+  "num_turns": 19,
+  "stop_reason": "end_turn",
+  "session_id": "e48ec8ba-3ed2-4df8-9f3d-df0a513f6493",
+  "total_cost_usd": 0.7389162,
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 49494,
+    "cache_read_input_tokens": 806014,
+    "output_tokens": 13338,
+    "output_tokens_details": {
+      "thinking_tokens": 6792
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 49494,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 150,
+        "cache_read_input_tokens": 72847,
+        "cache_creation_input_tokens": 965,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 965
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 26,
+      "outputTokens": 13338,
+      "cacheReadInputTokens": 806014,
+      "cacheCreationInputTokens": 49494,
+      "webSearchRequests": 0,
+      "costUSD": 0.7389162,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T7 is done: `src/runstat/loader.py` and `src/runstat/__main__.py` now enforce the shared exit-code/error contract across all three commands (0 success, 1 empty run, 2 for missing dir/malformed input/usage errors, stderr-only messages, no tracebacks). T7's verify passes, and I re-ran T3–T6's verify commands to confirm no regressions. Proposal written to `loop/proposal.json`.",
+  "ttft_ms": 1532,
+  "ttft_stream_ms": 1004,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 133346,
+  "uuid": "7b82bd38-789c-4c40-b0da-2a043477e255",
+  "phase": "work",
+  "iteration": 7
+}

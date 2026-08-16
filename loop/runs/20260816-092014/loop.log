@@ -99,3 +99,19 @@
 [36m[loop][0m cost=$0.3658104 turns=12 dur=52s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T6 done
+[36m[loop][0m    committed 27c0d72
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            6
+[36m[loop][0m   tasks closed:          6/10
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         0
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       0
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $8.08 (estimate, not a bill)
+[36m[loop][0m ── iteration 7 (7/30 this run) · T7 · 6/10 done ──
+[36m[loop][0m    Enforce the exit-code and error contract across all three commands
+[36m[loop][0m cost=$0.7389162 turns=19 dur=133s error=false
+[36m[loop][0m cost=$0.3088026 turns=14 dur=51s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T7 done

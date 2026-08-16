@@ -1,0 +1,43 @@
+{
+  "task": "T7",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "A run directory that does not exist exits 2 with a message on stderr and empty stdout.",
+      "met": true,
+      "evidence": "loader.py:_require_run_dir raises RunDirNotFound when Path(run_dir).is_dir() is false; __main__.py catches it and returns 2 with str(exc) on stderr; output is only printed after the try block succeeds, so stdout stays empty. Gate re-run confirms `chk 2 summary $d/nope` and `chk 2 signals $d/nope` pass."
+    },
+    {
+      "criterion": "A single unparseable file in sessions/ exits 2 and names that file's path on stderr; the same holds for one unparseable line of iterations.jsonl, which names iterations.jsonl.",
+      "met": true,
+      "evidence": "loader.py:load_sessions wraps json.loads in try/except json.JSONDecodeError, raising MalformedInput(str(path)); load_iterations does the same for each line, raising MalformedInput(str(path)) with the iterations.jsonl path. Gate confirms `uv run runstat summary $d/badsess` stderr contains '002-work.json' and `uv run runstat signals $d/baditer` stderr contains 'iterations.jsonl'."
+    },
+    {
+      "criterion": "A malformed record is never skipped and never produces a partial report.",
+      "met": true,
+      "evidence": "The except json.JSONDecodeError block raises immediately on the first bad file/line instead of `continue`-ing past it, so the loop halts before any output is printed; __main__.py only calls print(output) after the try block completes without exception."
+    },
+    {
+      "criterion": "A valid run directory containing no session files exits 1, with the explanation on stderr and empty stdout.",
+      "met": true,
+      "evidence": "load_sessions raises NoSessions(run_dir) if the sessions list is empty after the glob loop; __main__.py maps NoSessions to return 1. Gate confirms `chk 1 summary $d/empty` and `chk 1 signals $d/empty` pass."
+    },
+    {
+      "criterion": "Invoking with no subcommand, an unknown subcommand, or the wrong number of arguments exits 2 with a usage message on stderr.",
+      "met": true,
+      "evidence": "No-subcommand path explicitly checked (`args.command is None` -> parser.print_usage(stderr); return 2). Unknown subcommand and wrong arg count fall through to argparse's own parser.error()/SystemExit(2), unchanged from prior tasks. Gate confirms `chk 2` (no args), `chk 2 bogus $A`, and `chk 2 compare $A` (missing second arg) all pass."
+    },
+    {
+      "criterion": "No invocation prints a Python traceback; all error text goes to stderr and stdout stays empty whenever the exit code is non-zero.",
+      "met": true,
+      "evidence": "A bare `except Exception` catches anything not covered by the three specific loader exceptions and turns it into a one-line stderr message + exit 2; output var is only printed on the success path. Gate's chk() asserts empty stdout and non-empty, traceback-free stderr on every failing case, all passing."
+    },
+    {
+      "criterion": "All three commands share this behaviour.",
+      "met": true,
+      "evidence": "summary, signals, and compare bodies all moved inside one shared try block in main(), all three calling load_sessions/load_iterations, so all three inherit RunDirNotFound/MalformedInput/NoSessions handling for free. Gate exercises summary, signals, and compare against missing/malformed/empty dirs and all match the expected codes."
+    }
+  ],
+  "findings": [],
+  "notes": "Re-ran the full gate verify command independently (not just trusting proposal.json) against fresh tmp fixtures; all sub-checks passed, ending in GATE_PASS. Diff is scoped to src/runstat/loader.py and src/runstat/__main__.py only, matching the task's files list. No absolute paths introduced."
+}

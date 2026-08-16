@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 6,
+  "iteration": 7,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:43:59Z",
+  "updated": "2026-08-16T08:47:08Z",
   "tasks": [
     {
       "id": "T1",
@@ -170,7 +170,7 @@
         "All three commands share this behaviour."
       ],
       "verify": "d=\"$(mktemp -d)\" && A=tests/fixtures/runs/20260814-101500 && mkdir -p \"$d/empty/sessions\" && : >\"$d/empty/iterations.jsonl\" && cp -R $A \"$d/badsess\" && printf '{' >\"$d/badsess/sessions/002-work.json\" && cp -R $A \"$d/baditer\" && printf 'not json\\n' >>\"$d/baditer/iterations.jsonl\" && chk() { e=$1; shift; uv run runstat \"$@\" >\"$d/o\" 2>\"$d/e\"; rc=$?; [ \"$rc\" = \"$e\" ] || { echo \"want exit $e got $rc for: $*\"; return 1; }; [ -s \"$d/o\" ] && { echo \"stdout not empty for: $*\"; return 1; }; [ -s \"$d/e\" ] || { echo \"stderr empty for: $*\"; return 1; }; grep -q Traceback \"$d/e\" && { echo \"traceback for: $*\"; return 1; }; return 0; } && chk 2 && chk 2 bogus \"$A\" && chk 2 compare \"$A\" && chk 2 summary \"$d/nope\" && chk 2 signals \"$d/nope\" && chk 2 summary \"$d/badsess\" && chk 2 signals \"$d/badsess\" && chk 2 signals \"$d/baditer\" && chk 2 compare \"$A\" \"$d/baditer\" && chk 1 summary \"$d/empty\" && chk 1 signals \"$d/empty\" && uv run runstat summary \"$d/badsess\" 2>&1 >/dev/null | grep -q '002-work.json' && uv run runstat signals \"$d/baditer\" 2>&1 >/dev/null | grep -q 'iterations.jsonl'",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

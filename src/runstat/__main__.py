@@ -4,7 +4,7 @@ import argparse
 import sys
 
 from runstat.compare import compute_comparison, format_comparison
-from runstat.loader import load_iterations, load_sessions
+from runstat.loader import MalformedInput, NoSessions, RunDirNotFound, load_iterations, load_sessions
 from runstat.signals import compute_signals, format_signals
 from runstat.summary import format_summary
 
@@ -43,27 +43,37 @@ def main(argv=None):
         parser.print_usage(sys.stderr)
         return 2
 
-    if args.command == "summary":
-        sessions = load_sessions(args.run_dir)
-        print(format_summary(sessions))
-        return 0
+    try:
+        if args.command == "summary":
+            sessions = load_sessions(args.run_dir)
+            output = format_summary(sessions)
 
-    if args.command == "signals":
-        sessions = load_sessions(args.run_dir)
-        iterations = load_iterations(args.run_dir)
-        print(format_signals(compute_signals(sessions, iterations)))
-        return 0
+        elif args.command == "signals":
+            sessions = load_sessions(args.run_dir)
+            iterations = load_iterations(args.run_dir)
+            output = format_signals(compute_signals(sessions, iterations))
 
-    if args.command == "compare":
-        sessions_a = load_sessions(args.run_dir_a)
-        iterations_a = load_iterations(args.run_dir_a)
-        sessions_b = load_sessions(args.run_dir_b)
-        iterations_b = load_iterations(args.run_dir_b)
-        rows = compute_comparison(sessions_a, iterations_a, sessions_b, iterations_b)
-        print(format_comparison(rows))
-        return 0
+        elif args.command == "compare":
+            sessions_a = load_sessions(args.run_dir_a)
+            iterations_a = load_iterations(args.run_dir_a)
+            sessions_b = load_sessions(args.run_dir_b)
+            iterations_b = load_iterations(args.run_dir_b)
+            rows = compute_comparison(sessions_a, iterations_a, sessions_b, iterations_b)
+            output = format_comparison(rows)
+    except RunDirNotFound as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    except MalformedInput as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    except NoSessions as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    except Exception as exc:  # never let a traceback reach the user
+        print(f"runstat: {exc}", file=sys.stderr)
+        return 2
 
-    # Stub: implemented by later tasks in the plan.
+    print(output)
     return 0
 
 

@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **6/10 done** · iteration 6
+**Status:** running · **7/10 done** · iteration 7
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:43:59Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:47:08Z
 
 ## Progress
 
@@ -16,7 +16,7 @@
 - [x] **T4** — Call out error sessions and permission denials in summary
 - [x] **T5** — Implement runstat signals — the eight run-level signals
 - [x] **T6** — Implement runstat compare — two runs side by side with deltas
-- [ ] **T7** — Enforce the exit-code and error contract across all three commands
+- [x] **T7** — Enforce the exit-code and error contract across all three commands
 - [ ] **T8** — Write the pytest suite, including the worked example end to end
 - [ ] **T9** — Write README.md with examples replayed from the tool
 - [ ] **T10** — Write docs/runstat.md, the telemetry contract
@@ -177,7 +177,7 @@ A=tests/fixtures/runs/20260814-101500; B=tests/fixtures/runs/20260815-090000; o=
 
 ### T7 — Enforce the exit-code and error contract across all three commands
 
-`pending` · depends on: T3, T5, T6
+`done` · depends on: T3, T5, T6
 
 A partial result indistinguishable from a correct one is the failure mode this whole tool exists to catch, so a malformed session file or iterations.jsonl line must be a loud refusal, never a silent skip. This task makes every command obey one contract: 0 on success, 1 when the run directory is valid but holds no sessions, 2 for a usage error, a missing directory or malformed input — with the offending path on stderr, stdout empty, and no traceback ever reaching the user.
 
