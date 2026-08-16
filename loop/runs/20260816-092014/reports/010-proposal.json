@@ -1,0 +1,8 @@
+{
+  "task": "T10",
+  "outcome": "done",
+  "summary": "Wrote docs/runstat.md: the run-directory layout, every session field and iterations.jsonl field runstat reads, all eight signal derivations, and an explicit statement of the attempts-burned double-counting trap, naming brief 0002 as the other implementation that must agree.",
+  "files": ["docs/runstat.md"],
+  "verified": "the task's verify command (docs/runstat.md keyword sweep including 'cumulative') printed VERIFY_OK; uv run pytest -q still prints '20 passed'.",
+  "notes": "Derivations were copied verbatim from src/runstat/signals.py (compute_signals, _trailing_no_progress_streak) and loader.py, not re-derived from the brief, so this doc matches the actual code rather than just the brief's prose. Pure documentation task; no source files touched."
+}

@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 40874,
+  "num_turns": 11,
+  "stop_reason": "end_turn",
+  "session_id": "327b8b27-42c3-459c-8829-fdf7d49e9d78",
+  "total_cost_usd": 0.4188981,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 38982,
+    "cache_read_input_tokens": 424777,
+    "output_tokens": 3835,
+    "output_tokens_details": {
+      "thinking_tokens": 389
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 38982,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 82,
+        "cache_read_input_tokens": 62778,
+        "cache_creation_input_tokens": 522,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 522
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 16,
+      "outputTokens": 3835,
+      "cacheReadInputTokens": 424777,
+      "cacheCreationInputTokens": 38982,
+      "webSearchRequests": 0,
+      "costUSD": 0.4188981,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T10 done: `docs/runstat.md` now documents the telemetry layout, all eight signal derivations copied from the actual code, and the attempts-burned trap explicitly. Verify command and the full test suite both pass; proposal written for the driver.",
+  "ttft_ms": 1850,
+  "ttft_stream_ms": 1220,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 44556,
+  "uuid": "19db6780-b3d5-4ed7-81fc-043f144ec92b",
+  "phase": "work",
+  "iteration": 10
+}

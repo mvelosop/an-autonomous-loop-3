@@ -1,0 +1,15 @@
+{
+  "task": "T10",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "docs/runstat.md documents the run directory layout — sessions/*.json and iterations.jsonl — and states that session file names are name-sortable in run order.", "met": true, "evidence": "'Run directory layout' section (lines 13-23) shows the tree and states 'Session file names are name-sortable in run order'."},
+    {"criterion": "It documents every session field runstat reads: phase, iteration, total_cost_usd, num_turns, duration_ms, is_error, permission_denials.", "met": true, "evidence": "Table at lines 30-38 lists all seven fields with descriptions."},
+    {"criterion": "It documents the six keys of an iterations.jsonl record and the four legal outcome values: done, gate_fail, review_fail, blocked.", "met": true, "evidence": "Example record and table at lines 44-55 give all six keys (iteration, task, outcome, attempts, tasks_done, tasks_total); lines 57-62 list all four outcome values with definitions."},
+    {"criterion": "It gives the derivation of all eight signals, matching what the code computes.", "met": true, "evidence": "Table at lines 66-77 gives all eight derivations. Cross-checked word-for-word against src/runstat/signals.py's compute_signals/_trailing_no_progress_streak and loop/run.sh's sig_* functions (lines 188-219) — iterations count, tasks_done/tasks_total from last record, iterations/closed rounded to 2 decimals with 'n/a' at zero, gate_fail/review_fail counts, non-done count for attempts burned, trailing no-progress streak with 0 baseline, and sum of total_cost_usd all match exactly."},
+    {"criterion": "It states the attempts-burned trap explicitly: the signal counts records whose outcome is not done, and summing the cumulative per-record attempts field would double-count a task appearing in several records.", "met": true, "evidence": "Dedicated '### The attempts-burned trap' section (lines 79-89) states this exactly, including the gate_fail/gate_fail/done retry example."},
+    {"criterion": "It names brief 0002 as the other implementation of these derivations and says the two must agree.", "met": true, "evidence": "Intro (lines 4-11) and closing '## Agreement with the loop driver' section (lines 98-106) both name brief 0002 and its acceptance item 6, stating the two implementations must not drift apart."},
+    {"criterion": "It contains no absolute paths.", "met": true, "evidence": "grep -n '/Users' docs/runstat.md returned no matches."}
+  ],
+  "findings": [],
+  "notes": "Verify command passed (VERIFY_OK). Diff scope is docs/runstat.md only plus the driver's own telemetry log for this run — no source or state.json changes. All eight derivations were checked against both src/runstat/signals.py and loop/run.sh's inline jq and match exactly, so the doc's central claim (the two implementations agree) is itself true, not just asserted."
+}

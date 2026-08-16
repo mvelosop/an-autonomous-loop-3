@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 9,
+  "iteration": 10,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:53:38Z",
+  "updated": "2026-08-16T08:55:17Z",
   "tasks": [
     {
       "id": "T1",
@@ -242,7 +242,7 @@
         "It contains no absolute paths."
       ],
       "verify": "f=docs/runstat.md; test -f $f && for k in 'sessions/' 'iterations.jsonl' 'total_cost_usd' 'num_turns' 'duration_ms' 'is_error' 'permission_denials' 'gate_fail' 'review_fail' 'blocked' 'iterations per closed' 'attempts burned' 'no-progress streak' 'estimated spend' 'tasks closed' 'gate failures' 'review rejections' '0002'; do grep -qF -- \"$k\" $f || { echo \"docs/runstat.md does not mention: $k\"; exit 1; }; done; grep -qiE 'cumulative|double-count|double count' $f",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     }

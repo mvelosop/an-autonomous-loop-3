@@ -109,3 +109,10 @@ No internal module, function or exception name is pinned — every gate goes thr
 - **Summary:** Wrote README.md documenting what runstat is (post-hoc analysis only, no runtime role in the loop), how to install and run it with uv via both entry points, all three commands with worked examples copied verbatim from the checked-in fixtures, the input layout, and the exit-code contract.
 - **Files:** README.md
 - **Notes for next iteration:** Captured each command's stdout with Python's repr() first to see exact whitespace before pasting into README, since the gate does an exact substring grep per line (not a normalized/trimmed compare) — the compare table's 'tasks closed' row has two trailing spaces in the tool's real output (no delta text, but the column padding still emits spaces) that I preserved in the README code fence. Documented signals'/iterations-per-closed's `n/a` case and attempts-burned's cumulative-attempts trap from the brief even though neither is exercised by the two checked-in fixtures, since both are part of the documented contract. Did not touch docs/runstat.md — that's T10's file, out of this task's scope.
+
+## T10 — Write docs/runstat.md, the telemetry contract
+
+- **Outcome:** done (review: PASS)
+- **Summary:** Wrote docs/runstat.md: the run-directory layout, every session field and iterations.jsonl field runstat reads, all eight signal derivations, and an explicit statement of the attempts-burned double-counting trap, naming brief 0002 as the other implementation that must agree.
+- **Files:** docs/runstat.md
+- **Notes for next iteration:** Derivations were copied verbatim from src/runstat/signals.py (compute_signals, _trailing_no_progress_streak) and loader.py, not re-derived from the brief, so this doc matches the actual code rather than just the brief's prose. Pure documentation task; no source files touched.

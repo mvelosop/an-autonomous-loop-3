@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **9/10 done** · iteration 9
+**Status:** running · **10/10 done** · iteration 10
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:53:38Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:55:17Z
 
 ## Progress
 
@@ -19,7 +19,7 @@
 - [x] **T7** — Enforce the exit-code and error contract across all three commands
 - [x] **T8** — Write the pytest suite, including the worked example end to end
 - [x] **T9** — Write README.md with examples replayed from the tool
-- [ ] **T10** — Write docs/runstat.md, the telemetry contract
+- [x] **T10** — Write docs/runstat.md, the telemetry contract
 
 ## Tasks
 
@@ -248,7 +248,7 @@ d="$(mktemp -d)" && A=tests/fixtures/runs/20260814-101500 && B=tests/fixtures/ru
 
 ### T10 — Write docs/runstat.md, the telemetry contract
 
-`pending` · depends on: T7
+`done` · depends on: T7
 
 The loop driver computes the same eight signals inline that runstat computes afterwards, and brief 0002 acceptance item 6 requires the two to agree exactly. A derivation recorded in only one implementation is how that agreement quietly breaks, so this document is the shared reference: the telemetry layout field by field, and each signal's derivation written out. It must state the attempts-burned trap explicitly — that the signal counts records whose outcome is not done, and is not the sum of the cumulative per-task attempts field.
 
