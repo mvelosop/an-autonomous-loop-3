@@ -157,6 +157,36 @@ input and an expected exit code end an argument that a paragraph cannot
 Scenario 12 is the one that keeps the control plane and the analysis plane
 honest: the same fixture arbitrates `run.sh` and `runstat`.
 
+### Reviewer calibration — separate, and NOT part of `run-all.sh`
+
+```bash
+loop/tests/reviewer-calibration/run-calibration.sh        # all four cases
+loop/tests/reviewer-calibration/run-calibration.sh 03     # just one
+```
+
+Everything above is free and offline. **This one calls a real model** (~$1.20
+for four cases), which is why it is excluded from the suite and must be invoked
+deliberately.
+
+It answers a question the suite cannot: two full runs produced 21 work/review
+pairs and *zero* rejections, and from outside, a reviewer with nothing to catch
+is indistinguishable from a reviewer that cannot catch. Each case hands a real
+review session work that **passes its own gate** but violates its acceptance
+criteria — a hollow test, a value hardcoded to the fixture, an out-of-scope
+feature, a criterion no test asserts. Baseline: 4/4 caught
+([`RESULTS.md`](tests/reviewer-calibration/RESULTS.md)).
+
+**Setup it needs, which the fixture suite does not:** a trusted workdir. The
+harness calls `claude -p` directly rather than going through the driver, and an
+untrusted workspace makes `claude` ignore `.claude/settings.json` — so the
+review would run under a different permission surface than a real run and the
+results would look fine and mean nothing. Its own preflight refuses to start
+until that is fixed, and names the workdir.
+
+Re-run it after any change to `.claude/skills/loop-review/SKILL.md` and compare
+against the baseline. A review contract that stops catching planted defects has
+regressed, whatever its prose says.
+
 The suite is mutation-checked — reverting the blocked-path fix, narrowing the
 gate to the current task, disabling the mask, or freezing the attempt counter
 each turn it red.

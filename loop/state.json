@@ -4,12 +4,12 @@
   "status": "complete",
   "iteration": 11,
   "created": "2026-08-15T20:00:00Z",
-  "updated": "2026-08-15T22:28:53Z",
+  "updated": "2026-08-16T15:00:00Z",
   "tasks": [
     {
       "id": "T1",
       "title": "Scaffold the runstat package with uv, src layout and pytest",
-      "goal": "Nothing can be built until there is a project uv can install and a test suite pytest can collect. This task creates the packaging skeleton — pyproject.toml, src/runstat/, and one real test — so that every later task can be verified by running the installed package rather than by poking at loose files. It also fixes the names later tasks depend on: the distribution is runstat and the console script points at runstat.cli:main.",
+      "goal": "Nothing can be built until there is a project uv can install and a test suite pytest can collect. This task creates the packaging skeleton \u2014 pyproject.toml, src/runstat/, and one real test \u2014 so that every later task can be verified by running the installed package rather than by poking at loose files. It also fixes the names later tasks depend on: the distribution is runstat and the console script points at runstat.cli:main.",
       "files": [
         "pyproject.toml",
         "src/runstat/__init__.py",
@@ -18,7 +18,7 @@
       "depends_on": [],
       "acceptance": [
         "pyproject.toml declares a project named runstat, requires-python >=3.13, an empty runtime dependency list, and pytest as the only dev dependency.",
-        "The build is configured so that `uv run python -c \"import runstat\"` imports the package from src/runstat/ — an src/ layout that is actually installed, not a path hack.",
+        "The build is configured so that `uv run python -c \"import runstat\"` imports the package from src/runstat/ \u2014 an src/ layout that is actually installed, not a path hack.",
         "pyproject.toml declares the console script entry point `runstat = \"runstat.cli:main\"` (the module it names is written in a later task).",
         "tests/test_smoke.py contains at least one test that passes, so `uv run pytest -q` exits 0 rather than 5 for an empty suite.",
         "No runtime dependency outside the standard library is added anywhere."
@@ -54,7 +54,7 @@
     {
       "id": "T3",
       "title": "Load a run directory strictly, failing loudly on malformed input",
-      "goal": "Both reports read the same two things off disk: sessions/*.json and iterations.jsonl. Putting that in one loader gives the commands a single definition of what a run is, and — more importantly — a single place where a malformed file becomes a hard error instead of a silent skip. The brief is explicit that undercounting silently is worse than refusing loudly, so the loader raises with the offending path rather than dropping a record.",
+      "goal": "Both reports read the same two things off disk: sessions/*.json and iterations.jsonl. Putting that in one loader gives the commands a single definition of what a run is, and \u2014 more importantly \u2014 a single place where a malformed file becomes a hard error instead of a silent skip. The brief is explicit that undercounting silently is worse than refusing loudly, so the loader raises with the offending path rather than dropping a record.",
       "files": [
         "src/runstat/loader.py",
         "tests/test_loader.py"
@@ -67,7 +67,7 @@
         "runstat.loader.load_run(path) returns an object exposing run_id (the run directory's own name), sessions (session records sorted by file name) and iterations (the iterations.jsonl records as dicts, in file order).",
         "Each session record exposes phase, iteration, total_cost_usd, num_turns, duration_ms, is_error, permission_denials and the path it was read from.",
         "runstat.loader.RunError is raised when the run directory does not exist, when any sessions/*.json file is not valid JSON, and when any non-blank line of iterations.jsonl is not valid JSON.",
-        "The RunError message names the offending file — the session file's name for a bad session, iterations.jsonl for a bad record line.",
+        "The RunError message names the offending file \u2014 the session file's name for a bad session, iterations.jsonl for a bad record line.",
         "A run directory that exists but has no session files loads successfully with an empty sessions list; deciding what that means is the CLI's job, not the loader's. A missing iterations.jsonl is treated as zero records.",
         "Tests cover the good fixture and each malformed case, writing only inside tmp_path."
       ],
@@ -91,7 +91,7 @@
         "compute_signals returns a mapping with numeric keys: iterations, tasks_done, tasks_total, iterations_per_closed, gate_failures, review_rejections, attempts_burned, no_progress_streak, estimated_spend",
         "No value returned by compute_signals is a string",
         "iterations_per_closed is None when no task has closed, and a float otherwise",
-        "attempts_burned counts records whose outcome is not 'done' — never the sum of the attempts field, which is a cumulative per-task counter",
+        "attempts_burned counts records whose outcome is not 'done' \u2014 never the sum of the attempts field, which is a cumulative per-task counter",
         "no_progress_streak counts trailing records that did not increase tasks_done, and is 0 for an empty run",
         "format_signals returns exactly eight (label, display) pairs in the brief's order",
         "format_signals renders the fixture as 3, 2/8, 1.50, 1, 0, 1, 0, $4.08",
@@ -105,7 +105,7 @@
     {
       "id": "T5",
       "title": "Build the CLI entry points and the summary command",
-      "goal": "This is the first thing an operator actually runs. It brings up the argument parser, the console script and python -m runstat, and implements summary: a per-phase rollup of sessions, cost, turns and wall time with a total row. The error and denial callouts are not decoration — a permission denial nobody sees is a fence in the wrong place, so a session with is_error true or a non-empty permission_denials list has to be named in the output.",
+      "goal": "This is the first thing an operator actually runs. It brings up the argument parser, the console script and python -m runstat, and implements summary: a per-phase rollup of sessions, cost, turns and wall time with a total row. The error and denial callouts are not decoration \u2014 a permission denial nobody sees is a fence in the wrong place, so a session with is_error true or a non-empty permission_denials list has to be named in the output.",
       "files": [
         "src/runstat/cli.py",
         "src/runstat/__main__.py",
@@ -146,7 +146,7 @@
         "`uv run runstat signals <run-dir>` prints exactly eight lines and nothing else, one per signal, in the brief's order.",
         "Each line is `<label>: <value>` using the labels iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend.",
         "On the brief's fixture the values are exactly 3, 2/8, 1.50, 1, 0, 1, 0 and $4.08.",
-        "The values come from compute_signals — the command formats and prints, it does not recompute any derivation.",
+        "The values come from compute_signals \u2014 the command formats and prints, it does not recompute any derivation.",
         "The label estimated spend is what marks the money as an estimate; the command exits 0 on a readable run.",
         "A test drives the command over the fixture in tmp_path and asserts all eight values exactly."
       ],
@@ -158,7 +158,7 @@
     {
       "id": "T7",
       "title": "Add the compare command",
-      "goal": "This is the repeatability check: two runs of the same plan side by side, so a large divergence in cost or iterations is visible as the finding it is. It reuses the same eight signals rather than inventing a second set, and adds a delta column. Only signals that are numbers get a delta — tasks closed is a pair like 2/8 and subtracting it would be meaningless, so its delta stays blank.",
+      "goal": "This is the repeatability check: two runs of the same plan side by side, so a large divergence in cost or iterations is visible as the finding it is. It reuses the same eight signals rather than inventing a second set, and adds a delta column. Only signals that are numbers get a delta \u2014 tasks closed is a pair like 2/8 and subtracting it would be meaningless, so its delta stays blank.",
       "files": [
         "src/runstat/cli.py",
         "src/runstat/compare.py",
@@ -172,7 +172,7 @@
         "The delta is run B minus run A, signed, for signals whose values are numeric (including the dollar figure); it is blank for non-numeric signals such as tasks closed.",
         "Comparing the brief's fixture against a variant with its last iteration record removed shows iterations 3 then 2 with a delta of -1, and iterations per closed 1.50 then 2.00 with a positive delta.",
         "The command exits 0 when both run directories are readable.",
-        "Both runs' signals are the ones compute_signals produces — compare does not define its own derivations.",
+        "Both runs' signals are the ones compute_signals produces \u2014 compare does not define its own derivations.",
         "A test compares the fixture with a variant it builds inside tmp_path and asserts at least one numeric delta."
       ],
       "verify": "uv run python -c \"\nimport sys,pathlib,tempfile,subprocess\nsys.path.insert(0,'tests')\nfrom fixtures import write_fixture_run\na=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nb=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\nj=b/'iterations.jsonl'\nkeep=[l for l in j.read_text().splitlines() if l.strip()][:-1]\nj.write_text(chr(10).join(keep)+chr(10))\np=subprocess.run(['runstat','compare',str(a),str(b)],capture_output=True,text=True)\nassert p.returncode==0, (p.returncode,p.stderr)\nout=p.stdout\nlow=out.lower()\nfor k in ['iterations','tasks closed','iterations per closed','gate failures','review rejections','attempts burned','no-progress streak','estimated spend']:\n    assert k in low, (k,out)\nlines=[l for l in out.splitlines() if l.strip()]\ndef toks(l):\n    return ''.join(ch if (ch.isdigit() or ch=='.' or ch=='-' or ch=='+') else ' ' for ch in l).split()\nit=[l for l in lines if l.strip().lower().startswith('iterations') and not l.strip().lower().startswith('iterations per')]\nassert it, out\nt=toks(it[-1])\nassert '3' in t and '2' in t and any(x.startswith('-1') for x in t), (t,out)\npc=[l for l in lines if l.strip().lower().startswith('iterations per')]\nassert pc, out\nt2=toks(pc[-1])\nassert '1.50' in t2 and '2.00' in t2, (t2,out)\ntc=[l for l in lines if l.strip().lower().startswith('tasks closed')]\nassert tc and '2/8' in tc[-1] and '1/8' in tc[-1], (tc,out)\nprint('compare ok')\n\"",
@@ -199,7 +199,7 @@
         "Exit 1 when the run directory exists and is well-formed but contains no session files.",
         "Exit 0 on success for all three commands.",
         "On every failing path stdout is completely empty and the explanation goes to stderr.",
-        "The stderr message for malformed input names the offending file — the session file's name, or iterations.jsonl.",
+        "The stderr message for malformed input names the offending file \u2014 the session file's name, or iterations.jsonl.",
         "No Python traceback ever reaches stderr, for any of these cases.",
         "Tests cover each exit code for each command where it applies, driving the CLI as a subprocess inside tmp_path."
       ],
@@ -211,7 +211,7 @@
     {
       "id": "T9",
       "title": "Add the end-to-end worked-example acceptance test",
-      "goal": "Each earlier task was verified in isolation, which is exactly how an implementation drifts from the documented behaviour while every part still passes. This test replays the brief's transcript end to end against the installed CLI — summary, signals and compare over one fixture — so the whole is checked, not the pieces. The brief calls this the one test that catches that drift.",
+      "goal": "Each earlier task was verified in isolation, which is exactly how an implementation drifts from the documented behaviour while every part still passes. This test replays the brief's transcript end to end against the installed CLI \u2014 summary, signals and compare over one fixture \u2014 so the whole is checked, not the pieces. The brief calls this the one test that catches that drift.",
       "files": [
         "tests/test_worked_example.py"
       ],
@@ -220,7 +220,7 @@
       ],
       "acceptance": [
         "tests/test_worked_example.py defines test_summary, test_signals and test_compare, each invoking the installed CLI as a subprocess rather than calling Python functions directly.",
-        "test_summary asserts the brief's per-phase pairing — plan $1.98/12/141s, work $1.50/18/204s, review $0.60/9/72s, total 7/$4.08/39/417s — on content, not on column alignment, and asserts the estimate wording is present.",
+        "test_summary asserts the brief's per-phase pairing \u2014 plan $1.98/12/141s, work $1.50/18/204s, review $0.60/9/72s, total 7/$4.08/39/417s \u2014 on content, not on column alignment, and asserts the estimate wording is present.",
         "test_signals asserts all eight key: value lines exactly, values included.",
         "test_compare builds a variant of the fixture and asserts at least one numeric delta.",
         "Every test writes only inside pytest's tmp_path; no test reads loop/runs/ or any other real run directory.",
@@ -233,23 +233,23 @@
     },
     {
       "id": "T10",
-      "title": "Write the README, with every documented example matching real output",
+      "title": "Write the runstat usage doc, with every documented example matching real output",
       "goal": "Write README.md covering what runstat is, how to install and run it, the three commands, the exit-code contract, and the input layout it reads. Every example must show output captured from the tool as it actually behaves. A README whose examples have drifted from the code is worse than none, so the gate replays what the tool prints and requires each line to appear verbatim in the document.",
       "files": [
-        "README.md"
+        "docs/runstat-cli.md"
       ],
       "depends_on": [
         "T9"
       ],
       "acceptance": [
-        "README.md documents runstat summary, runstat signals and runstat compare, each with a worked example",
-        "Every line the signals command prints for the fixture run appears verbatim in the README",
+        "docs/runstat-cli.md documents runstat summary, runstat signals and runstat compare, each with a worked example",
+        "Every line the signals command prints for the fixture run appears verbatim in the document",
         "The exit-code contract (0 success, 1 no sessions, 2 usage or malformed) is documented",
         "The input layout it reads (sessions/*.json and iterations.jsonl) is described",
         "Install and run instructions use uv",
         "Any dollar figure in the README is labelled an estimate"
       ],
-      "verify": "uv run python - <<'PY'\nimport pathlib, subprocess, sys, tempfile\nsys.path.insert(0, 'tests')\nfrom fixtures import write_fixture_run\n\nt = pathlib.Path('README.md').read_text()\nfor cmd in ['runstat summary', 'runstat signals', 'runstat compare']:\n    assert cmd in t, cmd\nfor token in ['sessions/', 'iterations.jsonl', 'uv']:\n    assert token in t, token\nassert 'estimate' in t.lower(), 'no estimate wording for money'\nfor code in ['0', '1', '2']:\n    assert code in t\nr = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\np = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)\nassert p.returncode == 0, (p.returncode, p.stderr)\nfor line in [l.strip() for l in p.stdout.splitlines() if l.strip()]:\n    assert line in t, 'README does not match real output: ' + line\nprint('readme ok')\nPY",
+      "verify": "uv run python - <<'PY'\nimport pathlib, subprocess, sys, tempfile\nsys.path.insert(0, 'tests')\nfrom fixtures import write_fixture_run\n\nt = pathlib.Path('docs/runstat-cli.md').read_text()\nfor cmd in ['runstat summary', 'runstat signals', 'runstat compare']:\n    assert cmd in t, cmd\nfor token in ['sessions/', 'iterations.jsonl', 'uv']:\n    assert token in t, token\nassert 'estimate' in t.lower(), 'no estimate wording for money'\nfor code in ['0', '1', '2']:\n    assert code in t\nr = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))\np = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)\nassert p.returncode == 0, (p.returncode, p.stderr)\nfor line in [l.strip() for l in p.stdout.splitlines() if l.strip()]:\n    assert line in t, 'README does not match real output: ' + line\nprint('readme ok')\nPY",
       "status": "done",
       "attempts": 0,
       "notes": ""
@@ -257,7 +257,7 @@
     {
       "id": "T11",
       "title": "Document the telemetry contract and the cross-check against the driver",
-      "goal": "Write docs/runstat.md: the on-disk telemetry contract runstat consumes, field by field, and how each of the eight signals is derived. This is the document that keeps the loop driver and runstat from drifting apart — brief 0002 acceptance item 6 requires them to agree, and a derivation recorded in only one of the two implementations is how that agreement quietly breaks.",
+      "goal": "Write docs/runstat.md: the on-disk telemetry contract runstat consumes, field by field, and how each of the eight signals is derived. This is the document that keeps the loop driver and runstat from drifting apart \u2014 brief 0002 acceptance item 6 requires them to agree, and a derivation recorded in only one of the two implementations is how that agreement quietly breaks.",
       "files": [
         "docs/runstat.md"
       ],

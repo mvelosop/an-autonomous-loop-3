@@ -209,6 +209,35 @@ run_case() {
   cp "$WORK/loop/verdict.json" "$HERE/results/$name.verdict.json" 2>/dev/null
 }
 
+# The driver refuses to start in an untrusted workspace because `claude -p`
+# silently ignores .claude/settings.json there. This harness calls claude
+# directly, so it needs the same check: a review session running under the
+# wrong permission surface produces results that look fine and mean nothing.
+preflight() {
+  for tool in jq git claude; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "missing required tool: $tool" >&2; exit 1; }
+  done
+  local abs trusted
+  abs="$(cd "$(dirname "$WORK")" 2>/dev/null && pwd -P)/$(basename "$WORK")"
+  trusted="$(jq -r --arg p "$abs" '.projects[$p].hasTrustDialogAccepted // false' \
+    "$HOME/.claude.json" 2>/dev/null)"
+  if [[ "$trusted" != "true" ]]; then
+    cat >&2 <<MSG
+calibration: the workdir is not a trusted workspace, so \`claude -p\` would
+  ignore .claude/settings.json and the review would run under a different
+  permission surface than a real run. Results would be meaningless.
+
+  workdir: $abs
+  fix:     run \`claude\` interactively there once and accept the trust dialog,
+           or set projects["<workdir>"].hasTrustDialogAccepted = true in
+           ~/.claude.json
+MSG
+    exit 1
+  fi
+  say "preflight ok — workdir trusted, model $MODEL"
+}
+preflight
+
 targets=()
 if [[ $# -gt 0 ]]; then
   for pat in "$@"; do

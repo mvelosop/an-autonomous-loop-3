@@ -1,118 +1,132 @@
-# runstat
+# An autonomous loop
 
-A command-line tool that reads a completed [autonomous loop](CLAUDE.md) run's
-telemetry off disk and reports what happened: what each phase cost, whether
-the run was converging, and how two runs compare.
+An experiment in agentic development: the minimum infrastructure for Claude to
+work **unattended for an extended period** following a plan — and the evidence
+that it did.
 
-`runstat` is strictly post-hoc analysis over archived runs — it has no runtime
-role in the loop itself.
+The loop is the deliverable. The program it builds is the proof it ran.
 
-## Install and run
+## Why this repo exists
 
-```
-uv sync
-uv run runstat summary <run-dir>
-```
+Three earlier attempts were started from the same short prompt and produced
+three unrelated systems. The prompt specified a *goal* and left every *decision*
+open, and each decision had three or four defensible answers.
 
-`python -m runstat` works the same way:
+So the first artifact here is not code. It is
+[**brief 0002**](docs/briefs/0002-next-generation-autonomous-loop.md), which
+pins the decisions and leaves the mechanics open, so a re-run reproduces the
+loop's **behaviour** rather than its bytes. Every decision in it is either a
+measured result from a prior run or a rule from the vendored design notes in
+[`docs/references/`](docs/references/).
 
-```
-uv run python -m runstat signals <run-dir>
-```
-
-## Input layout
-
-A run directory looks like this:
+## How the loop works
 
 ```
-<run-id>/
-  sessions/*.json      one per claude session, name-sortable
-  iterations.jsonl     one JSON object per completed iteration
+docs/briefs/NNNN-*.md
+        │  plan phase — once, opus
+        ▼
+loop/state.json          tasks, acceptance criteria, verify commands
+        │  iterate phase — repeat, sonnet
+        ▼
+  driver picks the next ready task
+    → work session      does ONE task, proposes an outcome
+    → gate              driver re-runs EVERY done task's verify command
+    → review session    separate, read-only, independent verdict
+    → driver            applies it, journals, commits
+    → signals           printed; one of them can halt the run
 ```
 
-Each `sessions/*.json` file is a `claude -p --output-format json` result with
-two keys added by the driver, `phase` (`"plan"`, `"work"` or `"review"`) and
-`iteration`. `runstat` reads `total_cost_usd`, `num_turns`, `duration_ms`,
-`is_error` and `permission_denials` from it.
+Every session is a fresh `claude -p` with **no memory of any other**. Files are
+the entire continuity. The driver owns every mechanical decision — which task is
+next, whether a task is really done, attempts, when to stop; agents do the work
+and give opinions, and never set status or commit.
 
-Each line of `iterations.jsonl` is one JSON object, for example:
+Details: [`loop/README.md`](loop/README.md).
 
-```json
-{"iteration": 2, "task": "T2", "outcome": "gate_fail", "attempts": 1, "tasks_done": 1, "tasks_total": 8}
-```
+## What it built
 
-## Commands
+[**`runstat`**](docs/runstat-cli.md) — a CLI that reads a finished run's
+telemetry and reports what each phase cost, whether the run was converging, and
+how two runs compare. The loop's first job was to build its own instrument.
 
-### `runstat summary <run-dir>`
+- [Usage and worked examples](docs/runstat-cli.md)
+- [The telemetry contract and each signal's derivation](docs/runstat.md)
+- [The brief it was built from](docs/briefs/0003-runstat-cli.md)
 
-Per-phase rollup: session count, total cost, total turns and total wall time,
-plus a total row. Any session with `is_error` true, or a non-empty
-`permission_denials`, is called out by file name.
+## Results
 
-```
-$ uv run runstat summary loop/runs/20260814-101500
-phase    sessions       cost   turns    wall
-plan            1 $    1.98      12    141s
-work            3 $    1.50      18    204s
-review          3 $    0.60       9     72s
-total           7 $    4.08      39    417s
+**Run 1** — 11 tasks, 11 iterations, ~$11.67, exit 0.
+**Run 2** — planned and built again from the same brief in an isolated
+checkout with no access to run 1's history, journal or telemetry: 10 tasks, 10
+iterations, exit 0.
 
-Dollar figures are an estimate, not a bill.
-```
-
-### `runstat signals <run-dir>`
-
-The eight run-level convergence signals, as `key: value` lines:
+Two independent decompositions, two different structures, identical loop
+behaviour:
 
 ```
-$ uv run runstat signals loop/runs/20260814-101500
-iterations: 3
-tasks closed: 2/8
-iterations per closed: 1.50
-gate failures: 1
-review rejections: 0
-attempts burned: 1
-no-progress streak: 0
-estimated spend: $4.08
+signal                   run 1    run 2
+iterations                  11       10
+tasks closed             11/11    10/10
+iterations per closed     1.00     1.00
+gate failures                0        0
+review rejections            0        0
 ```
 
-### `runstat compare <run-dir> <run-dir>`
+That is the repeatability claim this repo exists to make, and the numbers were
+computed by `runstat` — the tool the loop built — agreeing to the cent with the
+driver that ran it, which is brief 0002's acceptance item 6.
 
-All eight signals for both runs side by side, with a delta column (run B minus
-run A). The delta is signed for numeric signals and blank for `tasks closed`,
-which is a pair rather than a number.
+**Twenty-one work/review pairs produced zero rejections**, which is unreadable
+on its own: a reviewer with nothing to catch and a reviewer that cannot catch
+look identical from outside. So the defect was planted instead of waited for —
+[reviewer calibration](loop/tests/reviewer-calibration/RESULTS.md) hands a real
+review session work that passes its gate but violates its acceptance criteria.
+**4 of 4 caught**, including the two shapes a gate structurally cannot see: work
+that is correct but out of scope, and criteria no test asserts.
 
-```
-$ uv run runstat compare loop/runs/20260814-101500 loop/runs/20260815-093000
-signal                      run a      run b      delta
-iterations                      3          2         -1
-tasks closed                  2/8        1/8           
-iterations per closed        1.50       2.00      +0.50
-gate failures                   1          1         +0
-review rejections               0          0         +0
-attempts burned                 1          1         +0
-no-progress streak              0          1         +1
-estimated spend             $4.08      $4.08     +$0.00
+## Layout
 
-Dollar figures are an estimate, not a bill.
-```
-
-This is the repeatability check: two runs of the same plan should show
-comparable signals, and a large divergence is the finding.
-
-## Exit codes
-
-| Code | Meaning |
+| Path | What it is |
 | --- | --- |
-| `0` | success |
-| `1` | the run directory is valid but has no session files |
-| `2` | usage error, missing directory, or malformed input |
+| `loop/run.sh` | the driver — the only thing you run |
+| `loop/README.md` | how the loop works, its stop conditions and its tests |
+| `loop/tests/` | 19 fixture scenarios, free and offline |
+| `loop/tests/reviewer-calibration/` | planted-defect calibration (calls a real model) |
+| `.claude/skills/` | the three session contracts: plan, work, review |
+| `docs/briefs/` | the inputs a run is planned from |
+| `docs/references/` | vendored design notes the briefs cite |
+| `src/`, `tests/` | `runstat`, built by run 1 |
 
-A malformed session file or `iterations.jsonl` line is a hard failure, never a
-silent skip — it exits 2 with the offending file named on stderr. On every
-failing path stdout stays empty and no Python traceback ever reaches the user.
+## Branches
 
-## Money
+`main` reads as one commit per milestone. The branches are **never deleted** —
+they hold the loop's per-iteration commits, and those commits *are* the evidence
+that each task was done by a separate, fresh session that could not see the
+others. A squash on `main` destroys the only record of that.
 
-Any dollar figure `runstat` prints is an estimate — `total_cost_usd` as
-reported by `claude -p`, not a bill.
+| Branch | Holds |
+| --- | --- |
+| `001-an-autonomous-loop` | the harness and its fixture suite |
+| `002-runstat` | run 1, one commit per iteration |
+| `run2-blind` | run 2 — **deliberately never merged**; it is a second, independent implementation of the same brief, and merging it would overwrite run 1's. It exists so the comparison above stays reproducible. |
+| `003-reviewer-calibration` | the planted-defect harness |
+
+## Running it
+
+```bash
+loop/run.sh docs/briefs/0003-runstat-cli.md   # plan, then iterate
+loop/run.sh                                   # resume from existing state
+loop/tests/run-all.sh                         # the loop's own tests (free)
+```
+
+Preflight refuses to start on a problem it can name — most importantly an
+**untrusted workspace**, which makes `claude -p` silently ignore this repo's
+permission settings. That failure cost an earlier experiment an entire run and
+left one line in a log as its only trace.
+
+## Rules that hold everywhere here
+
+All durable state stays in this repo; nothing is written to `~/.claude` or any
+global location. No tracked file names the machine it ran on — the driver masks
+`$HOME` and the username out of everything it persists. Agents never push. See
+[`CLAUDE.md`](CLAUDE.md).
