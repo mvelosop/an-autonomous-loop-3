@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 43359,
+  "num_turns": 16,
+  "stop_reason": "end_turn",
+  "session_id": "c752c158-10fc-4b5d-b7ba-5c09268eb760",
+  "total_cost_usd": 0.3500391,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 30140,
+    "cache_read_input_tokens": 384817,
+    "output_tokens": 3580,
+    "output_tokens_details": {
+      "thinking_tokens": 711
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 30140,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 91,
+        "cache_read_input_tokens": 53162,
+        "cache_creation_input_tokens": 1296,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1296
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 18,
+      "outputTokens": 3580,
+      "cacheReadInputTokens": 384817,
+      "cacheCreationInputTokens": 30140,
+      "webSearchRequests": 0,
+      "costUSD": 0.3500391,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**PASS** — T8's pytest suite (20 tests) genuinely covers the worked example end-to-end, the error contract, and asserts exact signal values; all fixture arithmetic checks out by hand and the implementation isn't hardcoded to the fixture. No findings.",
+  "ttft_ms": 1586,
+  "ttft_stream_ms": 1041,
+  "time_to_request_ms": 20,
+  "type": "result",
+  "duration_ms": 47140,
+  "uuid": "e62dbd7e-e497-4e28-8412-003760c2ec1c",
+  "phase": "review",
+  "iteration": 8
+}

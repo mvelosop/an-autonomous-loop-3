@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 7,
+  "iteration": 8,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:47:08Z",
+  "updated": "2026-08-16T08:50:57Z",
   "tasks": [
     {
       "id": "T1",
@@ -193,7 +193,7 @@
         "Tests assert on content, not on column alignment, for summary and compare; signals values are asserted exactly."
       ],
       "verify": "out=\"$(uv run pytest -q 2>&1)\"; printf '%s\\n' \"$out\" | tail -3; printf '%s\\n' \"$out\" | grep -qE '^[0-9]{2,} passed' && grep -rq tmp_path tests && grep -rq '4\\.08' tests && ! grep -rq 'loop/runs' tests",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

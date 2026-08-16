@@ -1,0 +1,33 @@
+{
+  "task": "T8",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "`uv run pytest -q` exits 0 with at least ten tests passing and none failing.",
+      "met": true,
+      "evidence": "`uv run pytest -q` -> '20 passed in 0.05s', 20 >= 10, zero failures."
+    },
+    {
+      "criterion": "One test drives the brief's worked example end to end and asserts summary's per-phase numbers, signals' eight values, and a compare delta on at least one numeric signal.",
+      "met": true,
+      "evidence": "tests/test_worked_example.py:8-38 runs summary, signals and compare in one test against worked_example_run/variant_run: asserts all brief per-phase tokens ($1.98/$1.50/$0.60/$4.08, 141s/204s/72s/417s), the exact 8-key signals dict, and compare deltas ('-1' for iterations, '$4.08'/'$3.65' for spend)."
+    },
+    {
+      "criterion": "Tests cover the error contract: missing directory, malformed session file, malformed iterations.jsonl line, and a run with no sessions, each asserted on exit code and on stderr.",
+      "met": true,
+      "evidence": "tests/test_errors.py: test_missing_run_dir_exits_2 (L1-6), test_malformed_session_file_exits_2_and_names_the_file (L9-16), test_malformed_iterations_line_exits_2_and_names_the_file (L19-28), test_run_dir_with_no_sessions_exits_1 (L31-40) — each asserts exit code, out=='', and non-empty/path-containing stderr."
+    },
+    {
+      "criterion": "Every test writes only inside pytest's tmp_path; no test references loop/runs or any absolute path.",
+      "met": true,
+      "evidence": "conftest.py's make_run_dir fixture builds run dirs under tmp_path (L37); `grep -rn 'loop/runs|/Users/' tests/` returns nothing; all fixture-building tests take tmp_path-derived fixtures, not fixtures/runs/ on disk."
+    },
+    {
+      "criterion": "Tests assert on content, not on column alignment, for summary and compare; signals values are asserted exactly.",
+      "met": true,
+      "evidence": "summary/compare tests check substring tokens ('$4.08' in out) rather than fixed layout; test_signals.py and test_worked_example.py parse signals output into a dict and assert full equality against the brief's 8 exact values (L28-37 in test_signals.py, L20-29 in test_worked_example.py)."
+    }
+  ],
+  "findings": [],
+  "notes": "Verified the variant fixture's arithmetic by hand (costs sum to $3.65, iterations/tasks-closed/no-progress-streak all match the asserted (3,2,-1) etc. tuples) and confirmed compute_signals/compute_rollup in src/runstat compute values from real data rather than hardcoding to the fixture. Suite is hermetic (grep for loop/runs and /Users/ in tests/ is clean) and gate output (20 passed) matches loop/runs/20260816-092014/gates/T8.log."
+}

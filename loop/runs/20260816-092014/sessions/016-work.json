@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 175204,
+  "num_turns": 24,
+  "stop_reason": "end_turn",
+  "session_id": "58328c64-0a43-41ae-b575-0b0d4a70fd1f",
+  "total_cost_usd": 0.9604832999999999,
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 61491,
+    "cache_read_input_tokens": 892631,
+    "output_tokens": 21578,
+    "output_tokens_details": {
+      "thinking_tokens": 10516
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 61491,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 139,
+        "cache_read_input_tokens": 84803,
+        "cache_creation_input_tokens": 1006,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1006
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 26,
+      "outputTokens": 21578,
+      "cacheReadInputTokens": 892631,
+      "cacheCreationInputTokens": 61491,
+      "webSearchRequests": 0,
+      "costUSD": 0.9604832999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T8 is done: added `tests/conftest.py` plus five test modules (20 tests total) covering `summary`, `signals`, `compare`, the error/exit-code contract, and a dedicated worked-example end-to-end test. `uv run pytest -q` passes with `20 passed`, and T8's exact verify command succeeds. `loop/proposal.json` is written; state, journal, and commit are the driver's job next.",
+  "ttft_ms": 1482,
+  "ttft_stream_ms": 956,
+  "time_to_request_ms": 46,
+  "type": "result",
+  "duration_ms": 178547,
+  "uuid": "c365d3a1-0443-46df-9884-db05d78c59be",
+  "phase": "work",
+  "iteration": 8
+}

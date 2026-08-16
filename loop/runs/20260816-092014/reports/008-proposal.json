@@ -1,0 +1,15 @@
+{
+  "task": "T8",
+  "outcome": "done",
+  "summary": "Added a pytest suite (tests/conftest.py + five test modules, 20 tests) covering summary/signals/compare, the error/exit-code contract, and a dedicated end-to-end test that drives the brief's worked example through summary, signals and compare in one test.",
+  "files": [
+    "tests/conftest.py",
+    "tests/test_worked_example.py",
+    "tests/test_summary.py",
+    "tests/test_signals.py",
+    "tests/test_compare.py",
+    "tests/test_errors.py"
+  ],
+  "verified": "uv run pytest -q -> '20 passed'; also ran T8's exact verify command (passed count regex + grep for tmp_path/4.08 in tests + absence of loop/runs) and it printed VERIFY_OK; uv run pytest -q for the whole suite still exits 0 (no earlier task's behaviour broken).",
+  "notes": "conftest.py builds every run directory from scratch under tmp_path via a make_run_dir factory fixture (writes session JSON + iterations.jsonl) rather than copying the checked-in tests/fixtures/runs data — keeps the suite hermetic per the brief's 'every test writes inside tmp_path' rule and independent of T2's fixture files changing. worked_example_run/variant_run fixtures reproduce the brief's worked example and the tests/fixtures/runs/20260815-090000 variant's numbers exactly (same values T6 already asserts in its gate), so the same $4.08/$3.65/-0.43 spend delta is exercised here too. run_cli is a fixture wrapping runstat.__main__.main() directly (no subprocess) and catches SystemExit so argparse's own usage-error exits (no subcommand, unknown subcommand, wrong arg count for compare) can be asserted like any other exit code — needed because argparse calls sys.exit itself rather than returning from main() on a parse error. Tests assert on parsed content (dict of label:value for signals, membership checks for summary/compare, and direct calls into compute_rollup/compute_signals/compute_comparison for exact numeric assertions) rather than fixed column alignment, per the brief's explicit instruction. 20 tests total, comfortably over the floor of ten."
+}

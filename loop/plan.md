@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **7/10 done** · iteration 7
+**Status:** running · **8/10 done** · iteration 8
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:47:08Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:50:57Z
 
 ## Progress
 
@@ -17,7 +17,7 @@
 - [x] **T5** — Implement runstat signals — the eight run-level signals
 - [x] **T6** — Implement runstat compare — two runs side by side with deltas
 - [x] **T7** — Enforce the exit-code and error contract across all three commands
-- [ ] **T8** — Write the pytest suite, including the worked example end to end
+- [x] **T8** — Write the pytest suite, including the worked example end to end
 - [ ] **T9** — Write README.md with examples replayed from the tool
 - [ ] **T10** — Write docs/runstat.md, the telemetry contract
 
@@ -201,7 +201,7 @@ d="$(mktemp -d)" && A=tests/fixtures/runs/20260814-101500 && mkdir -p "$d/empty/
 
 ### T8 — Write the pytest suite, including the worked example end to end
 
-`pending` · depends on: T7
+`done` · depends on: T7
 
 The gates check the tool from outside; this suite is what keeps it honest as it changes. It must include the brief's worked example as a single end-to-end test — the one test that catches an implementation whose parts each pass in isolation while the whole drifts — alongside per-command and error-contract tests. Every test builds its run directories inside pytest's tmp_path; nothing reads or writes a real run directory under loop/runs.
 
