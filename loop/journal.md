@@ -116,3 +116,9 @@ No internal module, function or exception name is pinned — every gate goes thr
 - **Summary:** Wrote docs/runstat.md: the run-directory layout, every session field and iterations.jsonl field runstat reads, all eight signal derivations, and an explicit statement of the attempts-burned double-counting trap, naming brief 0002 as the other implementation that must agree.
 - **Files:** docs/runstat.md
 - **Notes for next iteration:** Derivations were copied verbatim from src/runstat/signals.py (compute_signals, _trailing_no_progress_streak) and loader.py, not re-derived from the brief, so this doc matches the actual code rather than just the brief's prose. Pure documentation task; no source files touched.
+
+## Run ended — complete
+
+- **Run:** `20260816-092014` · 10 iteration(s) this run
+- **Plan:** 10/10 done, 0 blocked
+- **Signals:** 10 iterations · 1.00 per closed · 0 gate failure(s) · 0 review rejection(s) · 0 attempt(s) burned · streak 0 · ~$12.33

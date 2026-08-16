@@ -4,7 +4,7 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **10/10 done** · iteration 10
+**Status:** complete · **10/10 done** · iteration 10
 
 **Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:55:17Z
 
