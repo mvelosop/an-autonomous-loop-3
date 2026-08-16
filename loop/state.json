@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 5,
+  "iteration": 6,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:41:01Z",
+  "updated": "2026-08-16T08:43:59Z",
   "tasks": [
     {
       "id": "T1",
@@ -144,7 +144,7 @@
         "compare exits 0 when both run directories are readable."
       ],
       "verify": "A=tests/fixtures/runs/20260814-101500; B=tests/fixtures/runs/20260815-090000; o=\"$(uv run runstat compare $A $B)\" || exit 1; printf '%s\\n' \"$o\" | grep -qE '^iterations:?[[:space:]|]+3[[:space:]|]+2[[:space:]|]+-1[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^iterations per closed:?[[:space:]|]+1\\.50[[:space:]|]+2\\.00[[:space:]|]+\\+0\\.50[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^tasks closed:?[[:space:]|]+2/8[[:space:]|]+1/8[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^review rejections:?[[:space:]|]+0[[:space:]|]+1[[:space:]|]+\\+1[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^gate failures:?[[:space:]|]+1[[:space:]|]+0[[:space:]|]+-1[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^no-progress streak:?[[:space:]|]+0[[:space:]|]+1[[:space:]|]+\\+1[[:space:]|]*$' && printf '%s\\n' \"$o\" | grep -qE '^estimated spend:?[[:space:]|]+\\$4\\.08[[:space:]|]+\\$3\\.65.*0\\.43'",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

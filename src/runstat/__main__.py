@@ -3,6 +3,7 @@
 import argparse
 import sys
 
+from runstat.compare import compute_comparison, format_comparison
 from runstat.loader import load_iterations, load_sessions
 from runstat.signals import compute_signals, format_signals
 from runstat.summary import format_summary
@@ -51,6 +52,15 @@ def main(argv=None):
         sessions = load_sessions(args.run_dir)
         iterations = load_iterations(args.run_dir)
         print(format_signals(compute_signals(sessions, iterations)))
+        return 0
+
+    if args.command == "compare":
+        sessions_a = load_sessions(args.run_dir_a)
+        iterations_a = load_iterations(args.run_dir_a)
+        sessions_b = load_sessions(args.run_dir_b)
+        iterations_b = load_iterations(args.run_dir_b)
+        rows = compute_comparison(sessions_a, iterations_a, sessions_b, iterations_b)
+        print(format_comparison(rows))
         return 0
 
     # Stub: implemented by later tasks in the plan.

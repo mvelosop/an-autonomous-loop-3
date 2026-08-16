@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **5/10 done** · iteration 5
+**Status:** running · **6/10 done** · iteration 6
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:41:01Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:43:59Z
 
 ## Progress
 
@@ -15,7 +15,7 @@
 - [x] **T3** — Implement runstat summary — the per-phase rollup
 - [x] **T4** — Call out error sessions and permission denials in summary
 - [x] **T5** — Implement runstat signals — the eight run-level signals
-- [ ] **T6** — Implement runstat compare — two runs side by side with deltas
+- [x] **T6** — Implement runstat compare — two runs side by side with deltas
 - [ ] **T7** — Enforce the exit-code and error contract across all three commands
 - [ ] **T8** — Write the pytest suite, including the worked example end to end
 - [ ] **T9** — Write README.md with examples replayed from the tool
@@ -154,7 +154,7 @@ o="$(uv run runstat signals tests/fixtures/runs/20260814-101500)" || exit 1; pri
 
 ### T6 — Implement runstat compare — two runs side by side with deltas
 
-`pending` · depends on: T5
+`done` · depends on: T5
 
 This is the repeatability check: two runs of the same plan should show comparable signals, and a large divergence is the finding. It prints every signal from `signals` for both runs with a delta column, so it must reuse the same derivations rather than recomputing them differently. The delta is the second run minus the first; signals that are not numeric, such as tasks closed, get a blank delta rather than a placeholder.
 

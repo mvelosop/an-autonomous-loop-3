@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 50373,
+  "num_turns": 12,
+  "stop_reason": "end_turn",
+  "session_id": "1eb1bb3a-e513-462f-a6fa-a5d8dc5b0732",
+  "total_cost_usd": 0.3658104,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 33308,
+    "cache_read_input_tokens": 324018,
+    "output_tokens": 4581,
+    "output_tokens_details": {
+      "thinking_tokens": 2088
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 33308,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 213,
+        "cache_read_input_tokens": 55091,
+        "cache_creation_input_tokens": 2535,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2535
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 14,
+      "outputTokens": 4581,
+      "cacheReadInputTokens": 324018,
+      "cacheCreationInputTokens": 33308,
+      "webSearchRequests": 0,
+      "costUSD": 0.3658104,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T6 (`runstat compare`) — **PASS**. Manually re-ran `compare` against both fixture runs: all deltas match the brief exactly (iterations -1, iterations per closed +0.50, gate failures -1, review rejections +1, attempts burned 0, no-progress streak +1, estimated spend -$0.43), non-numeric `tasks closed` gets a blank delta, and it correctly reuses `signals.py`'s `compute_signals`/`format_value` rather than recomputing. Diff is scoped to exactly the task's files, no absolute paths, exits 0. Verdict written to `loop/verdict.json`.",
+  "ttft_ms": 1526,
+  "ttft_stream_ms": 969,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 51724,
+  "uuid": "251229f6-e3eb-491d-94ab-690e7ae29ae1",
+  "phase": "review",
+  "iteration": 6
+}

@@ -1,0 +1,38 @@
+{
+  "task": "T6",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "`runstat compare <run-a> <run-b>` prints one line per signal, with the signal's label, its value for run A, its value for run B, and a delta.",
+      "met": true,
+      "evidence": "src/runstat/compare.py:45-53 format_comparison; observed output has one line per label with 4 columns (label, run A, run B, delta)"
+    },
+    {
+      "criterion": "Every signal that `signals` prints appears in compare, with the same labels.",
+      "met": true,
+      "evidence": "compute_comparison iterates signals_a.items() from the same compute_signals used by T5's signals.py; observed output lists all 8 labels in the brief's order"
+    },
+    {
+      "criterion": "Numeric deltas are the second run's value minus the first's, formatted to the same precision as the signal itself, with an explicit leading `+` when positive.",
+      "met": true,
+      "evidence": "compare.py:6-15 _numeric_delta computes value_b - value_a; compare.py:18-31 _format_delta preserves 2-decimal precision for 'iterations per closed'/'estimated spend' and adds '+' for positive values (e.g. observed '+0.50', '+1')"
+    },
+    {
+      "criterion": "Non-numeric signals — tasks closed — get a blank delta column, not `n/a` or `0`.",
+      "met": true,
+      "evidence": "compare.py:8-9 explicitly returns None for label=='tasks closed'; observed output row 'tasks closed  2/8  1/8' with no trailing delta text"
+    },
+    {
+      "criterion": "Against the two fixture runs the deltas are: iterations -1, iterations per closed +0.50, gate failures -1, review rejections +1, attempts burned 0, no-progress streak +1, and estimated spend a drop of 0.43.",
+      "met": true,
+      "evidence": "ran `uv run runstat compare tests/fixtures/runs/20260814-101500 tests/fixtures/runs/20260815-090000` directly: iterations -1, iterations per closed +0.50, gate failures -1, review rejections +1, attempts burned 0, no-progress streak +1, estimated spend $4.08 -> $3.65 (-$0.43) — all match"
+    },
+    {
+      "criterion": "compare exits 0 when both run directories are readable.",
+      "met": true,
+      "evidence": "manual run against the two fixtures printed `exit=0`; T6's verify command (which asserts exact output via regex) also exited 0 per the gate"
+    }
+  ],
+  "findings": [],
+  "notes": "compare.py correctly reuses compute_signals/format_value from signals.py rather than recomputing derivations, as the brief requires. Diff is scoped to exactly the task's files (src/runstat/compare.py new, src/runstat/__main__.py wired up). No absolute paths introduced."
+}
