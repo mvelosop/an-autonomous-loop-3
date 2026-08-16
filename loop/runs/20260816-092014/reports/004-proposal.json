@@ -1,0 +1,8 @@
+{
+  "task": "T4",
+  "outcome": "done",
+  "summary": "runstat summary now calls out sessions with is_error true or non-empty permission_denials by file name, appended after the rollup and estimate line, without affecting the per-phase numbers or a clean run's output.",
+  "files": ["src/runstat/summary.py"],
+  "verified": "T4's verify command (build a copy of the fixture, flag 004-work.json is_error and 006-work.json permission_denials, run `uv run runstat summary`) exits 0 and its output names both files and says 'error'/'denial'; the unmodified fixture's summary output has no 'denial' text. Also re-ran T3's verify command to confirm the rollup numbers are unchanged, and `uv run pytest -q` still exits 5 (no tests collected, expected until T8).",
+  "notes": "Added a private _format_call_outs(sessions) helper in summary.py rather than folding call-outs into compute_rollup, since call-outs are per-session (identified by file name) not per-phase, and keeping them separate lets format_summary omit the blank line + call-out block entirely when nothing is flagged (required so a clean run prints no 'denial' text). Error call-outs are listed before denial call-outs when both are present. Wording ('error: <file> reported is_error' / 'permission denials: <file> — <list>') is not pinned by the brief beyond needing the file name and, for denials, the word 'denial' — free to reword later if a future task needs different phrasing."
+}

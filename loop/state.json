@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 3,
+  "iteration": 4,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:36:25Z",
+  "updated": "2026-08-16T08:37:57Z",
   "tasks": [
     {
       "id": "T1",
@@ -96,7 +96,7 @@
         "summary exits 0 in all of these cases — an error session is something to report, not a failure to read the run."
       ],
       "verify": "d=\"$(mktemp -d)\" && cp -R tests/fixtures/runs/20260814-101500 \"$d/flag\" && python3 -c \"import json,pathlib,sys; s=pathlib.Path(sys.argv[1])/'sessions'; a=json.loads((s/'004-work.json').read_text()); a['is_error']=True; (s/'004-work.json').write_text(json.dumps(a)); b=json.loads((s/'006-work.json').read_text()); b['permission_denials']=['Bash(git push:*)']; (s/'006-work.json').write_text(json.dumps(b))\" \"$d/flag\" && o=\"$(uv run runstat summary \"$d/flag\")\" && printf '%s\\n' \"$o\" | grep -q '004-work.json' && printf '%s\\n' \"$o\" | grep -q '006-work.json' && printf '%s\\n' \"$o\" | grep -qi denial && printf '%s\\n' \"$o\" | grep -qi error && ! uv run runstat summary tests/fixtures/runs/20260814-101500 | grep -qi denial",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

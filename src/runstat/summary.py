@@ -22,6 +22,21 @@ def _format_row(label, row):
     return f"{label:<8}{row['sessions']:>3}  ${row['cost']:.2f}  {row['turns']:>4}  {wall_s}s"
 
 
+def _format_call_outs(sessions):
+    """Name sessions that reported an error or a permission denial."""
+    lines = []
+    for session in sessions:
+        if session.get("is_error"):
+            lines.append(f"error: {session['file']} reported is_error")
+    for session in sessions:
+        denials = session.get("permission_denials")
+        if denials:
+            lines.append(
+                f"permission denials: {session['file']} — {', '.join(denials)}"
+            )
+    return lines
+
+
 def format_summary(sessions):
     """Render the per-phase rollup plus a total row, as the brief's table."""
     rows = compute_rollup(sessions)
@@ -40,4 +55,9 @@ def format_summary(sessions):
     lines.append(_format_row("total", total))
     lines.append("")
     lines.append("Dollar figures are an estimate, not a bill.")
+
+    call_outs = _format_call_outs(sessions)
+    if call_outs:
+        lines.append("")
+        lines.extend(call_outs)
     return "\n".join(lines)

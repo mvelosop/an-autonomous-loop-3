@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 50221,
+  "num_turns": 13,
+  "stop_reason": "end_turn",
+  "session_id": "5591588b-b79a-44ca-9809-9409c034c96e",
+  "total_cost_usd": 0.44015880000000007,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 37683,
+    "cache_read_input_tokens": 468456,
+    "output_tokens": 4898,
+    "output_tokens_details": {
+      "thinking_tokens": 1239
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 37683,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 98,
+        "cache_read_input_tokens": 61273,
+        "cache_creation_input_tokens": 728,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 728
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 18,
+      "outputTokens": 4898,
+      "cacheReadInputTokens": 468456,
+      "cacheCreationInputTokens": 37683,
+      "webSearchRequests": 0,
+      "costUSD": 0.44015880000000007,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T4 is done: `runstat summary` now names sessions with `is_error: true` or non-empty `permission_denials` in a call-out block after the rollup, leaving clean runs unaffected. Verify command passes, T3's verify still passes, and `loop/proposal.json` is written for the driver.",
+  "ttft_ms": 1583,
+  "ttft_stream_ms": 1031,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 54097,
+  "uuid": "95288236-5948-4c27-8b43-969ce35caa1f",
+  "phase": "work",
+  "iteration": 4
+}

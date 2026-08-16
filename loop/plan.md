@@ -4,16 +4,16 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **3/10 done** · iteration 3
+**Status:** running · **4/10 done** · iteration 4
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:36:25Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:37:57Z
 
 ## Progress
 
 - [x] **T1** — Scaffold the runstat package with both entry points
 - [x] **T2** — Check in the two fixture run directories the gates read
 - [x] **T3** — Implement runstat summary — the per-phase rollup
-- [ ] **T4** — Call out error sessions and permission denials in summary
+- [x] **T4** — Call out error sessions and permission denials in summary
 - [ ] **T5** — Implement runstat signals — the eight run-level signals
 - [ ] **T6** — Implement runstat compare — two runs side by side with deltas
 - [ ] **T7** — Enforce the exit-code and error contract across all three commands
@@ -108,7 +108,7 @@ o="$(uv run runstat summary tests/fixtures/runs/20260814-101500)" || exit 1; pri
 
 ### T4 — Call out error sessions and permission denials in summary
 
-`pending` · depends on: T3
+`done` · depends on: T3
 
 A permission denial the operator never sees is a fence in the wrong place that nobody knows about, and a crashed session hidden inside a phase total is the same problem. summary must name the offending session files rather than just folding them into the rollup. This is not an error condition: a run with a denial in it is still a readable run, so the exit code stays 0 and the rollup still prints.
 

@@ -1,0 +1,33 @@
+{
+  "task": "T4",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "A session whose `is_error` is true is called out in summary's output, identified by its file name.",
+      "met": true,
+      "evidence": "src/runstat/summary.py:29-30 emits 'error: {session['file']} reported is_error'; gate output shows 'error: 004-work.json reported is_error'."
+    },
+    {
+      "criterion": "A session whose `permission_denials` is a non-empty list is called out in summary's output, identified by its file name, and the call-out says these are denials.",
+      "met": true,
+      "evidence": "src/runstat/summary.py:31-36 emits 'permission denials: {session['file']} — {...}'; gate output shows 'permission denials: 006-work.json — Bash(git push:*)'."
+    },
+    {
+      "criterion": "Both call-outs happen in the same run when both conditions are present, and the per-phase rollup still prints.",
+      "met": true,
+      "evidence": "Manually verified: a session with both is_error=True and non-empty permission_denials produces both lines, and the rollup/total rows print unchanged (verified locally and via the T4 gate against the flagged fixture copy, which shows both plan/work/review/total rows plus both call-outs)."
+    },
+    {
+      "criterion": "A run where every session has is_error false and empty permission_denials prints no call-out and still exits 0.",
+      "met": true,
+      "evidence": "`uv run runstat summary tests/fixtures/runs/20260814-101500` prints no 'denial'/'error:' call-out text and exits 0."
+    },
+    {
+      "criterion": "summary exits 0 in all of these cases — an error session is something to report, not a failure to read the run.",
+      "met": true,
+      "evidence": "Gate command's final `uv run runstat summary \"$d/flag\"` exits 0 (captured via `o=\"$(...)\"` succeeding and `$?` check after manual re-run)."
+    }
+  ],
+  "findings": [],
+  "notes": "Change is scoped to src/runstat/summary.py only, matching the task's files list. `session['file']` is populated by loader.py's existing loader, not new code. Wording of call-out lines is not pinned by the brief beyond containing the file name and, for denials, the word 'denial' -- reasonable choice. No absolute paths introduced."
+}
