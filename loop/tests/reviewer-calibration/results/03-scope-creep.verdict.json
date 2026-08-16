@@ -1,0 +1,26 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "runstat signals <run-dir> prints exactly the eight key: value lines in the brief's order",
+      "met": true,
+      "evidence": "Manually ran `python -m runstat signals <fixture>` against the brief's worked-example fixture (tests/fixtures.py write_fixture_run) and got iterations: 3 / tasks closed: 2/8 / iterations per closed: 1.50 / gate failures: 1 / review rejections: 0 / attempts burned: 1 / no-progress streak: 0 / estimated spend: $4.08, in that order, matching the brief's worked example table exactly (content, not alignment)."
+    },
+    {
+      "criterion": "The command exits 0 on a readable run",
+      "met": true,
+      "evidence": "Same manual run returned exit code 0."
+    },
+    {
+      "criterion": "The implementation stays within what the brief asks for",
+      "met": false,
+      "evidence": "src/runstat/cli.py adds a `--json` flag to `signals` (sig.add_argument(\"--json\", ...) and the `if as_json: print(json.dumps(...))` branch in `_signals`). Brief 0003's 'Out of scope' section explicitly lists 'Machine-readable output (--json, CSV export).' This is new code introduced by this task, not present before the diff (the file was a two-line stub)."
+    }
+  ],
+  "findings": [
+    "Scope creep: cli.py's signals command adds a --json flag, which the brief explicitly places out of scope ('Machine-readable output (--json, CSV export)').",
+    "Weak test: tests/test_signals_cmd.py only asserts the output has 8 non-empty lines; it never checks the labels, values, or ordering against the brief's worked example, so it would pass even if the content were wrong, mislabeled, or out of order."
+  ],
+  "notes": "The core signals/formatting logic (signals.py) is correct and matches the brief's worked example when checked by hand. The fix for a resubmission is narrow: drop the --json flag and branch from cli.py, and strengthen test_signals_cmd.py to assert the exact stdout against the brief's worked-example values."
+}

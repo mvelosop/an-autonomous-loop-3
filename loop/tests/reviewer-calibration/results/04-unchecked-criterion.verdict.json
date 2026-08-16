@@ -1,0 +1,39 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A missing or malformed run directory exits 2",
+      "met": true,
+      "evidence": "Manually ran `runstat signals` against a missing dir and a dir with an invalid-JSON session file: both exit 2 (cli.py RunError handler, loader.py raises RunError on missing dir / json.JSONDecodeError)."
+    },
+    {
+      "criterion": "A readable but empty run exits 1",
+      "met": false,
+      "evidence": "No code path implements this. cli.py has no check for an empty run; loader.load_run() silently returns an empty Run (no sessions dir, no iterations file -> no RunError). Ran `runstat signals` against an existing empty directory: it exits 0 and prints a full all-zero signals report instead of exiting 1."
+    },
+    {
+      "criterion": "On every failing path stdout is completely empty",
+      "met": false,
+      "evidence": "cli.py's RunError handler does `print(f\"runstat: {exc}\")` (stdout) immediately before the stderr print. Ran against a missing dir: stdout contained `runstat: run directory not found: ...`, not empty."
+    },
+    {
+      "criterion": "On every failing path the explanation goes to stderr",
+      "met": true,
+      "evidence": "The RunError handler does also print to stderr (`file=sys.stderr`). Present, but co-mingled with the stdout duplicate above, which is itself a separate criterion failure."
+    },
+    {
+      "criterion": "No traceback reaches the user",
+      "met": false,
+      "evidence": "Reproduced: a session JSON missing a required key (e.g. `{\"phase\": \"work\"}`, a malformed record per the brief) raises an uncaught KeyError in loader.py's load_run (dataclass construction indexes data[\"iteration\"] etc. with no .get/try). This prints a full Python traceback to stderr and exits 1 -- not caught by cli.py's `except RunError`."
+    }
+  ],
+  "findings": [
+    "Empty-run exit code 1 is entirely unimplemented -- one of five acceptance criteria for this task, not a partial miss.",
+    "cli.py's error handler prints the error to both stdout and stderr, violating the stdout-must-be-empty-on-failure contract on every single failing path, including the one case the shipped test does cover.",
+    "Uncaught KeyError on a malformed session record produces a traceback and exit code 1, directly violating 'no traceback reaches the user' and also violating the exit-code contract (malformed input should be 2, not an unhandled crash).",
+    "tests/test_errors.py contains a single test covering only the missing-directory path. The gate passes trivially without exercising 4 of the 5 acceptance criteria, so 'verify exits 0' gives no real signal here.",
+    "loop/proposal.json's summary ('Implemented the task and verified it', files: []) does not reflect the actual change to src/runstat/cli.py and does not mention that most of the contract was left untested."
+  ],
+  "notes": "The next work session needs to: (1) add an explicit empty-run check (no sessions AND no iterations.jsonl records -> exit 1), (2) remove the duplicate stdout print in cli.py's error handler, (3) wrap loader.py's per-field dict access so malformed/missing keys raise RunError instead of KeyError, and (4) extend tests/test_errors.py to actually cover all five acceptance criteria (empty run, stdout-empty-on-failure, no-traceback-on-malformed-record) instead of just the missing-directory case."
+}
