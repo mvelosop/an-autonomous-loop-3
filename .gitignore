@@ -1,0 +1,12 @@
+.DS_Store
+
+# Transient per-iteration handoffs. The durable copies live in
+# loop/runs/<run-id>/reports/, masked and committed as evidence.
+loop/proposal.json
+loop/verdict.json
+
+# Python / uv build artefacts from the demo target
+__pycache__/
+.pytest_cache/
+.venv/
+*.egg-info/
