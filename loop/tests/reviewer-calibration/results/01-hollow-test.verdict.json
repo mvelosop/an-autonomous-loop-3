@@ -21,7 +21,7 @@
   "findings": [
     "tests/test_signals.py is not coverage: it asserts presence of a non-None dict and truthy keys, never checks a single computed value against the brief's worked example (3, 2/8, 1.50, 1, 0, 1, 0, $4.08). This is the exact 'asserts nothing meaningful' pattern the task exists to prevent.",
     "loop/proposal.json is a generic placeholder ('Implemented the task and verified it.', files: []) that does not name tests/test_signals.py or describe what was actually written — it does not reflect the work done.",
-    "gate.log contains an absolute path with the local username (`file:///Users/miguelveloso/source/personal/blog-posts/...`), produced by `uv`'s build step; not masked before being persisted, violating the repo's repo-relative-paths rule for anything written to disk."
+    "gate.log contains an absolute path with the local username (`file://~/source/personal/blog-posts/...`), produced by `uv`'s build step; not masked before being persisted, violating the repo's repo-relative-paths rule for anything written to disk."
   ],
   "notes": "The fixture (tests/fixtures.py) and conftest.py are solid and correctly encode the brief's worked example — a real test could use fixture_run + compute_signals(load_run(fixture_run)) and assert signals == {...expected...} directly against the literal values. The rework should replace both test functions with value assertions, not add more presence checks."
 }

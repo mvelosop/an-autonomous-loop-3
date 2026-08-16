@@ -205,8 +205,13 @@ run_case() {
     say "  MISSED — verdict $verdict, \$$cost"
     miss=$((miss + 1)); RESULTS+=("MISSED   $name  (verdict $verdict)")
   fi
+  # Masked on the way in: a verdict quotes what the reviewer saw, so a finding
+  # about an unmasked path carries that path into a tracked file. (Case 01
+  # found exactly that in this harness's gate log — and then this copy leaked
+  # it again.)
   mkdir -p "$HERE/results"
-  cp "$WORK/loop/verdict.json" "$HERE/results/$name.verdict.json" 2>/dev/null
+  sed -e "s#${HOME}#~#g" -e "s#$(basename "$HOME")#USER#g" \
+    <"$WORK/loop/verdict.json" >"$HERE/results/$name.verdict.json" 2>/dev/null
 }
 
 # The driver refuses to start in an untrusted workspace because `claude -p`
