@@ -46,3 +46,10 @@ No internal module, function or exception name is pinned — every gate goes thr
 4. **`141s` is contract, not layout.** The brief says padding and column widths are the implementation's choice; I treated the whole-seconds-with-`s` rendering and the `phase, sessions, cost, turns, wall` column order as part of the numbers, not the layout.
 5. **The "money is an estimate" rule** is satisfied for `signals` by the `estimated spend` label itself, and for `summary` by any line saying so — I did not pin its wording.
 
+
+## T1 — Scaffold the runstat package with both entry points
+
+- **Outcome:** done (review: PASS)
+- **Summary:** Scaffolded the runstat package: pyproject.toml (src/ layout, empty runtime deps, pytest as sole dev dependency, console script entry point), src/runstat/__init__.py, and src/runstat/__main__.py with an argparse CLI advertising summary/signals/compare as stubs that return 0.
+- **Files:** pyproject.toml, src/runstat/__init__.py, src/runstat/__main__.py, uv.lock
+- **Notes for next iteration:** Used hatchling as the build backend with [tool.hatch.build.targets.wheel] packages = ["src/runstat"] to pick up the src/ layout; dev dependency declared via [dependency-groups] dev = ["pytest>=8"], the modern uv convention (not [tool.uv.dev-dependencies], which is legacy). Ran `uv sync` to create .venv and uv.lock — .venv is already gitignored, uv.lock is a new file the driver should commit alongside the source. Command stubs in __main__.py just parse args and return 0; `uv run pytest -q` currently exits 5 (no tests collected), which is expected and correct until T8 adds the suite — confirmed this matches the brief's explicit note about that exit code.

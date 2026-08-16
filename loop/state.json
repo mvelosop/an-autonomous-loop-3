@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 0,
+  "iteration": 1,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:25:56Z",
+  "updated": "2026-08-16T08:32:22Z",
   "tasks": [
     {
       "id": "T1",
@@ -26,7 +26,7 @@
         "No file added by this task contains an absolute path."
       ],
       "verify": "uv run python -c 'import runstat' && uv run python -m runstat --help >/dev/null && uv run runstat --help >/dev/null && uv run runstat --help | grep -q summary && uv run runstat --help | grep -q signals && uv run runstat --help | grep -q compare && uv run python -c 'import pytest' && python3 -c \"import tomllib,pathlib; d=tomllib.loads(pathlib.Path('pyproject.toml').read_text()); assert d['project'].get('dependencies',[])==[], d['project'].get('dependencies'); assert 'runstat' in d['project'].get('scripts',{}), d['project'].get('scripts')\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },
@@ -61,7 +61,10 @@
         "src/runstat/",
         "src/runstat/__main__.py"
       ],
-      "depends_on": ["T1", "T2"],
+      "depends_on": [
+        "T1",
+        "T2"
+      ],
       "acceptance": [
         "`runstat summary tests/fixtures/runs/20260814-101500` exits 0 and prints rows for plan (1 session, $1.98, 12 turns, 141s), work (3, $1.50, 18, 204s), review (3, $0.60, 9, 72s) and a total row (7, $4.08, 39, 417s).",
         "Rows appear in the column order the brief's table uses: phase, sessions, cost, turns, wall.",
@@ -82,7 +85,9 @@
       "files": [
         "src/runstat/"
       ],
-      "depends_on": ["T3"],
+      "depends_on": [
+        "T3"
+      ],
       "acceptance": [
         "A session whose `is_error` is true is called out in summary's output, identified by its file name.",
         "A session whose `permission_denials` is a non-empty list is called out in summary's output, identified by its file name, and the call-out says these are denials.",
@@ -102,7 +107,10 @@
       "files": [
         "src/runstat/"
       ],
-      "depends_on": ["T1", "T2"],
+      "depends_on": [
+        "T1",
+        "T2"
+      ],
       "acceptance": [
         "Output is one `key: value` line per signal, using exactly the labels in the brief: iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend.",
         "`runstat signals tests/fixtures/runs/20260814-101500` exits 0 and prints exactly the values 3, 2/8, 1.50, 1, 0, 1, 0 and $4.08 against those labels, in that order.",
@@ -124,7 +132,9 @@
       "files": [
         "src/runstat/"
       ],
-      "depends_on": ["T5"],
+      "depends_on": [
+        "T5"
+      ],
       "acceptance": [
         "`runstat compare <run-a> <run-b>` prints one line per signal, with the signal's label, its value for run A, its value for run B, and a delta.",
         "Every signal that `signals` prints appears in compare, with the same labels.",
@@ -145,7 +155,11 @@
       "files": [
         "src/runstat/"
       ],
-      "depends_on": ["T3", "T5", "T6"],
+      "depends_on": [
+        "T3",
+        "T5",
+        "T6"
+      ],
       "acceptance": [
         "A run directory that does not exist exits 2 with a message on stderr and empty stdout.",
         "A single unparseable file in sessions/ exits 2 and names that file's path on stderr; the same holds for one unparseable line of iterations.jsonl, which names iterations.jsonl.",
@@ -168,7 +182,9 @@
         "tests/",
         "tests/conftest.py"
       ],
-      "depends_on": ["T7"],
+      "depends_on": [
+        "T7"
+      ],
       "acceptance": [
         "`uv run pytest -q` exits 0 with at least ten tests passing and none failing.",
         "One test drives the brief's worked example end to end and asserts summary's per-phase numbers, signals' eight values, and a compare delta on at least one numeric signal.",
@@ -188,7 +204,9 @@
       "files": [
         "README.md"
       ],
-      "depends_on": ["T7"],
+      "depends_on": [
+        "T7"
+      ],
       "acceptance": [
         "README.md explains what runstat is and states that it has no runtime role in the loop — it is post-hoc analysis over archived runs.",
         "It shows how to install and run with uv, including both `uv run runstat ...` and `uv run python -m runstat ...`.",
@@ -211,7 +229,9 @@
       "files": [
         "docs/runstat.md"
       ],
-      "depends_on": ["T7"],
+      "depends_on": [
+        "T7"
+      ],
       "acceptance": [
         "docs/runstat.md documents the run directory layout — sessions/*.json and iterations.jsonl — and states that session file names are name-sortable in run order.",
         "It documents every session field runstat reads: phase, iteration, total_cost_usd, num_turns, duration_ms, is_error, permission_denials.",

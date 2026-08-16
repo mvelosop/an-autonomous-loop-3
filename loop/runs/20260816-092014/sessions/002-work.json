@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 69292,
+  "num_turns": 17,
+  "stop_reason": "end_turn",
+  "session_id": "bc72f1eb-e90b-4d48-8f28-cbb1287a0015",
+  "total_cost_usd": 0.5609390999999999,
+  "usage": {
+    "input_tokens": 32,
+    "cache_creation_input_tokens": 35847,
+    "cache_read_input_tokens": 848137,
+    "output_tokens": 6088,
+    "output_tokens_details": {
+      "thinking_tokens": 2457
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 35847,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 202,
+        "cache_read_input_tokens": 59401,
+        "cache_creation_input_tokens": 764,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 764
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 32,
+      "outputTokens": 6088,
+      "cacheReadInputTokens": 848137,
+      "cacheCreationInputTokens": 35847,
+      "webSearchRequests": 0,
+      "costUSD": 0.5609390999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T1 is done. I scaffolded the `runstat` package — `pyproject.toml` (src/ layout, empty runtime deps, pytest as the sole dev dependency, `runstat` console script), `src/runstat/__init__.py`, and `src/runstat/__main__.py` with an argparse CLI that already advertises the `summary`, `signals`, and `compare` subcommands as stubs. T1's verify command passes, and `uv run pytest -q` correctly exits 5 (no tests yet, as expected until T8). Report written to `loop/proposal.json`; leaving status/commit to the driver.",
+  "ttft_ms": 2522,
+  "ttft_stream_ms": 1873,
+  "time_to_request_ms": 17,
+  "type": "result",
+  "duration_ms": 75263,
+  "uuid": "aa80e229-1307-455c-a77f-661152a46150",
+  "phase": "work",
+  "iteration": 1
+}

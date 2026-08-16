@@ -1,0 +1,33 @@
+{
+  "task": "T1",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "pyproject.toml declares a project named runstat with an empty runtime dependency list and a console script entry point named `runstat`.",
+      "met": true,
+      "evidence": "pyproject.toml: name = \"runstat\", dependencies = [], [project.scripts] runstat = \"runstat.__main__:main\""
+    },
+    {
+      "criterion": "pytest is declared as a development dependency and `uv run pytest` resolves it; no other dependency is added anywhere.",
+      "met": true,
+      "evidence": "pyproject.toml [dependency-groups] dev = [\"pytest>=8\"]; `uv run python -c 'import pytest'` succeeds; dependencies list stays empty; uv.lock has no other packages beyond pytest's own deps"
+    },
+    {
+      "criterion": "The package lives under src/runstat/ and `uv run python -c \"import runstat\"` succeeds.",
+      "met": true,
+      "evidence": "src/runstat/__init__.py exists; import command ran clean"
+    },
+    {
+      "criterion": "`uv run runstat --help` and `uv run python -m runstat --help` both exit 0 and both list the subcommands summary, signals and compare.",
+      "met": true,
+      "evidence": "Ran both directly; both print the same usage text listing summary, signals, compare and exit 0"
+    },
+    {
+      "criterion": "No file added by this task contains an absolute path.",
+      "met": true,
+      "evidence": "grep -rl \"/Users/\" pyproject.toml src/ .gitignore uv.lock returned no matches"
+    }
+  ],
+  "findings": [],
+  "notes": "uv.lock was generated as a side effect of `uv sync` and isn't in the task's files list, but it's a normal, necessary artifact of a uv project (not gitignored, no absolute paths) — not scope creep. .gitignore was already present and unchanged from before this task; its existing entries already covered .venv/__pycache__, so nothing was needed there. Full T1 verify command re-run and passes end to end."
+}

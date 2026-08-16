@@ -4,13 +4,13 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **0/10 done** · iteration 0
+**Status:** running · **1/10 done** · iteration 1
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:25:56Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:32:22Z
 
 ## Progress
 
-- [ ] **T1** — Scaffold the runstat package with both entry points
+- [x] **T1** — Scaffold the runstat package with both entry points
 - [ ] **T2** — Check in the two fixture run directories the gates read
 - [ ] **T3** — Implement runstat summary — the per-phase rollup
 - [ ] **T4** — Call out error sessions and permission denials in summary
@@ -25,7 +25,7 @@
 
 ### T1 — Scaffold the runstat package with both entry points
 
-`pending` · depends on: none
+`done` · depends on: none
 
 Nothing else in this plan can be run until there is a project uv can execute. This task creates the Python project (src/ layout, standard library only at runtime, pytest as the sole dev dependency) and a CLI that already knows its three subcommands, so every later task extends a working program instead of inventing one. The three subcommands may be stubs here; the point is that `runstat` and `python -m runstat` both resolve and both advertise summary, signals and compare.
 

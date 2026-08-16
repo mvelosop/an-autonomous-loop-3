@@ -12,3 +12,10 @@
 [36m[loop][0m planning from docs/briefs/0003-runstat-cli.md using opus
 [36m[loop][0m cost=$2.4152145 turns=20 dur=598s error=false
 [36m[loop][0m planned: 0003-runstat-cli — 10 tasks
+[36m[loop][0m committed the plan
+[36m[loop][0m ── iteration 1 (1/30 this run) · T1 · 0/10 done ──
+[36m[loop][0m    Scaffold the runstat package with both entry points
+[36m[loop][0m cost=$0.5609390999999999 turns=17 dur=75s error=false
+[36m[loop][0m cost=$0.3527541 turns=15 dur=50s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T1 done
