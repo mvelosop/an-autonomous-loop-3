@@ -1,0 +1,8 @@
+{
+  "task": "T9",
+  "outcome": "done",
+  "summary": "Wrote README.md documenting what runstat is (post-hoc analysis only, no runtime role in the loop), how to install and run it with uv via both entry points, all three commands with worked examples copied verbatim from the checked-in fixtures, the input layout, and the exit-code contract.",
+  "files": ["README.md"],
+  "verified": "Ran T9's verify command (replays summary/signals/compare against the two fixture runs and greps every non-empty printed line into README.md, plus the uv/python -m/iterations.jsonl/estimat/exit checks) — printed 'VERIFY OK, n=22'; also ran `uv run pytest -q`, which still passes all 20 tests.",
+  "notes": "Captured each command's stdout with Python's repr() first to see exact whitespace before pasting into README, since the gate does an exact substring grep per line (not a normalized/trimmed compare) — the compare table's 'tasks closed' row has two trailing spaces in the tool's real output (no delta text, but the column padding still emits spaces) that I preserved in the README code fence. Documented signals'/iterations-per-closed's `n/a` case and attempts-burned's cumulative-attempts trap from the brief even though neither is exercised by the two checked-in fixtures, since both are part of the documented contract. Did not touch docs/runstat.md — that's T10's file, out of this task's scope."
+}

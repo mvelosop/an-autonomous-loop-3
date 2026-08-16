@@ -1,0 +1,16 @@
+{
+  "task": "T9",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "README.md explains what runstat is and states that it has no runtime role in the loop — it is post-hoc analysis over archived runs.", "met": true, "evidence": "README.md lines 3-11: 'It has no runtime role in the loop... runstat is strictly post-hoc analysis over archived runs under loop/runs/'"},
+    {"criterion": "It shows how to install and run with uv, including both `uv run runstat ...` and `uv run python -m runstat ...`.", "met": true, "evidence": "README.md lines 13-26, 'Install and run' section with both entry points shown"},
+    {"criterion": "It documents all three commands, each with a worked example whose command line and full output are copied from an actual run against the checked-in fixtures.", "met": true, "evidence": "README.md lines 55-121, summary/signals/compare each with a fenced code block using tests/fixtures/runs/20260814-101500 and .../20260815-090000"},
+    {"criterion": "Every output line shown for summary, signals and compare matches what the tool prints today, character for character.", "met": true, "evidence": "Re-ran the gate's own replay loop plus a manual byte-level check of the 'tasks closed' row (which has trailing spaces in real output) — matches README.md line 111 exactly, trailing spaces included"},
+    {"criterion": "It states the exit-code contract — 0 success, 1 valid run directory with no sessions, 2 usage error, missing directory or malformed input.", "met": true, "evidence": "README.md lines 123-137, table with all three codes and the stdout/stderr/traceback rules"},
+    {"criterion": "It describes the input layout: <run-id>/sessions/*.json and <run-id>/iterations.jsonl, and the fields read from each.", "met": true, "evidence": "README.md lines 28-53, layout diagram plus the five session fields and the iterations.jsonl record shape/outcomes"},
+    {"criterion": "It says the dollar figures are estimates, not a bill.", "met": true, "evidence": "README.md line 63 and reproduced verbatim in the summary example output (line 72)"},
+    {"criterion": "It contains no absolute paths.", "met": true, "evidence": "grep -n '/Users' README.md returned nothing"}
+  ],
+  "findings": [],
+  "notes": "Re-ran T9's verify command directly (VERIFY_OK) and independently diffed the tool's live output against the README's code fences, including whitespace-sensitive rows. Diff is scoped to README.md only — no other tracked files changed by this task. docs/runstat.md is referenced but not created, correctly left to T10."
+}

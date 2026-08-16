@@ -131,3 +131,20 @@
 [36m[loop][0m cost=$0.3500391 turns=16 dur=47s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T8 done
+[36m[loop][0m    committed 84a1d4b
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            8
+[36m[loop][0m   tasks closed:          8/10
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         0
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       0
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $10.44 (estimate, not a bill)
+[36m[loop][0m ── iteration 9 (9/30 this run) · T9 · 8/10 done ──
+[36m[loop][0m    Write README.md with examples replayed from the tool
+[36m[loop][0m cost=$0.7446543000000001 turns=21 dur=114s error=false
+[33m[loop][0m     3 permission denial(s) — the fence may be in the wrong place
+[36m[loop][0m cost=$0.36806399999999995 turns=10 dur=44s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T9 done

@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **8/10 done** · iteration 8
+**Status:** running · **9/10 done** · iteration 9
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:50:57Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:53:38Z
 
 ## Progress
 
@@ -18,7 +18,7 @@
 - [x] **T6** — Implement runstat compare — two runs side by side with deltas
 - [x] **T7** — Enforce the exit-code and error contract across all three commands
 - [x] **T8** — Write the pytest suite, including the worked example end to end
-- [ ] **T9** — Write README.md with examples replayed from the tool
+- [x] **T9** — Write README.md with examples replayed from the tool
 - [ ] **T10** — Write docs/runstat.md, the telemetry contract
 
 ## Tasks
@@ -223,7 +223,7 @@ out="$(uv run pytest -q 2>&1)"; printf '%s\n' "$out" | tail -3; printf '%s\n' "$
 
 ### T9 — Write README.md with examples replayed from the tool
 
-`pending` · depends on: T7
+`done` · depends on: T7
 
 A README whose examples have drifted is worse than none, because a reader trusts it. This one documents what runstat is, how to install and run it with uv, all three commands with worked examples, the exit-code contract and the input layout it reads — and its gate replays the tool against the checked-in fixture runs and requires every line the tool prints to appear verbatim in the file. Use tests/fixtures/runs/20260814-101500 and tests/fixtures/runs/20260815-090000 as the example inputs so a reader can reproduce every example exactly.
 

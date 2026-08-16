@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 8,
+  "iteration": 9,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:50:57Z",
+  "updated": "2026-08-16T08:53:38Z",
   "tasks": [
     {
       "id": "T1",
@@ -218,7 +218,7 @@
         "It contains no absolute paths."
       ],
       "verify": "d=\"$(mktemp -d)\" && A=tests/fixtures/runs/20260814-101500 && B=tests/fixtures/runs/20260815-090000 && uv run runstat summary $A >\"$d/all\" && uv run runstat signals $A >>\"$d/all\" && uv run runstat compare $A $B >>\"$d/all\" && n=0 && while IFS= read -r l; do [ -z \"$l\" ] && continue; grep -qF -- \"$l\" README.md || { echo \"README is missing this line the tool prints: $l\"; exit 1; }; n=$((n+1)); done <\"$d/all\" && [ \"$n\" -ge 20 ] && grep -q 'uv run runstat' README.md && grep -q 'python -m runstat' README.md && grep -q 'iterations.jsonl' README.md && grep -qi estimat README.md && grep -q 'exit' README.md",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },
