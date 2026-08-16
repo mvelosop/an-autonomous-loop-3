@@ -1,0 +1,43 @@
+{
+  "task": "T5",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "Output is one `key: value` line per signal, using exactly the labels in the brief: iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend.",
+      "met": true,
+      "evidence": "signals.py format_signals() joins compute_signals()'s dict as 'label: value' lines; dict keys (src/runstat/signals.py) are exactly the eight brief labels in brief order."
+    },
+    {
+      "criterion": "`runstat signals tests/fixtures/runs/20260814-101500` exits 0 and prints exactly the values 3, 2/8, 1.50, 1, 0, 1, 0 and $4.08 against those labels, in that order.",
+      "met": true,
+      "evidence": "Ran the command manually: iterations: 3, tasks closed: 2/8, iterations per closed: 1.50, gate failures: 1, review rejections: 0, attempts burned: 1, no-progress streak: 0, estimated spend: $4.08 — matches the brief's worked example verbatim."
+    },
+    {
+      "criterion": "iterations per closed is iterations divided by tasks closed to two decimals, and is the literal string `n/a` when zero tasks are closed.",
+      "met": true,
+      "evidence": "signals.py: `round(n_iterations / tasks_done, 2) if tasks_done else None`, rendered by format_value() as `f'{value:.2f}'` or `'n/a'` when None. Verified 20260815-090000 gives 2.00 (4 iterations here is not the fixture; actual fixture has 2 iterations/1 closed = 2.00, confirmed by running the tool)."
+    },
+    {
+      "criterion": "attempts burned counts iterations.jsonl records whose outcome is not `done` — it is not the sum of the per-record `attempts` field.",
+      "met": true,
+      "evidence": "signals.py: `attempts_burned = sum(1 for record in iterations if record[\"outcome\"] != \"done\")`. Against the fixture (1 gate_fail record, 2 done) this yields 1, matching the expected value — not the attempts field sum, which would also be different."
+    },
+    {
+      "criterion": "no-progress streak counts the trailing records whose tasks_done did not increase over the previous record.",
+      "met": true,
+      "evidence": "_trailing_no_progress_streak() walks iterations.jsonl backward comparing tasks_done to the prior record (baseline 0 for the first). Fixture 20260814 (tasks_done 1,1,2 — last record increased) gives streak 0; fixture 20260815 (tasks_done 1,1) gives streak 1, matching T6's expected delta of +1 between the two fixtures."
+    },
+    {
+      "criterion": "tasks closed reads tasks_done and tasks_total from the last record of iterations.jsonl.",
+      "met": true,
+      "evidence": "signals.py: `last = iterations[-1]; tasks_done = last[\"tasks_done\"]; tasks_total = last[\"tasks_total\"]`."
+    },
+    {
+      "criterion": "estimated spend sums total_cost_usd across all session files and is labelled as an estimate by its own label.",
+      "met": true,
+      "evidence": "`estimated_spend = sum(session[\"total_cost_usd\"] for session in sessions)`, printed under the label \"estimated spend\" which itself states it is an estimate; value $4.08 matches the fixture total."
+    }
+  ],
+  "findings": [],
+  "notes": "Manually re-ran the full verify command from state.json against both fixtures — all eight labels/values match, including the second fixture's iterations-per-closed of 2.00. Implementation stays in src/runstat/ as scoped, load_iterations() is a small, in-scope addition to loader.py needed to read iterations.jsonl. No absolute paths in the changed files. Gate log (loop/runs/20260816-092014/gates/T5.log) is empty, consistent with a silent pass (same pattern as T1/T3/T4's gate logs)."
+}

@@ -2,9 +2,9 @@
   "run_id": "0003-runstat-cli",
   "brief": "docs/briefs/0003-runstat-cli.md",
   "status": "running",
-  "iteration": 4,
+  "iteration": 5,
   "created": "2026-08-16T08:25:56Z",
-  "updated": "2026-08-16T08:37:57Z",
+  "updated": "2026-08-16T08:41:01Z",
   "tasks": [
     {
       "id": "T1",
@@ -121,7 +121,7 @@
         "estimated spend sums total_cost_usd across all session files and is labelled as an estimate by its own label."
       ],
       "verify": "o=\"$(uv run runstat signals tests/fixtures/runs/20260814-101500)\" || exit 1; printf '%s\\n' \"$o\" | grep -qE '^iterations:[[:space:]]+3$' && printf '%s\\n' \"$o\" | grep -qE '^tasks closed:[[:space:]]+2/8$' && printf '%s\\n' \"$o\" | grep -qE '^iterations per closed:[[:space:]]+1\\.50$' && printf '%s\\n' \"$o\" | grep -qE '^gate failures:[[:space:]]+1$' && printf '%s\\n' \"$o\" | grep -qE '^review rejections:[[:space:]]+0$' && printf '%s\\n' \"$o\" | grep -qE '^attempts burned:[[:space:]]+1$' && printf '%s\\n' \"$o\" | grep -qE '^no-progress streak:[[:space:]]+0$' && printf '%s\\n' \"$o\" | grep -qE '^estimated spend:[[:space:]]+\\$4\\.08$' && uv run runstat signals tests/fixtures/runs/20260815-090000 | grep -qE '^iterations per closed:[[:space:]]+2\\.00$'",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

@@ -30,3 +30,17 @@ def load_sessions(run_dir):
             }
         )
     return sessions
+
+
+def load_iterations(run_dir):
+    """Return one dict per line of ``<run_dir>/iterations.jsonl``, in file order."""
+    path = Path(run_dir) / "iterations.jsonl"
+    if not path.exists():
+        return []
+    records = []
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        records.append(json.loads(line))
+    return records

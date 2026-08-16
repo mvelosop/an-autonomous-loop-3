@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **4/10 done** · iteration 4
+**Status:** running · **5/10 done** · iteration 5
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:37:57Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T08:41:01Z
 
 ## Progress
 
@@ -14,7 +14,7 @@
 - [x] **T2** — Check in the two fixture run directories the gates read
 - [x] **T3** — Implement runstat summary — the per-phase rollup
 - [x] **T4** — Call out error sessions and permission denials in summary
-- [ ] **T5** — Implement runstat signals — the eight run-level signals
+- [x] **T5** — Implement runstat signals — the eight run-level signals
 - [ ] **T6** — Implement runstat compare — two runs side by side with deltas
 - [ ] **T7** — Enforce the exit-code and error contract across all three commands
 - [ ] **T8** — Write the pytest suite, including the worked example end to end
@@ -130,7 +130,7 @@ d="$(mktemp -d)" && cp -R tests/fixtures/runs/20260814-101500 "$d/flag" && pytho
 
 ### T5 — Implement runstat signals — the eight run-level signals
 
-`pending` · depends on: T1, T2
+`done` · depends on: T1, T2
 
 These eight numbers are the only thing that makes a run visible from outside itself, and the loop driver computes the same eight inline while a run is in flight. Brief 0002 acceptance item 6 requires the two implementations to agree exactly on a completed run, so the derivations in the brief's table are not free choices — a formula that is merely reasonable but different is a defect. Note especially that attempts burned counts records whose outcome is not `done`, and is not the sum of the `attempts` field.
 
