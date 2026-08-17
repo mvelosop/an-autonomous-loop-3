@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 48499,
+  "num_turns": 12,
+  "stop_reason": "end_turn",
+  "session_id": "1580a042-ebd4-49c8-ba7a-88f3fcb4696d",
+  "total_cost_usd": 0.4069233,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 30030,
+    "cache_read_input_tokens": 558921,
+    "output_tokens": 3933,
+    "output_tokens_details": {
+      "thinking_tokens": 1455
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 30030,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 184,
+        "cache_read_input_tokens": 53015,
+        "cache_creation_input_tokens": 1333,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1333
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 24,
+      "outputTokens": 3933,
+      "cacheReadInputTokens": 558921,
+      "cacheCreationInputTokens": 30030,
+      "webSearchRequests": 0,
+      "costUSD": 0.4069233,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: PASS** — T2 extends `load_run` cleanly to read `reports/NNN-verdict.json` into a new `Verdict` dataclass on `Run.verdicts`, handles missing/empty `reports/` as non-malformed, raises `RunError` naming the file for bad JSON or missing keys, never reads `*-proposal.json`, and leaves all existing tests/behavior untouched (verified via `pytest` and the `git diff --quiet` check against `ba3d62f`). All six acceptance criteria met, no findings.",
+  "ttft_ms": 2033,
+  "ttft_stream_ms": 1332,
+  "time_to_request_ms": 17,
+  "type": "result",
+  "duration_ms": 50112,
+  "uuid": "91d24031-d091-44d3-b6d3-227dfdad845b",
+  "phase": "review",
+  "iteration": 2
+}

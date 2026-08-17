@@ -2,9 +2,9 @@
   "run_id": "0004-runstat-review",
   "brief": "docs/briefs/0004-runstat-review.md",
   "status": "running",
-  "iteration": 1,
+  "iteration": 2,
   "created": "2026-08-17T00:00:00Z",
-  "updated": "2026-08-17T22:48:58Z",
+  "updated": "2026-08-17T22:50:51Z",
   "tasks": [
     {
       "id": "T1",
@@ -46,7 +46,7 @@
         "New tests live in a new test file under tests/; no existing tests/test_*.py file is modified, the whole suite passes, and summary, signals and compare produce the output they produce today."
       ],
       "verify": "uv run python -c \"import pathlib,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_fixture_run, write_review_fixture_run; from runstat.loader import load_run; d=pathlib.Path(tempfile.mkdtemp()); run=load_run(write_review_fixture_run(d)); assert [v.iteration for v in run.verdicts]==[1,2,3], run.verdicts; assert [v.task for v in run.verdicts]==['T1','T2','T2'], run.verdicts; assert [v.verdict for v in run.verdicts]==['PASS','FAIL','PASS'], run.verdicts; assert [len(v.criteria) for v in run.verdicts]==[3,3,3], run.verdicts; assert [len(v.findings) for v in run.verdicts]==[0,2,0], run.verdicts; assert all(set(('criterion','met','evidence'))<=set(c) for v in run.verdicts for c in v.criteria), run.verdicts; plain=load_run(write_fixture_run(d/'plain')); assert list(plain.verdicts)==[], plain.verdicts; assert len(plain.sessions)==7 and len(plain.iterations)==3, plain; print('loader verdicts ok')\" && uv run pytest -q && git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

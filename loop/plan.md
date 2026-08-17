@@ -4,14 +4,14 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **1/6 done** · iteration 1
+**Status:** running · **2/6 done** · iteration 2
 
-**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:48:58Z
+**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:50:51Z
 
 ## Progress
 
 - [x] **T1** — Add the review fixtures to tests/fixtures.py
-- [ ] **T2** — Load reports/NNN-verdict.json in the existing loader
+- [x] **T2** — Load reports/NNN-verdict.json in the existing loader
 - [ ] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
 - [ ] **T4** — Print every finding verbatim, grouped by iteration
 - [ ] **T5** — Report the five coherence checks
@@ -44,7 +44,7 @@ uv run python -c "import json,pathlib,sys,tempfile; sys.path.insert(0,'tests'); 
 
 ### T2 — Load reports/NNN-verdict.json in the existing loader
 
-`pending` · depends on: T1
+`done` · depends on: T1
 
 The verdicts are already on disk and nothing can read them. The brief requires reuse of the existing loader and error types rather than a second way to read a run, so this extends load_run instead of adding a parallel reader. It unblocks every later task: the review command, the findings section and the coherence checks all consume what this returns.
 
