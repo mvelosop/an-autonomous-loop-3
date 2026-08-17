@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 835487,
+  "num_turns": 49,
+  "stop_reason": "end_turn",
+  "session_id": "3250feda-a0a0-4670-80a3-4a0979f9b51d",
+  "total_cost_usd": 4.335597499999999,
+  "usage": {
+    "input_tokens": 76,
+    "cache_creation_input_tokens": 113956,
+    "cache_read_input_tokens": 3244565,
+    "output_tokens": 62935,
+    "output_tokens_details": {
+      "thinking_tokens": 41922
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 113956,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2512,
+        "cache_read_input_tokens": 129514,
+        "cache_creation_input_tokens": 370,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 370
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-opus-5": {
+      "inputTokens": 76,
+      "outputTokens": 62935,
+      "cacheReadInputTokens": 3244565,
+      "cacheCreationInputTokens": 113956,
+      "webSearchRequests": 0,
+      "costUSD": 4.335597499999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-opus-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Plan written and self-checked.\n\n## `loop/state.json` — `0004-runstat-review`\n\n**6 tasks**, linear dependency chain. **First ready task: T1** (no dependencies).\n\n| id | title | gate proves |\n| --- | --- | --- |\n| T1 | Add the review fixtures to `tests/fixtures.py` | the brief's three verdicts + a second, singly-incoherent run exist with exactly the brief's numbers |\n| T2 | Load `reports/NNN-verdict.json` in the existing loader | `load_run(...).verdicts`, missing `reports/` ≠ malformed, plus the unchanged-commands check |\n| T3 | `runstat review`: table, totals block, exit codes | the 7 non-coherence totals values exactly; exits 0/1/2 with empty stdout, named file, no traceback |\n| T4 | Print every finding verbatim, grouped by iteration | both fixture findings appear under a heading naming iteration 2 and T2; the \"no findings\" line appears only when true |\n| T5 | The five coherence checks | all five fire on a synthetic run, each named `check <n>` with iteration and task; `coherence: ok` on the good fixture; still exit 0 |\n| T6 | Document `review` in both docs | replays the tool and requires every line of the documented transcript verbatim in real output |\n\nEvery verify command fails right now, each for the right reason (missing fixture builder → missing `verdicts` attribute → `argparse: invalid choice: 'review'`). The whole set runs in well under a second. I also wrote a throwaway stub implementation **outside the repo** (`/tmp`) and confirmed T3–T6 *pass* against it — a gate that can only fail is as broken as one that only passes.\n\n## What I interpreted rather than read\n\n**Names I pinned because a gate needed one** (the brief is silent on all of these):\n\n- `write_review_fixture_run(dest)` and `write_incoherent_fixture_run(dest)` in `tests/fixtures.py`, both returning the run directory — every later gate imports them.\n- `load_run(...).verdicts`, entries exposing `.iteration` (parsed from `NNN`), `.task`, `.verdict`, `.criteria` (the dicts as written), `.findings`. This mirrors the existing `Session`, but it is structure, not behaviour.\n- Three output strings: violation lines contain the literal `check <n>` with the brief's numbering; the findings heading contains the word `iteration` plus the number and task id; the empty-run line contains `no findings`. Without these, \"names check 1\" and \"a line saying so plainly\" are not checkable.\n- The `review` example in `docs/runstat-cli.md` must be a `$`-prefixed transcript of fixture run `20260817-120000` — the gate diffs its lines against real output, so a different example run would fail it.\n\n**Judgment calls:**\n\n- **The totals block arrives in two pieces.** The brief shows `coherence: ok` inside it, but coherence is T5. T3's gate asserts the other seven values and T3's goal says so explicitly, so a reviewer doesn't fail it for the missing line.\n- **\"Malformed verdict\" includes a missing key**, not just unparseable JSON — otherwise a verdict without `criteria` would traceback rather than exit 2.\n- **The fixture needs an `iterations.jsonl`.** The brief's fixture table lists only `reports/`, but check 5 compares against it and the worked example says `coherence: ok`, so I required records 1–3 naming T1, T2, T2.\n- **A present-but-empty `reports/` is exit 1**, same as a missing one.\n- **The unchanged-commands proof** is `uv run pytest -q` plus `git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py`, on T2 and T6. Those two files pin the existing commands' output and exit codes; requiring them byte-identical to the current branch tip means new tests go in new files. **This hard-codes commit `ba3d62f`** — worth knowing if the branch is ever rebased.\n- **Six tasks, the top of the brief's range.** I split the command's output three ways (table+totals / findings / coherence) so each gate is small and each failure points at one thing.\n- I left `README.md` alone; the brief names only the two `docs/` files.",
+  "ttft_ms": 6326,
+  "ttft_stream_ms": 5608,
+  "time_to_request_ms": 20,
+  "type": "result",
+  "duration_ms": 878031,
+  "uuid": "5195b8bf-c5d9-46fa-8d05-002ba5278d98",
+  "phase": "plan",
+  "iteration": 0
+}
