@@ -41,7 +41,6 @@ cd "$REPO" || exit 1
 
 LOOP_DIR="$REPO/loop"
 STATE="$LOOP_DIR/state.json"
-JOURNAL="$LOOP_DIR/journal.md"
 PROPOSAL="$LOOP_DIR/proposal.json"
 VERDICT="$LOOP_DIR/verdict.json"
 
@@ -55,8 +54,14 @@ PLAN_MODEL="${LOOP_PLAN_MODEL:-opus}"
 WORK_MODEL="${LOOP_WORK_MODEL:-sonnet}"
 
 BRIEF="${1:-}"
+BRANCH="$(git branch --show-current 2>/dev/null)"
+[[ -n "$BRANCH" ]] || BRANCH="detached-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+BRANCH_SAFE="${BRANCH//\//-}"
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
-RUN_DIR="$LOOP_DIR/runs/$RUN_ID"
+# Grouped by branch: two loops running in parallel write to different paths, so
+# their telemetry can never collide even if they start in the same second.
+RUN_PATH="$BRANCH_SAFE/$RUN_ID"
+RUN_DIR="$LOOP_DIR/runs/$RUN_PATH"
 SESSIONS="$RUN_DIR/sessions"
 ITERATIONS="$RUN_DIR/iterations.jsonl"
 
@@ -142,7 +147,7 @@ run_session() {
 archive_transcript() {
   [[ "${LOOP_ARCHIVE_TRANSCRIPTS:-0}" == "1" ]] || return 0
   local result="$1" phase="$2" iter="$3" sid src dest
-  dest="${LOOP_TRANSCRIPT_DIR:-$REPO/../loop-transcripts}/$RUN_ID"
+  dest="${LOOP_TRANSCRIPT_DIR:-$REPO/../loop-transcripts}/$RUN_PATH"
   case "$(cd "$dest" 2>/dev/null && pwd)" in "$REPO"|"$REPO"/*)
     warn "refusing to archive transcripts inside the repo"; return 0 ;;
   esac
@@ -266,7 +271,7 @@ preflight() {
     || { say "  [ ] masking cannot resolve \$HOME"; ok=0; }
 
   mkdir -p "$SESSIONS" 2>/dev/null \
-    && say "  [x] telemetry dir loop/runs/$RUN_ID" \
+    && say "  [x] telemetry dir loop/runs/$RUN_PATH" \
     || { say "  [ ] cannot create telemetry dir"; ok=0; }
 
   if [[ -f "$STATE" ]]; then
@@ -289,7 +294,15 @@ preflight
 
 # --- plan phase (once) ---
 
-[[ -f "$JOURNAL" ]] || printf '# Journal\n\nAppend-only narrative of this plan. Rendered state lives in loop/plan.md.\n' >"$JOURNAL"
+# The journal is named for the PLAN, so a resumed run keeps appending to the
+# same narrative while a different plan — on this branch or a parallel one —
+# never touches this file.
+open_journal() {
+  JOURNAL="$LOOP_DIR/journals/$(state_get .run_id).md"
+  mkdir -p "$LOOP_DIR/journals"
+  [[ -f "$JOURNAL" ]] || printf '# Journal — %s\n\nAppend-only narrative of this plan. Rendered state lives in loop/plan.md.\n' \
+    "$(state_get .run_id)" >"$JOURNAL"
+}
 
 if [[ ! -f "$STATE" ]]; then
   if [[ -z "$BRIEF" ]]; then
@@ -300,7 +313,7 @@ if [[ ! -f "$STATE" ]]; then
 
   say "planning from $BRIEF using $PLAN_MODEL"
   run_session plan 0 "$PLAN_MODEL" "/loop-plan $BRIEF" \
-    || die "planning session failed — see loop/runs/$RUN_ID/"
+    || die "planning session failed — see loop/runs/$RUN_PATH/"
 
   [[ -f "$STATE" ]] || die "planning produced no loop/state.json"
   jq -e . "$STATE" >/dev/null 2>&1 || die "loop/state.json is not valid JSON"
@@ -314,6 +327,7 @@ if [[ ! -f "$STATE" ]]; then
   [[ "$bad_dep" -eq 0 ]] || die "$bad_dep dependency reference(s) name a task that does not exist"
 
   say "planned: $(state_get '"\(.run_id) — \(.tasks|length) tasks"')"
+  open_journal
 
   # The plan phase's report carries the planner's "what I interpreted rather
   # than read" list — the operator's one cheap chance to catch a misreading
@@ -332,6 +346,7 @@ if [[ ! -f "$STATE" ]]; then
 else
   say "resuming $(state_get .run_id) — $(state_get '[.tasks[]|select(.status=="done")]|length')/$(state_get '.tasks|length') done"
   state_edit --arg t "$(ts)" '.status="running" | .updated=$t'
+  open_journal
 fi
 
 # --- iterate ---
@@ -431,7 +446,7 @@ while true; do
   for id in "${gate_failed[@]:-}"; do
     [[ -n "$id" && "$id" != "$task" ]] || continue
     warn "   GATE REGRESSION $id — reverting to pending"
-    state_edit --arg id "$id" --arg n "regressed: verify failed during $task — see loop/runs/$RUN_ID/gates/$id.log" \
+    state_edit --arg id "$id" --arg n "regressed: verify failed during $task — see loop/runs/$RUN_PATH/gates/$id.log" \
       '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)'
   done
 
@@ -464,7 +479,7 @@ while true; do
       say "   $task done" ;;
     gate_fail|review_fail)
       reason="$([[ "$outcome" == "gate_fail" ]] \
-        && echo "gate failed — see loop/runs/$RUN_ID/gates/$task.log" \
+        && echo "gate failed — see loop/runs/$RUN_PATH/gates/$task.log" \
         || jq -r '(.findings // []) | join("; ")' "$VERDICT" 2>/dev/null | mask)"
       state_edit --arg id "$task" --arg n "$reason" \
         '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)' ;;
@@ -532,7 +547,7 @@ state_edit --arg s "$status" --arg t "$(ts)" '.status=$s | .updated=$t'
 
 say ""
 say "═══ $status ═══"
-say "run:    $RUN_ID  ($run_iters iteration(s) this run)"
+say "run:    $RUN_PATH  ($run_iters iteration(s) this run)"
 say "plan:   $(state_get '[.tasks[]|select(.status=="done")]|length')/$(state_get '.tasks|length') done, $(state_get '[.tasks[]|select(.status=="blocked")]|length') blocked"
 print_signals
 say ""
@@ -543,13 +558,13 @@ for p in plan work review; do
 done
 say ""
 case "$status" in
-  complete)       say "plan complete. journal: loop/journal.md" ;;
+  complete)       say "plan complete. journal: $JOURNAL" ;;
   blocked)        say "a human is needed. read the blocked task's notes in loop/state.json" ;;
-  stalled)        say "no recorded progress twice running — read loop/runs/$RUN_ID/" ;;
+  stalled)        say "no recorded progress twice running — read loop/runs/$RUN_PATH/" ;;
   max_iterations) say "iteration budget spent. resumable: re-run loop/run.sh" ;;
   cost_ceiling)   say "cost ceiling reached. resumable: raise LOOP_COST_CEILING and re-run" ;;
   not_converging) say "iterations-per-closed-task exceeded $CONVERGENCE_MAX — the run is not converging." ;;
-  session_error)  say "a claude session failed. see loop/runs/$RUN_ID/" ;;
+  session_error)  say "a claude session failed. see loop/runs/$RUN_PATH/" ;;
 esac
 render_plan
 {
@@ -565,6 +580,6 @@ render_plan
 } >>"$JOURNAL"
 
 git add -A >/dev/null 2>&1
-git diff --cached --quiet 2>/dev/null || git commit -q -m "[loop] run $RUN_ID: $status"
+git diff --cached --quiet 2>/dev/null || git commit -q -m "[loop] run $RUN_PATH: $status"
 
 exit "$exit_code"

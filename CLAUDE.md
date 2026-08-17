@@ -14,7 +14,7 @@ of them share memory. All continuity lives in files:
 | Path | Role |
 | --- | --- |
 | `loop/state.json` | **Single source of truth.** Tasks, acceptance criteria, verify commands, status, attempts. |
-| `loop/journal.md` | Append-only. One entry per iteration. A view, never the source of truth. |
+| `loop/journals/<plan-id>.md` | Append-only, **one per plan**. One entry per iteration. A view, never the source of truth. |
 | `loop/proposal.json` | Transient. The work session's report on the task it just did. |
 | `loop/verdict.json` | Transient. The review session's independent verdict. |
 | `loop/runs/<run-id>/` | Telemetry: one JSON per session, plus `iterations.jsonl`. |
@@ -44,8 +44,8 @@ gives an independent verdict → driver applies it, journals, commits.
    passes it.** Claiming done without both just costs an attempt.
 7. **No web access.** `WebFetch`/`WebSearch` are denied so a run cannot drift
    with the internet. Package installs are fine.
-8. **Halting cleanly with a good blocker report is a success. Faking progress is
-   the only real failure.**
+8. **Halting cleanly, with a clear account of what blocked you, is a success.
+   Faking progress is the only real failure.**
 
 ## Toolchain
 

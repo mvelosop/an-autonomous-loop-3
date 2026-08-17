@@ -297,8 +297,8 @@ economized.
    the load-bearing half: `git push`, `git reset --hard`, `rm -rf`, `sudo`,
    `curl`, recursive `claude` invocations, and any read or write under
    `~/.claude`.
-8. **Halting cleanly with a good blocker report is a success. Faking progress is
-   the only real failure.**
+8. **Halting cleanly, with a clear account of what blocked you, is a success.
+   Faking progress is the only real failure.**
 
 ---
 
@@ -314,7 +314,6 @@ The driver refuses to start unless it has verified, and printed:
 - Required tools exist (`jq`, `uv`, `claude`).
 - Writable telemetry directory for this run.
 - State validates, or a brief is available to plan from.
-- No blocker file is left over from a previous run.
 - Masking is active.
 
 A preflight that passes silently is worth less than one that prints what it
@@ -383,7 +382,7 @@ conditions, same evidence on disk — the brief did its job.
 ## 14. Acceptance — how we know the experiment worked
 
 1. A run completes a full plan unattended, with per-task commits.
-2. `loop/journal.md` reads as a coherent account of what happened, written by
+2. The plan's journal reads as a coherent account of what happened, written by
    agents that never shared a session.
 3. At least one task is caught by the gate or the review session and re-worked
    — the safety net is proven, not assumed.

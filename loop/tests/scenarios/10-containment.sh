@@ -21,7 +21,7 @@ STUB
 fixture_run docs/briefs/0003-runstat-cli.md
 assert_exit 0
 assert_contained
-grep -q '~/secret/file.py' "$FX/repo/loop/journal.md" \
+grep -q '~/secret/file.py' "$(fx_journal)" \
   && ok "absolute path was masked to ~ in the journal" \
   || bad "journal did not carry the masked path"
 finish

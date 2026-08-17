@@ -1,0 +1,9 @@
+# Append-only narratives. One journal per plan means parallel loops normally
+# write to different files; union merge covers the case where two branches work
+# the same plan, keeping both sides' entries instead of conflicting.
+loop/journals/*.md merge=union
+
+# Per-run telemetry lives under loop/runs/<branch>/<timestamp>/ and so cannot
+# collide, but the record is append-only and union is the right resolution if
+# it ever does.
+loop/runs/**/iterations.jsonl merge=union

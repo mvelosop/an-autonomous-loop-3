@@ -92,7 +92,7 @@ files, both generated, neither ever parsed back:
 | File | What it answers |
 | --- | --- |
 | `loop/plan.md` | **Where are we?** Every task with status, attempts, goal, acceptance criteria and its verify command (collapsed). Re-rendered from `state.json` after every state change by `loop/render-plan.sh`. |
-| `loop/journal.md` | **What happened?** The planner's report — including its "what I interpreted rather than read" list — then one entry per iteration, then the run's outcome and signals. |
+| `loop/journals/<plan-id>.md` | **What happened?** The planner's report — including its "what I interpreted rather than read" list — then one entry per iteration, then the run's outcome and signals. |
 
 **Never hand-edit either.** `plan.md` is regenerated on every state change and
 your edits will be lost; `state.json` is the source of truth. This is the
@@ -147,7 +147,7 @@ input and an expected exit code end an argument that a paragraph cannot
 | `11-stall` | no recorded progress twice running stops the loop |
 | `12-signals-fixture` | the signal formulas against brief 0003's hand-computed fixture |
 | `13-empty-run-signals` | a run with no iterations reports zeros, not phantoms |
-| `14-rendered-views` | `plan.md` tracks state; `journal.md` carries the narrative |
+| `14-rendered-views` | `plan.md` tracks state; the plan's journal carries the narrative |
 | `15-telemetry-contract` | the driver emits exactly the shape `runstat` reads |
 | `16-review-fails-closed` | an unusable review verdict fails, never passes |
 | `17-stale-handoff` | a silent work session cannot inherit the previous report |
