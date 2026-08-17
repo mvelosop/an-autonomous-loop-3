@@ -4,16 +4,16 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **3/6 done** · iteration 3
+**Status:** running · **4/6 done** · iteration 4
 
-**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:53:41Z
+**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:55:53Z
 
 ## Progress
 
 - [x] **T1** — Add the review fixtures to tests/fixtures.py
 - [x] **T2** — Load reports/NNN-verdict.json in the existing loader
 - [x] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
-- [ ] **T4** — Print every finding verbatim, grouped by iteration
+- [x] **T4** — Print every finding verbatim, grouped by iteration
 - [ ] **T5** — Report the five coherence checks
 - [ ] **T6** — Document review and the reports/ directory in both docs
 
@@ -90,7 +90,7 @@ uv run python -c "import pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tes
 
 ### T4 — Print every finding verbatim, grouped by iteration
 
-`pending` · depends on: T3
+`done` · depends on: T3
 
 The findings are the point of this command — a count of them is not, because the whole question the brief asks is what the reviewers actually caught. This adds the section that prints each finding's text under the iteration it came from, and the line that says plainly when a run recorded no findings at all, which is the result a reader most needs to not miss.
 

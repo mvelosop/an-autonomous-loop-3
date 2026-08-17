@@ -2,9 +2,9 @@
   "run_id": "0004-runstat-review",
   "brief": "docs/briefs/0004-runstat-review.md",
   "status": "running",
-  "iteration": 3,
+  "iteration": 4,
   "created": "2026-08-17T00:00:00Z",
-  "updated": "2026-08-17T22:53:41Z",
+  "updated": "2026-08-17T22:55:53Z",
   "tasks": [
     {
       "id": "T1",
@@ -91,7 +91,7 @@
         "The table and the totals block are unchanged, and the exit-code contract is unchanged."
       ],
       "verify": "uv run python -c \"import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_review_fixture_run; R=lambda p: subprocess.run([sys.executable,'-m','runstat','review',str(p)],capture_output=True,text=True); d=pathlib.Path(tempfile.mkdtemp()); r=write_review_fixture_run(d); p=R(r); assert p.returncode==0, p.stderr; f=json.loads((r/'reports'/'002-verdict.json').read_text())['findings']; assert len(f)==2, f; assert all(x in p.stdout for x in f), (f, p.stdout); pre=[l for l in p.stdout.split(f[0])[0].splitlines() if l.strip()]; cand=[l for l in pre if 'T2' in l]; assert cand, pre; assert 'iteration' in cand[-1].lower() and '2' in cand[-1].replace('T2',''), cand[-1]; assert 'no finding' not in p.stdout.lower(), p.stdout; z=write_review_fixture_run(d/'nf'); w=json.loads((z/'reports'/'002-verdict.json').read_text()); w['findings']=[]; (z/'reports'/'002-verdict.json').write_text(json.dumps(w)); q=R(z); assert q.returncode==0, q.stderr; assert 'no finding' in q.stdout.lower(), q.stdout; assert next((l.split(':',1)[1].strip() for l in q.stdout.splitlines() if l.split(':',1)[0].strip().lower()=='findings'), None)=='0', q.stdout; print('findings section ok')\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

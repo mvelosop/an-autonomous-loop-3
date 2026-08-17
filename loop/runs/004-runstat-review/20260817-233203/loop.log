@@ -51,3 +51,19 @@
 [36m[loop][0m cost=$0.42640079999999997 turns=19 dur=64s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T3 done
+[36m[loop][0m    committed 21d303f
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            3
+[36m[loop][0m   tasks closed:          3/6
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         0
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       0
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $7.31 (estimate, not a bill)
+[36m[loop][0m ── iteration 4 (4/30 this run) · T4 · 3/6 done ──
+[36m[loop][0m    Print every finding verbatim, grouped by iteration
+[36m[loop][0m cost=$0.5633469000000001 turns=15 dur=88s error=false
+[36m[loop][0m cost=$0.33902550000000004 turns=10 dur=40s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T4 done

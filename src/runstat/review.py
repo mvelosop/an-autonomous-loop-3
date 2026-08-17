@@ -1,8 +1,8 @@
-"""Per-iteration table and totals for the `review` command.
+"""Per-iteration table, totals and findings for the `review` command.
 
 compute_review aggregates run.verdicts into rows and totals so format_review
-has nothing left to derive -- it only renders. The findings section (brief
-0004 task T4) and the coherence checks (task T5) build on this module later.
+has nothing left to derive -- it only renders. The coherence checks (brief
+0004 task T5) build on this module later.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ def _row(verdict) -> dict:
         "criteria": len(verdict.criteria),
         "not_met": not_met,
         "findings": len(verdict.findings),
+        "finding_texts": list(verdict.findings),
         "evidence": evidence,
     }
 
@@ -63,5 +64,16 @@ def format_review(review: dict) -> list:
     lines.append(f"criteria not met: {totals['criteria_not_met']}")
     lines.append(f"findings: {totals['findings']}")
     lines.append(f"evidence cited: {totals['evidence_cited']}/{totals['evidence_total']}")
+
+    lines.append("")
+    if totals["findings"] == 0:
+        lines.append("no findings recorded")
+    else:
+        for row in review["rows"]:
+            if not row["finding_texts"]:
+                continue
+            lines.append(f"iteration {row['iteration']} ({row['task']}):")
+            for text in row["finding_texts"]:
+                lines.append(f"  {text}")
 
     return lines
