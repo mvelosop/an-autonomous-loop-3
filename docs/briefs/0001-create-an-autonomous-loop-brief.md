@@ -24,5 +24,5 @@ project.
 specially important is the `~/source/personal/exploring-claude/docs/design-notes/executable-loop-harness.md`
 
 So, please, let's start a discussion on this topic to arrive at a new brief document, that will start 
-the next-generation agentic loop experiment, that incorporates the learnings ad most interesting parts 
+the next-generation agentic loop experiment, that incorporates the learnings and most interesting parts 
 from the above experiments.

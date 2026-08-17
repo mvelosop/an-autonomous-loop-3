@@ -10,7 +10,7 @@ fixture_stub_default
 fixture_run docs/briefs/0003-runstat-cli.md
 assert_exit 0
 
-RUN="$(ls -d "$FX/repo"/loop/runs/*/ | head -1)"
+RUN="$(ls -d "$FX/repo"/loop/runs/*/*/ | head -1)"
 
 n="$(ls "$RUN"sessions/*.json 2>/dev/null | wc -l | tr -d ' ')"
 [[ "$n" == "5" ]] && ok "5 session files (1 plan + 2x work/review)" || bad "session files: got $n, want 5"

@@ -1,6 +1,6 @@
 ---
 name: executable-loop-harness
-description: The loop's mechanical operations belong in a tested harness with schema-validated state, not in hand-parsed markdown described by prose contracts; the core is tech-agnostic (measured: 6% of the loop's contracts are stack-coupled, all of it the gate list) so it splits core/adapter/config, and the seam should be extracted at a second consumer rather than designed against one stack. Also records the result that generalizes furthest: no in-loop gate detects that the loop is globally stuck, so the operator must stay positioned to notice.
+description: The loop's mechanical operations belong in a tested harness with schema-validated state, not in hand-parsed markdown described by prose contracts; the core is tech-agnostic (measured: 6% of the loop's contracts are stack-coupled, all of it the gate list) so it splits core/adapter/config, and the seam should be extracted at a second consumer rather than designed against one stack. Also records the result that generalizes furthest: no in-loop gate detects that the loop is globally stuck, so the operator must stay positioned to notice. The script-vs-prose split reproduced post-authoring at plan 0139 — one prose rule, six correction events, convergence only at the script pointer.
 category: process
 status: Proposed
 decided: 2026-08-04
@@ -85,6 +85,31 @@ The loop converges on product code because the gates are executable — plan 013
 
 This is a claim about mechanics, not about value. Workflow work is the project's point (see `## Decision`). The conclusion is that it should be *shaped* so the loop can verify it.
 
+### The pattern reproduced — plan 0139's Rule 12 cascade
+
+Post-authoring confirmation, on a plan whose **product code converged cleanly** (27 controller↔contract pairs converted; most code reviews clean or single-finding). One prose rule — `integration-testing.guidelines.md` Rule 12, the flaky-red discipline (*transport-shaped reds may retry once; assertion-shaped reds must be re-run in isolation*) — absorbed **six distinct correction events in a single run**, measured at `722c483c` (`plans/0139-spa177-bigint-body-query-range-guard.md`, findings trail + review records):
+
+| Event | What the prose did |
+|---|---|
+| T2-F1 `[defect]` | the tick's `**Notes:**` claimed an isolation re-run that never happened — no run artifact existed |
+| T3-F1 `[defect]` | the next tick skipped the obligation citing "isolation is impossible with our tooling" — refuted by measurement (single-file isolation ran in ~4 s) |
+| T3-F3 `[defect]` | the T3-F1 *fix* inlined a hardcoded `--project=e2e` command into the rule — which exits 1 with **zero tests executed** for integration-project files, and re-derived prior art: `.claude/scripts/isolate-red.sh` had shipped one plan earlier (0138), already solving it, and 0138's untriaged insights had already named this guideline as its promotion target |
+| T3-F5 `[polish]` | the re-fixed sentence read "re-runs each file *that many times*" with no number anywhere in the sentence |
+| T4-F1 review record | the rule's file-relation clause ("a file the diff does **not** touch") gave a reviewer no guidance for a red in a diff-touched file |
+| T9-polish review record | a **hung** gate surfaced a third failure class the rule cannot express — it classifies by error *shape* and has no clause for the *absence* of a failure (no artifact, every signal "still running") |
+
+Convergence arrived exactly where this note predicts: the tick that **replaced the prose recipe with a pointer to the tested script** drew a clean review, and the topic produced zero further defect findings.
+
+**What the converging script actually is** — plan 0138's diagnostic trio under `.claude/scripts/`, each with a fixture under `.claude/scripts/tests/`:
+
+| Script | Role |
+|---|---|
+| `isolate-red.sh <artifact.json> [runs]` | reads a vitest JSON run artifact, extracts each failing file, classifies its project **by the real include-globs** from `vitest.e2e.config.ts` / `vitest.integration.config.ts` (never by directory name — the four `src/libs/*/tests/integration/**` files that *live* under "integration" but *belong* to e2e are exactly the trap T3-F3's hardcoded `--project=e2e` fell into), then re-runs each file in isolation N times (default 3). Exit 0 = every red 100% green in isolation (the flake shape); exit 1 = at least one reproduced (a real regression) |
+| `repeat-run.sh` | the N-times harness underneath — repeats a scoped vitest invocation and prints the `N=<n> red=<r> rate=<%>` tally |
+| `classify-red.sh` | the subject-vs-regression verdict on a full-suite red (the `git stash` diff-isolation half of 0138's classification procedure) |
+
+The fixture is what changes the review's epistemics: `isolate-red.fixture.sh` (19 cases, including the project-misclassification trap) let the T3-F3 reviewer **run** the claim — plant, execute, read the exit code — instead of re-reading prose about it. That is Rule 1's mechanism in one sentence: a check ends the argument; a paragraph reopens it. Two additions to the evidence base beyond confirmation: (i) a prose rule's failure modes are open-ended — three of the six events were *new classes* the rule's text could not have anticipated, which is why re-reading always finds something; (ii) **script-shaped prior art is invisible to a tick that only greps prose** — the loop paid two ticks to rediscover a shipped script whose promotion target was already named in an untriaged insight one plan back.
+
 ### The failure was invisible from inside the loop
 
 This is the sharpest result of the run, and the one that generalizes furthest beyond tooling choice.
@@ -124,3 +149,7 @@ Recorded as one entry because both additions landed the same day, before the not
 
 - **The invisible-from-inside-the-loop result** (`## Why`, and Rule 7). Added after the observation that plan 0136's failure was undetectable from the loop's own signals — every gate green, every mechanism per-tick, nothing evaluating the run against the point of the run. This is the note's most transferable claim and was missing from the original draft, which argued only the script-vs-prose case.
 - **The genericity architecture** (`## Decision / Context` → *Genericity*, and Rule 6). Added after measuring the loop's actual stack coupling at 6% and finding it concentrated entirely in the gate list, which makes a core/adapter/config split concrete rather than aspirational. Also narrowed the note's proposed venue from "a greenfield product" to "a second consumer repo" — the same seam gets tested for far less.
+
+### 2026-08-17 — the script-vs-prose split reproduced post-authoring (plan 0139)
+
+**What changed.** `## Why` gains *"The pattern reproduced — plan 0139's Rule 12 cascade"*: one prose rule (`integration-testing.guidelines.md` Rule 12) absorbed six distinct correction events across a single run whose product code converged cleanly, with convergence arriving only at the tick that replaced the prose recipe with a pointer to the tested `isolate-red.sh` script. The frontmatter description carries the one-line version. **No Rule changed** — this is confirming evidence for Rules 1–2, plus two additions to the evidence base: a prose rule's failure modes are open-ended (three of the six events were new classes the text could not have anticipated), and script-shaped prior art is invisible to a tick that only greps prose (the script had shipped one plan earlier, its promotion target already named in an untriaged insight). Extended the same day (before any reader consumed the entry, matching this history's 2026-08-04 precedent) with the converging script's anatomy: the plan-0138 trio (`isolate-red.sh` / `repeat-run.sh` / `classify-red.sh`), the include-glob project classification that defeats the directory-name trap, and the fixture-changes-epistemics point — the reviewer ran the claim instead of re-reading it.

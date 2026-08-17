@@ -12,6 +12,6 @@ assert_exit 1
 assert_log "workspace NOT trusted"
 assert_log "preflight failed"
 assert_no_state
-[[ ! -d "$FX/repo/loop/runs" ]] || [[ -z "$(ls -A "$FX/repo"/loop/runs/*/sessions 2>/dev/null)" ]] \
+[[ ! -d "$FX/repo/loop/runs" ]] || [[ -z "$(ls -A "$FX/repo"/loop/runs/*/*/sessions 2>/dev/null)" ]] \
   && ok "no session was run" || bad "a session ran despite failed preflight"
 finish

@@ -92,7 +92,7 @@ files, both generated, neither ever parsed back:
 | File | What it answers |
 | --- | --- |
 | `loop/plan.md` | **Where are we?** Every task with status, attempts, goal, acceptance criteria and its verify command (collapsed). Re-rendered from `state.json` after every state change by `loop/render-plan.sh`. |
-| `loop/journal.md` | **What happened?** The planner's report — including its "what I interpreted rather than read" list — then one entry per iteration, then the run's outcome and signals. |
+| `loop/journals/<plan-id>.md` | **What happened?** The planner's report — including its "what I interpreted rather than read" list — then one entry per iteration, then the run's outcome and signals. |
 
 **Never hand-edit either.** `plan.md` is regenerated on every state change and
 your edits will be lost; `state.json` is the source of truth. This is the
@@ -147,7 +147,7 @@ input and an expected exit code end an argument that a paragraph cannot
 | `11-stall` | no recorded progress twice running stops the loop |
 | `12-signals-fixture` | the signal formulas against brief 0003's hand-computed fixture |
 | `13-empty-run-signals` | a run with no iterations reports zeros, not phantoms |
-| `14-rendered-views` | `plan.md` tracks state; `journal.md` carries the narrative |
+| `14-rendered-views` | `plan.md` tracks state; the plan's journal carries the narrative |
 | `15-telemetry-contract` | the driver emits exactly the shape `runstat` reads |
 | `16-review-fails-closed` | an unusable review verdict fails, never passes |
 | `17-stale-handoff` | a silent work session cannot inherit the previous report |
@@ -156,6 +156,36 @@ input and an expected exit code end an argument that a paragraph cannot
 
 Scenario 12 is the one that keeps the control plane and the analysis plane
 honest: the same fixture arbitrates `run.sh` and `runstat`.
+
+### Reviewer calibration — separate, and NOT part of `run-all.sh`
+
+```bash
+loop/tests/reviewer-calibration/run-calibration.sh        # all four cases
+loop/tests/reviewer-calibration/run-calibration.sh 03     # just one
+```
+
+Everything above is free and offline. **This one calls a real model** (~$1.20
+for four cases), which is why it is excluded from the suite and must be invoked
+deliberately.
+
+It answers a question the suite cannot: two full runs produced 21 work/review
+pairs and *zero* rejections, and from outside, a reviewer with nothing to catch
+is indistinguishable from a reviewer that cannot catch. Each case hands a real
+review session work that **passes its own gate** but violates its acceptance
+criteria — a hollow test, a value hardcoded to the fixture, an out-of-scope
+feature, a criterion no test asserts. Baseline: 4/4 caught
+([`RESULTS.md`](tests/reviewer-calibration/RESULTS.md)).
+
+**Setup it needs, which the fixture suite does not:** a trusted workdir. The
+harness calls `claude -p` directly rather than going through the driver, and an
+untrusted workspace makes `claude` ignore `.claude/settings.json` — so the
+review would run under a different permission surface than a real run and the
+results would look fine and mean nothing. Its own preflight refuses to start
+until that is fixed, and names the workdir.
+
+Re-run it after any change to `.claude/skills/loop-review/SKILL.md` and compare
+against the baseline. A review contract that stops catching planted defects has
+regressed, whatever its prose says.
 
 The suite is mutation-checked — reverting the blocked-path fix, narrowing the
 gate to the current task, disabling the mask, or freezing the attempt counter

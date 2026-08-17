@@ -19,7 +19,8 @@ Read, in this order:
 1. `loop/state.json` — find your task. Read its `goal`, `acceptance` and
    `verify`. The goal tells you why the task exists; the acceptance criteria are
    what you will be judged against; the verify command is the gate you must pass.
-2. The last two entries of `loop/journal.md` — what just happened, and anything
+2. The last two entries of this plan's journal, `loop/journals/<run_id>.md`
+   (the `run_id` is in `state.json`) — what just happened, and anything
    flagged for you. If your task has non-empty `notes`, read those too: a
    previous attempt failed and that is what it learned.
 3. `CLAUDE.md`, and the brief named in `state.json`'s `brief` field.
@@ -76,7 +77,7 @@ implemented the store module" is not.
   review session decide. Do not edit `loop/state.json` at all.
 - **You do not commit.** The driver makes one commit per iteration covering
   everything. Leave your changes in the working tree.
-- **You do not write to `loop/journal.md`.** The driver assembles the entry from
+- **You do not write to the journal.** The driver assembles the entry from
   your report and the review's verdict.
 - **You do not push.** Ever.
 
@@ -88,5 +89,6 @@ guess and do not fake it. Write `loop/proposal.json` with `outcome: "blocked"`,
 and use `summary` for what you tried and `notes` for the specific decision or
 access you need to proceed.
 
-Then stop. Halting cleanly with a good blocker report is a success. Faking
+Then stop. Halting cleanly, with a clear account of what blocked you, is a
+success. Faking
 progress is the only real failure.

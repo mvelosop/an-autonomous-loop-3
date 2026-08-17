@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # JSON is what the driver computes over; markdown is what a human reads.
-# loop/plan.md must track state after every change, and loop/journal.md must
+# loop/plan.md must track state after every change, and the plan's journal must
 # carry the narrative a reader needs — the planner's report at the front and
 # the run's outcome at the end — without anyone opening a JSON file.
 . "$(dirname "$0")/../lib.sh"
@@ -11,7 +11,7 @@ fixture_run docs/briefs/0003-runstat-cli.md
 assert_exit 0
 
 P="$FX/repo/loop/plan.md"
-J="$FX/repo/loop/journal.md"
+J="$(fx_journal)"
 
 [[ -f "$P" ]] && ok "plan.md rendered" || bad "plan.md not rendered"
 grep -q 'Do NOT edit' "$P" && ok "plan.md warns it is generated" || bad "plan.md has no do-not-edit banner"

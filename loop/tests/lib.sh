@@ -108,8 +108,11 @@ fixture_run() {
 }
 
 fx_state() { jq -r "$@" "$FX/repo/loop/state.json"; }
-fx_iters() { cat "$FX/repo"/loop/runs/*/iterations.jsonl 2>/dev/null; }
+fx_iters() { cat "$FX/repo"/loop/runs/*/*/iterations.jsonl 2>/dev/null; }
 fx_log()   { cat "$FX/out.log"; }
+# One journal per plan, so the harness resolves it from state rather than
+# assuming a fixed path.
+fx_journal() { echo "$FX/repo/loop/journals/$(fx_state .run_id).md"; }
 fx_dump()  { note "last 25 log lines:"; tail -25 "$FX/out.log" | sed 's/^/      /'; }
 
 # ---------------------------------------------------------- assertions ------

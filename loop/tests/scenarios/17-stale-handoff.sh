@@ -26,7 +26,7 @@ LOOP_MAX_ATTEMPTS=2 LOOP_CONVERGENCE_MIN=99 fixture_run docs/briefs/0003-runstat
 assert_status T1 done
 assert_iter_outcome 2 blocked
 assert_log "no valid proposal"
-grep -q 'T1 report' "$FX/repo/loop/journal.md" && ok "T1's report is in its own entry" || bad "T1 report missing"
-[[ "$(grep -c 'T1 report' "$FX/repo/loop/journal.md")" == "1" ]] \
+grep -q 'T1 report' "$(fx_journal)" && ok "T1's report is in its own entry" || bad "T1 report missing"
+[[ "$(grep -c 'T1 report' "$(fx_journal)")" == "1" ]] \
   && ok "T1's report was not reused for T2" || bad "stale proposal leaked into a second entry"
 finish

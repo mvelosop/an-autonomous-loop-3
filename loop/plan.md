@@ -6,7 +6,7 @@
 
 **Status:** complete · **11/11 done** · iteration 11
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-15T22:28:53Z
+**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T15:00:00Z
 
 ## Progress
 
@@ -19,7 +19,7 @@
 - [x] **T7** — Add the compare command
 - [x] **T8** — Enforce the exit-code and error-output contract across all commands
 - [x] **T9** — Add the end-to-end worked-example acceptance test
-- [x] **T10** — Write the README, with every documented example matching real output
+- [x] **T10** — Write the runstat usage doc, with every documented example matching real output
 - [x] **T11** — Document the telemetry contract and the cross-check against the driver
 
 ## Tasks
@@ -446,7 +446,7 @@ uv run pytest -q tests/test_worked_example.py::test_summary tests/test_worked_ex
 
 </details>
 
-### T10 — Write the README, with every documented example matching real output
+### T10 — Write the runstat usage doc, with every documented example matching real output
 
 `done` · depends on: T9
 
@@ -454,8 +454,8 @@ Write README.md covering what runstat is, how to install and run it, the three c
 
 **Acceptance**
 
-- README.md documents runstat summary, runstat signals and runstat compare, each with a worked example
-- Every line the signals command prints for the fixture run appears verbatim in the README
+- docs/runstat-cli.md documents runstat summary, runstat signals and runstat compare, each with a worked example
+- Every line the signals command prints for the fixture run appears verbatim in the document
 - The exit-code contract (0 success, 1 no sessions, 2 usage or malformed) is documented
 - The input layout it reads (sessions/*.json and iterations.jsonl) is described
 - Install and run instructions use uv
@@ -469,7 +469,7 @@ import pathlib, subprocess, sys, tempfile
 sys.path.insert(0, 'tests')
 from fixtures import write_fixture_run
 
-t = pathlib.Path('README.md').read_text()
+t = pathlib.Path('docs/runstat-cli.md').read_text()
 for cmd in ['runstat summary', 'runstat signals', 'runstat compare']:
     assert cmd in t, cmd
 for token in ['sessions/', 'iterations.jsonl', 'uv']:
