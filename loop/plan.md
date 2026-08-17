@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **4/6 done** · iteration 4
+**Status:** running · **5/6 done** · iteration 5
 
-**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:55:53Z
+**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:58:44Z
 
 ## Progress
 
@@ -14,7 +14,7 @@
 - [x] **T2** — Load reports/NNN-verdict.json in the existing loader
 - [x] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
 - [x] **T4** — Print every finding verbatim, grouped by iteration
-- [ ] **T5** — Report the five coherence checks
+- [x] **T5** — Report the five coherence checks
 - [ ] **T6** — Document review and the reports/ directory in both docs
 
 ## Tasks
@@ -111,7 +111,7 @@ uv run python -c "import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0
 
 ### T5 — Report the five coherence checks
 
-`pending` · depends on: T4
+`done` · depends on: T4
 
 This is the part of the brief worth more than the summary: a verdict that passes a task while marking one of its own criteria not met is self-contradictory, and nothing checks for that today. Each check is a statement about one verdict that is either true or false; every violation is reported with its iteration and task. Violations are reported, never enforced — this command describes a finished run, and a run cannot be un-run.
 

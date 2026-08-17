@@ -1,8 +1,8 @@
-"""Per-iteration table, totals and findings for the `review` command.
+"""Per-iteration table, totals, findings and coherence for the `review` command.
 
-compute_review aggregates run.verdicts into rows and totals so format_review
-has nothing left to derive -- it only renders. The coherence checks (brief
-0004 task T5) build on this module later.
+compute_review aggregates run.verdicts (and run.iterations, for the coherence
+checks) into rows, totals and violations so format_review has nothing left to
+derive -- it only renders.
 """
 
 from __future__ import annotations
@@ -23,10 +23,39 @@ def _row(verdict) -> dict:
     }
 
 
+def _task_by_iteration(run) -> dict:
+    tasks = {}
+    for record in run.iterations:
+        iteration = record.get("iteration")
+        if iteration is not None:
+            tasks[iteration] = record.get("task")
+    return tasks
+
+
+def _violations(run) -> list:
+    expected_task = _task_by_iteration(run)
+    violations = []
+    for v in run.verdicts:
+        not_met = [c for c in v.criteria if not c["met"]]
+        if v.verdict == "PASS" and not_met:
+            violations.append((1, v.iteration, v.task))
+        if v.verdict == "PASS" and v.findings:
+            violations.append((2, v.iteration, v.task))
+        if v.verdict == "FAIL" and not not_met and not v.findings:
+            violations.append((3, v.iteration, v.task))
+        if any(not str(c["evidence"]).strip() for c in v.criteria):
+            violations.append((4, v.iteration, v.task))
+        want = expected_task.get(v.iteration)
+        if want is not None and want != v.task:
+            violations.append((5, v.iteration, v.task, want))
+    return violations
+
+
 def compute_review(run) -> dict:
     rows = [_row(v) for v in run.verdicts]
 
     criteria_ruled = sum(r["criteria"] for r in rows)
+    violations = _violations(run)
 
     totals = {
         "reviews": len(rows),
@@ -37,9 +66,10 @@ def compute_review(run) -> dict:
         "findings": sum(r["findings"] for r in rows),
         "evidence_cited": sum(r["evidence"] for r in rows),
         "evidence_total": criteria_ruled,
+        "coherence": "ok" if not violations else f"{len(violations)} violation(s)",
     }
 
-    return {"rows": rows, "totals": totals}
+    return {"rows": rows, "totals": totals, "violations": violations}
 
 
 def format_review(review: dict) -> list:
@@ -64,6 +94,7 @@ def format_review(review: dict) -> list:
     lines.append(f"criteria not met: {totals['criteria_not_met']}")
     lines.append(f"findings: {totals['findings']}")
     lines.append(f"evidence cited: {totals['evidence_cited']}/{totals['evidence_total']}")
+    lines.append(f"coherence: {totals['coherence']}")
 
     lines.append("")
     if totals["findings"] == 0:
@@ -75,5 +106,21 @@ def format_review(review: dict) -> list:
             lines.append(f"iteration {row['iteration']} ({row['task']}):")
             for text in row["finding_texts"]:
                 lines.append(f"  {text}")
+
+    lines.append("")
+    violations = review["violations"]
+    if not violations:
+        lines.append("coherence checks: no violations")
+    else:
+        for violation in violations:
+            if len(violation) == 4:
+                check, iteration, task, want = violation
+                lines.append(
+                    f"check {check}: iteration {iteration} task {task} "
+                    f"(iterations.jsonl names {want})"
+                )
+            else:
+                check, iteration, task = violation
+                lines.append(f"check {check}: iteration {iteration} task {task}")
 
     return lines

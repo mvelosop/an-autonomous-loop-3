@@ -2,9 +2,9 @@
   "run_id": "0004-runstat-review",
   "brief": "docs/briefs/0004-runstat-review.md",
   "status": "running",
-  "iteration": 4,
+  "iteration": 5,
   "created": "2026-08-17T00:00:00Z",
-  "updated": "2026-08-17T22:55:53Z",
+  "updated": "2026-08-17T22:58:44Z",
   "tasks": [
     {
       "id": "T1",
@@ -114,7 +114,7 @@
         "A verdict for an iteration that has no record in iterations.jsonl is not a check 5 violation."
       ],
       "verify": "uv run python -c \"import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_incoherent_fixture_run, write_review_fixture_run; R=lambda p: subprocess.run([sys.executable,'-m','runstat','review',str(p)],capture_output=True,text=True); cv=lambda o: next((l.split(':',1)[1].strip().lower() for l in o.splitlines() if l.split(':',1)[0].strip().lower()=='coherence'), None); T=pathlib.Path(tempfile.mkdtemp()); ok=R(write_review_fixture_run(T)); assert ok.returncode==0, ok.stderr; assert cv(ok.stdout)=='ok', ok.stdout; inc=R(write_incoherent_fixture_run(T/'inc')); assert inc.returncode==0, inc.stderr; assert cv(inc.stdout) not in (None,'ok'), inc.stdout; h1=[l for l in inc.stdout.splitlines() if 'check 1' in l.lower()]; assert len(h1)==1 and 'T1' in h1[0] and '1' in h1[0].replace('T1',''), inc.stdout; d=T/'five'/'20260817-140000'; (d/'reports').mkdir(parents=True); C=lambda met,ev: {'criterion':'c','met':met,'evidence':ev}; V=[{'task':'T1','verdict':'PASS','criteria':[C(True,'e'),C(False,'e')],'findings':[],'notes':'n'},{'task':'T2','verdict':'PASS','criteria':[C(True,'e')],'findings':['a defect nobody blocked on'],'notes':'n'},{'task':'T3','verdict':'FAIL','criteria':[C(True,'e')],'findings':[],'notes':'n'},{'task':'T4','verdict':'PASS','criteria':[C(True,'')],'findings':[],'notes':'n'},{'task':'T9','verdict':'PASS','criteria':[C(True,'e')],'findings':[],'notes':'n'}]; [(d/'reports'/('%03d-verdict.json'%i)).write_text(json.dumps(v)) for i,v in enumerate(V,1)]; (d/'iterations.jsonl').write_text(''.join(json.dumps({'iteration':i,'task':('T%d'%i),'outcome':'done','attempts':0,'tasks_done':i,'tasks_total':5})+chr(10) for i in range(1,6))); a=R(d); assert a.returncode==0, a.stderr; hit=lambda n: [l for l in a.stdout.splitlines() if ('check %d'%n) in l.lower()]; assert all(hit(n) for n in (1,2,3,4,5)), a.stdout; assert all(any(('T%d'%n) in l for l in hit(n)) for n in (1,2,3,4)), a.stdout; assert any(('T9' in l or 'T5' in l) and '5' in l for l in hit(5)), a.stdout; assert cv(a.stdout) not in (None,'ok'), a.stdout; print('coherence checks ok')\"",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

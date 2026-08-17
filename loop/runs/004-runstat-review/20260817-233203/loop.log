@@ -67,3 +67,19 @@
 [36m[loop][0m cost=$0.33902550000000004 turns=10 dur=40s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T4 done
+[36m[loop][0m    committed 87d3fa3
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            4
+[36m[loop][0m   tasks closed:          4/6
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         0
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       0
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $8.22 (estimate, not a bill)
+[36m[loop][0m ── iteration 5 (5/30 this run) · T5 · 4/6 done ──
+[36m[loop][0m    Report the five coherence checks
+[36m[loop][0m cost=$0.6004497 turns=14 dur=110s error=false
+[36m[loop][0m cost=$0.4018401 turns=13 dur=56s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T5 done
