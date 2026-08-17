@@ -85,3 +85,9 @@ Every verify command fails right now, each for the right reason (missing fixture
 - **Summary:** Documented the runstat review command and the reports/ directory in both docs/runstat-cli.md and docs/runstat.md, with a verbatim shell transcript replaying the actual tool output for the fixture run 20260817-120000.
 - **Files:** docs/runstat-cli.md, docs/runstat.md
 - **Notes for next iteration:** docs/runstat-cli.md: added reports/NNN-verdict.json and reports/NNN-proposal.json to the input layout, a new '### runstat review <run-dir>' section between compare and Exit codes with the full transcript captured by actually running the tool against write_review_fixture_run's output, and extended the exit-1 row to cover both 'no session files' and 'no verdict files'. docs/runstat.md: added the reports/ layout line, a '### reports/NNN-verdict.json' section (field table plus the note that proposal.json is deliberately unread), a '### The five coherence checks' section listing all five by number, and extended '### Malformed input' to mention a malformed verdict file. Captured the transcript by running `uv run python -m runstat review <fixture-dir>` directly and copying stdout verbatim (repr-checked for exact whitespace) rather than hand-typing it, so it can't drift from real output. Left summary/signals/compare sections of both docs untouched.
+
+## Run ended — complete
+
+- **Run:** `20260817-233203` · 6 iteration(s) this run
+- **Plan:** 6/6 done, 0 blocked
+- **Signals:** 6 iterations · 1.00 per closed · 0 gate failure(s) · 0 review rejection(s) · 0 attempt(s) burned · streak 0 · ~$10.37
