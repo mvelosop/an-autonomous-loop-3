@@ -4,15 +4,15 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **2/6 done** · iteration 2
+**Status:** running · **3/6 done** · iteration 3
 
-**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:50:51Z
+**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:53:41Z
 
 ## Progress
 
 - [x] **T1** — Add the review fixtures to tests/fixtures.py
 - [x] **T2** — Load reports/NNN-verdict.json in the existing loader
-- [ ] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
+- [x] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
 - [ ] **T4** — Print every finding verbatim, grouped by iteration
 - [ ] **T5** — Report the five coherence checks
 - [ ] **T6** — Document review and the reports/ directory in both docs
@@ -67,7 +67,7 @@ uv run python -c "import pathlib,sys,tempfile; sys.path.insert(0,'tests'); from 
 
 ### T3 — Add the runstat review command: per-iteration table, totals block, exit codes
 
-`pending` · depends on: T2
+`done` · depends on: T2
 
 This is the command the brief is about: it turns the verdicts the loader now reads into the per-iteration table and the totals block, and it inherits brief 0003's exit-code contract exactly. Two parts of the output land in later tasks and are deliberately not required here: the findings text (T4) and the coherence line and violations (T5). A reviewer should not fail this task for their absence.
 

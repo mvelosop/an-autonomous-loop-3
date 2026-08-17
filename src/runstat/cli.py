@@ -9,6 +9,7 @@ from pathlib import Path
 from .compare import compute_compare, format_compare
 from .errors import EmptyRunError
 from .loader import RunError, load_run
+from .review import compute_review, format_review
 from .signals import compute_signals, format_signals
 from .summary import compute_summary, format_summary
 
@@ -16,6 +17,11 @@ from .summary import compute_summary, format_summary
 def _require_sessions(run, run_dir) -> None:
     if not run.sessions:
         raise EmptyRunError(f"no session files: {run_dir}")
+
+
+def _require_verdicts(run, run_dir) -> None:
+    if not run.verdicts:
+        raise EmptyRunError(f"no verdict files: {run_dir}")
 
 
 def _cmd_summary(args: argparse.Namespace) -> int:
@@ -44,6 +50,14 @@ def _cmd_compare(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_review(args: argparse.Namespace) -> int:
+    run = load_run(args.run_dir)
+    _require_verdicts(run, args.run_dir)
+    for line in format_review(compute_review(run)):
+        print(line)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="runstat")
     subparsers = parser.add_subparsers(dest="command")
@@ -66,6 +80,12 @@ def build_parser() -> argparse.ArgumentParser:
     compare_parser.add_argument("run_dir_a", type=Path)
     compare_parser.add_argument("run_dir_b", type=Path)
     compare_parser.set_defaults(func=_cmd_compare)
+
+    review_parser = subparsers.add_parser(
+        "review", help="what the review sessions did, and whether their verdicts are coherent"
+    )
+    review_parser.add_argument("run_dir", type=Path)
+    review_parser.set_defaults(func=_cmd_review)
 
     return parser
 

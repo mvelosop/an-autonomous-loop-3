@@ -1,0 +1,38 @@
+{
+  "task": "T3",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "runstat review <run-dir> prints one row per verdict carrying the iteration, the task, the verdict, how many criteria were ruled on, how many were ruled met false, the number of findings, and the count of criteria with non-empty evidence over the total. Column layout is the implementation's choice.",
+      "met": true,
+      "evidence": "src/runstat/review.py:44-55 format_review builds a header and one row per verdict with iteration, task, verdict, criteria, not met, findings, and an 'evidence/total' column; confirmed against the fixture run's live output."
+    },
+    {
+      "criterion": "It then prints a totals block of key: value lines whose values on the fixture run 20260817-120000 are exactly: reviews 3, passed 2, failed 1, criteria ruled 9, criteria not met 1, findings 2, evidence cited 9/9.",
+      "met": true,
+      "evidence": "src/runstat/review.py:57-65 emits the seven key: value lines; the task's verify command asserts each value exactly against write_review_fixture_run and passed (gates/T3.log: 'review command ok')."
+    },
+    {
+      "criterion": "A run directory that is valid but has no verdicts exits 1, with a message on stderr and empty stdout.",
+      "met": true,
+      "evidence": "cli.py:22-24 _require_verdicts raises EmptyRunError when run.verdicts is empty; main() maps EmptyRunError to exit 1 (cli.py:106-108). Verify command's write_fixture_run(plain) case asserts (returncode, stdout) == (1, '') and non-empty stderr; passed."
+    },
+    {
+      "criterion": "A missing run directory exits 2, and so does a malformed verdict — with the offending file named on stderr, stdout empty and no traceback.",
+      "met": true,
+      "evidence": "load_run raises RunError for a missing directory and for malformed/incomplete verdict JSON (loader.py, unchanged from T2), naming the file; main() maps RunError to exit 2. Verify command's 'nope', 'bad' (invalid JSON) and 'bad2' (missing key) cases all assert (returncode, stdout) == (2, '') with the filename in stderr and no traceback; passed."
+    },
+    {
+      "criterion": "The command reuses load_run and the existing RunError / EmptyRunError contract rather than reading the run directory a second way.",
+      "met": true,
+      "evidence": "cli.py:53-58 _cmd_review calls load_run(args.run_dir) and _require_verdicts; no separate file-reading path was added."
+    },
+    {
+      "criterion": "Both python -m runstat review and the runstat console script work, and summary, signals and compare are unchanged.",
+      "met": true,
+      "evidence": "Verify command invokes via `python -m runstat review`, which passed. Manually confirmed `uv run runstat review <dir>` (console script) also works. `git diff HEAD -- src/runstat/summary.py src/runstat/signals.py src/runstat/compare.py` is empty; cli.py's existing _cmd_summary/_cmd_signals/_cmd_compare are untouched in the diff."
+    }
+  ],
+  "findings": [],
+  "notes": "Findings text (T4) and coherence line/violations (T5) are correctly absent, matching the task's explicit scope note that they land in later tasks. No absolute paths in new code. Full suite: 40 passed."
+}
