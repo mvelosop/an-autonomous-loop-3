@@ -43,3 +43,10 @@ Every verify command fails right now, each for the right reason (missing fixture
 - **Six tasks, the top of the brief's range.** I split the command's output three ways (table+totals / findings / coherence) so each gate is small and each failure points at one thing.
 - I left `README.md` alone; the brief names only the two `docs/` files.
 
+
+## T1 — Add the review fixtures to tests/fixtures.py
+
+- **Outcome:** done (review: PASS)
+- **Summary:** Added write_review_fixture_run and write_incoherent_fixture_run to tests/fixtures.py, materializing the brief's worked-example review run (three verdicts, one FAIL with two findings) and a second run with exactly one incoherent verdict.
+- **Files:** tests/fixtures.py, tests/test_review_fixtures.py
+- **Notes for next iteration:** write_review_fixture_run(dest) returns dest/20260817-120000 with reports/001-003-verdict.json plus a matching iterations.jsonl (records 1,2,3 -> T1,T2,T2), mirroring the field set write_fixture_run already uses for iteration records. write_incoherent_fixture_run(dest) treats dest itself as the run directory (no extra run-id subdirectory, since the brief doesn't pin a name for this fixture) and writes a single 001-verdict.json (PASS, second of three criteria met:false, all evidence non-empty, findings []) plus a one-line iterations.jsonl for iteration 1/T1 so check 5 (task mismatch) does not also fire. Tests for both builders live in the new tests/test_review_fixtures.py; the existing tests/test_fixtures.py (which only covers write_fixture_run) was left untouched.

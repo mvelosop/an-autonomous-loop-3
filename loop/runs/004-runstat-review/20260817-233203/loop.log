@@ -12,3 +12,10 @@
 [36m[loop][0m planning from docs/briefs/0004-runstat-review.md using opus
 [36m[loop][0m cost=$4.335597499999999 turns=49 dur=878s error=false
 [36m[loop][0m planned: 0004-runstat-review — 6 tasks
+[36m[loop][0m committed the plan
+[36m[loop][0m ── iteration 1 (1/30 this run) · T1 · 0/6 done ──
+[36m[loop][0m    Add the review fixtures to tests/fixtures.py
+[36m[loop][0m cost=$0.5169126 turns=13 dur=73s error=false
+[36m[loop][0m cost=$0.3855104999999999 turns=10 dur=59s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T1 done

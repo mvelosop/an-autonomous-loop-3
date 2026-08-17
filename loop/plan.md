@@ -4,13 +4,13 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **0/6 done** · iteration 0
+**Status:** running · **1/6 done** · iteration 1
 
-**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T00:00:00Z
+**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:48:58Z
 
 ## Progress
 
-- [ ] **T1** — Add the review fixtures to tests/fixtures.py
+- [x] **T1** — Add the review fixtures to tests/fixtures.py
 - [ ] **T2** — Load reports/NNN-verdict.json in the existing loader
 - [ ] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
 - [ ] **T4** — Print every finding verbatim, grouped by iteration
@@ -21,7 +21,7 @@
 
 ### T1 — Add the review fixtures to tests/fixtures.py
 
-`pending` · depends on: none
+`done` · depends on: none
 
 Every gate for this brief replays the tool against a fixed run directory, so that directory has to exist before anything else can be verified. This task adds two builders beside the existing write_fixture_run: the brief's worked-example run (three verdicts, one of them a FAIL carrying two findings) and a second run holding exactly one incoherent verdict. Their numbers are the arbiter for every later task's verify command, which is why they are pinned here rather than left to the code that consumes them.
 
