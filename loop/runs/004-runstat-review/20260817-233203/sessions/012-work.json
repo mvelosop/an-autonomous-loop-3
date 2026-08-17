@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 102756,
+  "num_turns": 23,
+  "stop_reason": "end_turn",
+  "session_id": "c7e7abfa-6903-473d-9475-e977dc74227e",
+  "total_cost_usd": 0.7622076,
+  "usage": {
+    "input_tokens": 40,
+    "cache_creation_input_tokens": 45566,
+    "cache_read_input_tokens": 1160422,
+    "output_tokens": 9371,
+    "output_tokens_details": {
+      "thinking_tokens": 2021
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 45566,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 120,
+        "cache_read_input_tokens": 69089,
+        "cache_creation_input_tokens": 795,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 795
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 40,
+      "outputTokens": 9371,
+      "cacheReadInputTokens": 1160422,
+      "cacheCreationInputTokens": 45566,
+      "webSearchRequests": 0,
+      "costUSD": 0.7622076,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T6 is done: `docs/runstat-cli.md` and `docs/runstat.md` now document the `review` command and `reports/` directory, with a transcript verified byte-for-byte against the tool's real output. Full test suite passes (40/40) and the two protected test files remain unchanged from `ba3d62f`. Report written to `loop/proposal.json`.",
+  "ttft_ms": 1575,
+  "ttft_stream_ms": 1021,
+  "time_to_request_ms": 14,
+  "type": "result",
+  "duration_ms": 104811,
+  "uuid": "e163f38b-32b1-4abb-a5a8-e4b7340c86be",
+  "phase": "work",
+  "iteration": 6
+}

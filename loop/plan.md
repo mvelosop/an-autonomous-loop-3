@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** running · **5/6 done** · iteration 5
+**Status:** running · **6/6 done** · iteration 6
 
-**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T22:58:44Z
+**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T23:01:25Z
 
 ## Progress
 
@@ -15,7 +15,7 @@
 - [x] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
 - [x] **T4** — Print every finding verbatim, grouped by iteration
 - [x] **T5** — Report the five coherence checks
-- [ ] **T6** — Document review and the reports/ directory in both docs
+- [x] **T6** — Document review and the reports/ directory in both docs
 
 ## Tasks
 
@@ -134,7 +134,7 @@ uv run python -c "import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0
 
 ### T6 — Document review and the reports/ directory in both docs
 
-`pending` · depends on: T5
+`done` · depends on: T5
 
 Both documents describe the telemetry contract and the commands, and a reader trusts them — so an example that has drifted from real output is worse than none. This task adds the review command and the reports/ directory to each, and its gate replays the tool and requires every printed line of the documented transcript to appear verbatim in what the tool actually produces. It also proves the existing commands never moved.
 

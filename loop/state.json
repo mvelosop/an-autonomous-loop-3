@@ -2,9 +2,9 @@
   "run_id": "0004-runstat-review",
   "brief": "docs/briefs/0004-runstat-review.md",
   "status": "running",
-  "iteration": 5,
+  "iteration": 6,
   "created": "2026-08-17T00:00:00Z",
-  "updated": "2026-08-17T22:58:44Z",
+  "updated": "2026-08-17T23:01:25Z",
   "tasks": [
     {
       "id": "T1",
@@ -138,7 +138,7 @@
         "The whole test suite passes, and tests/test_worked_example.py and tests/test_cli_contract.py are byte-identical to their state at commit ba3d62f."
       ],
       "verify": "uv run python -c \"import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_review_fixture_run; F=chr(96)*3; D=chr(36); d=pathlib.Path(tempfile.mkdtemp()); r=write_review_fixture_run(d); p=subprocess.run([sys.executable,'-m','runstat','review',str(r)],capture_output=True,text=True); assert p.returncode==0, p.stderr; real=[l.rstrip() for l in p.stdout.splitlines()]; cli=pathlib.Path('docs/runstat-cli.md').read_text(); tel=pathlib.Path('docs/runstat.md').read_text(); blocks=[b for b in cli.split(F)[1::2] if 'runstat review' in b and any(l.lstrip().startswith(D) for l in b.splitlines())]; assert blocks, 'docs/runstat-cli.md has no runstat review transcript block'; ex=[l.rstrip() for l in blocks[0].splitlines() if l.strip() and not l.lstrip().startswith(D)]; assert len(ex)>=12, ex; missing=[l for l in ex if l not in real]; assert not missing, missing; keys=('reviews','passed','failed','criteria ruled','criteria not met','findings','evidence cited','coherence'); tot=[l for l in real if l.split(':',1)[0].strip().lower() in keys]; assert len(tot)==8, tot; absent=[l for l in tot if l.strip() not in cli]; assert not absent, absent; assert any(x in cli for x in json.loads((r/'reports'/'002-verdict.json').read_text())['findings']), 'the review example does not show the findings the tool prints'; assert all(k in cli for k in ('reports/','verdict.json','runstat review')), 'docs/runstat-cli.md does not document the reports/ input'; assert all(k in tel for k in ('reports/','verdict.json','coherence','criteria')), 'docs/runstat.md does not document verdicts or the coherence checks'; print('docs ok')\" && uv run pytest -q && git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     }
