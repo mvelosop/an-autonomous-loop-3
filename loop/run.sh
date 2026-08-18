@@ -304,6 +304,26 @@ open_journal() {
     "$(state_get .run_id)" >"$JOURNAL"
 }
 
+# A branch cut from main inherits whatever state.json the last squash left
+# there. That state belongs to another branch's plan and must never be resumed
+# as if it were this one's. Reset it when a brief says "start a plan"; refuse
+# loudly otherwise, because a stale branch stamp must not silently destroy a
+# live plan.
+if [[ -f "$STATE" ]]; then
+  STATE_BRANCH="$(state_get '.branch // ""')"
+  if [[ -n "$STATE_BRANCH" && "$STATE_BRANCH" != "$BRANCH" ]]; then
+    if [[ -n "$BRIEF" ]]; then
+      say "state.json belongs to branch '$STATE_BRANCH'; you are on '$BRANCH'"
+      say "  a brief was given — resetting and planning fresh"
+      rm -f "$STATE" "$LOOP_DIR/plan.md"
+    else
+      die "state.json belongs to branch '$STATE_BRANCH' (plan $(state_get .run_id)), but you are on '$BRANCH'.
+  This is another branch's plan and will not be resumed here.
+  Pass a brief to start a new plan, or check out '$STATE_BRANCH' to resume that one."
+    fi
+  fi
+fi
+
 if [[ ! -f "$STATE" ]]; then
   if [[ -z "$BRIEF" ]]; then
     BRIEF="$(ls -1 docs/briefs/*.md 2>/dev/null | tail -1)"
@@ -326,6 +346,7 @@ if [[ ! -f "$STATE" ]]; then
   bad_dep="$(state_get '[.tasks[].id] as $ids | [.tasks[]|.depends_on[]?|select(($ids|index(.))==null)] | length')"
   [[ "$bad_dep" -eq 0 ]] || die "$bad_dep dependency reference(s) name a task that does not exist"
 
+  state_edit --arg b "$BRANCH" '.branch = $b'
   say "planned: $(state_get '"\(.run_id) — \(.tasks|length) tasks"')"
   open_journal
 
@@ -345,7 +366,7 @@ if [[ ! -f "$STATE" ]]; then
   git add -A && git commit -q -m "[loop] plan $(state_get .run_id)" && say "committed the plan"
 else
   say "resuming $(state_get .run_id) — $(state_get '[.tasks[]|select(.status=="done")]|length')/$(state_get '.tasks|length') done"
-  state_edit --arg t "$(ts)" '.status="running" | .updated=$t'
+  state_edit --arg t "$(ts)" --arg b "$BRANCH" '.status="running" | .updated=$t | .branch=$b'
   open_journal
 fi
 

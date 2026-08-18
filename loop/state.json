@@ -19,7 +19,7 @@
         "The three verdicts carry exactly the brief's worked-example numbers: tasks T1, T2, T2; verdicts PASS, FAIL, PASS; three criteria each; exactly one criterion ruled met false, in 002; every criterion carrying non-empty evidence; findings of length 0, 2 and 0, each finding a non-empty one-line string.",
         "Each verdict file is a JSON object with the keys task, verdict, criteria, findings and notes, and every criteria entry has criterion, met and evidence.",
         "That run directory also carries an iterations.jsonl whose records for iterations 1, 2 and 3 name tasks T1, T2 and T2, matching the three verdict files, so the run is coherent under all five of the brief's checks.",
-        "tests/fixtures.py gains write_incoherent_fixture_run(dest), which creates a run directory holding exactly one verdict: a PASS whose second criterion is met false, with every criterion carrying evidence, an empty findings list, and a task matching its iterations.jsonl record — so it violates the brief's coherence check 1 and nothing else.",
+        "tests/fixtures.py gains write_incoherent_fixture_run(dest), which creates a run directory holding exactly one verdict: a PASS whose second criterion is met false, with every criterion carrying evidence, an empty findings list, and a task matching its iterations.jsonl record \u2014 so it violates the brief's coherence check 1 and nothing else.",
         "Tests covering both builders live in a new test file under tests/; tests/fixtures.py is added to rather than rewritten, no existing tests/test_*.py file is modified, and nothing outside tests/ is changed."
       ],
       "verify": "uv run python -c \"import json,pathlib,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_incoherent_fixture_run, write_review_fixture_run; d=pathlib.Path(tempfile.mkdtemp()); r=write_review_fixture_run(d); assert r.name=='20260817-120000', r; vp=sorted((r/'reports').glob('*-verdict.json')); assert [p.name for p in vp]==['001-verdict.json','002-verdict.json','003-verdict.json'], vp; v=[json.loads(p.read_text()) for p in vp]; assert [x['task'] for x in v]==['T1','T2','T2'], v; assert [x['verdict'] for x in v]==['PASS','FAIL','PASS'], v; assert [len(x['criteria']) for x in v]==[3,3,3], v; assert [sum(1 for c in x['criteria'] if not c['met']) for x in v]==[0,1,0], v; assert [sum(1 for c in x['criteria'] if str(c['evidence']).strip()) for x in v]==[3,3,3], v; assert [len(x['findings']) for x in v]==[0,2,0], v; assert all(isinstance(s,str) and s.strip() for x in v for s in x['findings']), v; m=dict((json.loads(l)['iteration'],json.loads(l)['task']) for l in (r/'iterations.jsonl').read_text().splitlines() if l.strip()); assert [(k,m[k]) for k in sorted(m)][:3]==[(1,'T1'),(2,'T2'),(3,'T2')], m; assert all(m.get(int(p.name[:3]))==json.loads(p.read_text())['task'] for p in vp), m; r2=write_incoherent_fixture_run(d/'b'); vp2=sorted((r2/'reports').glob('*-verdict.json')); v2=[json.loads(p.read_text()) for p in vp2]; bad=[x for x in v2 if x['verdict']=='PASS' and any(not c['met'] for c in x['criteria'])]; assert len(bad)==1, v2; assert not bad[0]['criteria'][1]['met'], bad; assert all(str(c['evidence']).strip() for x in v2 for c in x['criteria']), v2; assert all(not x['findings'] for x in v2 if x['verdict']=='PASS'), v2; m2=dict((json.loads(l)['iteration'],json.loads(l)['task']) for l in (r2/'iterations.jsonl').read_text().splitlines() if l.strip()); assert all(m2.get(int(p.name[:3]))==json.loads(p.read_text())['task'] for p in vp2), m2; print('review fixtures ok')\" && uv run pytest -q",
@@ -40,7 +40,7 @@
       "acceptance": [
         "load_run returns a Run whose verdicts attribute holds one entry per reports/NNN-verdict.json, ordered by file name.",
         "Each entry exposes iteration (the integer parsed from the NNN in the file name), task, verdict, criteria (the list of dicts as written, each carrying criterion, met and evidence) and findings.",
-        "A run directory with no reports/ directory, or an empty one, loads with verdicts == [] and with its sessions and iterations exactly as before — a missing reports/ is not malformed input.",
+        "A run directory with no reports/ directory, or an empty one, loads with verdicts == [] and with its sessions and iterations exactly as before \u2014 a missing reports/ is not malformed input.",
         "A verdict file that is not valid JSON, or that is missing any of task, verdict, criteria or findings, raises loader.RunError naming the offending file. It is never skipped.",
         "reports/NNN-proposal.json is not read.",
         "New tests live in a new test file under tests/; no existing tests/test_*.py file is modified, the whole suite passes, and summary, signals and compare produce the output they produce today."
@@ -65,7 +65,7 @@
         "runstat review <run-dir> prints one row per verdict carrying the iteration, the task, the verdict, how many criteria were ruled on, how many were ruled met false, the number of findings, and the count of criteria with non-empty evidence over the total. Column layout is the implementation's choice.",
         "It then prints a totals block of key: value lines whose values on the fixture run 20260817-120000 are exactly: reviews 3, passed 2, failed 1, criteria ruled 9, criteria not met 1, findings 2, evidence cited 9/9.",
         "A run directory that is valid but has no verdicts exits 1, with a message on stderr and empty stdout.",
-        "A missing run directory exits 2, and so does a malformed verdict — with the offending file named on stderr, stdout empty and no traceback.",
+        "A missing run directory exits 2, and so does a malformed verdict \u2014 with the offending file named on stderr, stdout empty and no traceback.",
         "The command reuses load_run and the existing RunError / EmptyRunError contract rather than reading the run directory a second way.",
         "Both python -m runstat review and the runstat console script work, and summary, signals and compare are unchanged."
       ],
@@ -77,7 +77,7 @@
     {
       "id": "T4",
       "title": "Print every finding verbatim, grouped by iteration",
-      "goal": "The findings are the point of this command — a count of them is not, because the whole question the brief asks is what the reviewers actually caught. This adds the section that prints each finding's text under the iteration it came from, and the line that says plainly when a run recorded no findings at all, which is the result a reader most needs to not miss.",
+      "goal": "The findings are the point of this command \u2014 a count of them is not, because the whole question the brief asks is what the reviewers actually caught. This adds the section that prints each finding's text under the iteration it came from, and the line that says plainly when a run recorded no findings at all, which is the result a reader most needs to not miss.",
       "files": [
         "src/runstat/review.py"
       ],
@@ -86,7 +86,7 @@
       ],
       "acceptance": [
         "After the totals block, every finding in the run is printed verbatim, grouped by the iteration it came from.",
-        "Each group sits under a heading line containing the word 'iteration', the iteration number, and the task id — for the fixture run, a heading naming iteration 2 and task T2.",
+        "Each group sits under a heading line containing the word 'iteration', the iteration number, and the task id \u2014 for the fixture run, a heading naming iteration 2 and task T2.",
         "When the run recorded no findings at all, the command prints a line containing the words 'no findings'; that line does not appear when there are findings.",
         "The table and the totals block are unchanged, and the exit-code contract is unchanged."
       ],
@@ -98,7 +98,7 @@
     {
       "id": "T5",
       "title": "Report the five coherence checks",
-      "goal": "This is the part of the brief worth more than the summary: a verdict that passes a task while marking one of its own criteria not met is self-contradictory, and nothing checks for that today. Each check is a statement about one verdict that is either true or false; every violation is reported with its iteration and task. Violations are reported, never enforced — this command describes a finished run, and a run cannot be un-run.",
+      "goal": "This is the part of the brief worth more than the summary: a verdict that passes a task while marking one of its own criteria not met is self-contradictory, and nothing checks for that today. Each check is a statement about one verdict that is either true or false; every violation is reported with its iteration and task. Violations are reported, never enforced \u2014 this command describes a finished run, and a run cannot be un-run.",
       "files": [
         "src/runstat/review.py"
       ],
@@ -110,7 +110,7 @@
         "Every violation is reported on its own line containing the literal text 'check <n>' with the brief's number, plus the iteration and the task id.",
         "The totals block gains a coherence line: its value is 'ok' when there are no violations, and something other than 'ok' when there are.",
         "The fixture run 20260817-120000 reports coherence: ok, and the incoherent fixture reports exactly one violation, naming check 1, its iteration and its task.",
-        "Violations never change the exit code — a run with violations still exits 0.",
+        "Violations never change the exit code \u2014 a run with violations still exits 0.",
         "A verdict for an iteration that has no record in iterations.jsonl is not a check 5 violation."
       ],
       "verify": "uv run python -c \"import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_incoherent_fixture_run, write_review_fixture_run; R=lambda p: subprocess.run([sys.executable,'-m','runstat','review',str(p)],capture_output=True,text=True); cv=lambda o: next((l.split(':',1)[1].strip().lower() for l in o.splitlines() if l.split(':',1)[0].strip().lower()=='coherence'), None); T=pathlib.Path(tempfile.mkdtemp()); ok=R(write_review_fixture_run(T)); assert ok.returncode==0, ok.stderr; assert cv(ok.stdout)=='ok', ok.stdout; inc=R(write_incoherent_fixture_run(T/'inc')); assert inc.returncode==0, inc.stderr; assert cv(inc.stdout) not in (None,'ok'), inc.stdout; h1=[l for l in inc.stdout.splitlines() if 'check 1' in l.lower()]; assert len(h1)==1 and 'T1' in h1[0] and '1' in h1[0].replace('T1',''), inc.stdout; d=T/'five'/'20260817-140000'; (d/'reports').mkdir(parents=True); C=lambda met,ev: {'criterion':'c','met':met,'evidence':ev}; V=[{'task':'T1','verdict':'PASS','criteria':[C(True,'e'),C(False,'e')],'findings':[],'notes':'n'},{'task':'T2','verdict':'PASS','criteria':[C(True,'e')],'findings':['a defect nobody blocked on'],'notes':'n'},{'task':'T3','verdict':'FAIL','criteria':[C(True,'e')],'findings':[],'notes':'n'},{'task':'T4','verdict':'PASS','criteria':[C(True,'')],'findings':[],'notes':'n'},{'task':'T9','verdict':'PASS','criteria':[C(True,'e')],'findings':[],'notes':'n'}]; [(d/'reports'/('%03d-verdict.json'%i)).write_text(json.dumps(v)) for i,v in enumerate(V,1)]; (d/'iterations.jsonl').write_text(''.join(json.dumps({'iteration':i,'task':('T%d'%i),'outcome':'done','attempts':0,'tasks_done':i,'tasks_total':5})+chr(10) for i in range(1,6))); a=R(d); assert a.returncode==0, a.stderr; hit=lambda n: [l for l in a.stdout.splitlines() if ('check %d'%n) in l.lower()]; assert all(hit(n) for n in (1,2,3,4,5)), a.stdout; assert all(any(('T%d'%n) in l for l in hit(n)) for n in (1,2,3,4)), a.stdout; assert any(('T9' in l or 'T5' in l) and '5' in l for l in hit(5)), a.stdout; assert cv(a.stdout) not in (None,'ok'), a.stdout; print('coherence checks ok')\"",
@@ -121,7 +121,7 @@
     {
       "id": "T6",
       "title": "Document review and the reports/ directory in both docs",
-      "goal": "Both documents describe the telemetry contract and the commands, and a reader trusts them — so an example that has drifted from real output is worse than none. This task adds the review command and the reports/ directory to each, and its gate replays the tool and requires every printed line of the documented transcript to appear verbatim in what the tool actually produces. It also proves the existing commands never moved.",
+      "goal": "Both documents describe the telemetry contract and the commands, and a reader trusts them \u2014 so an example that has drifted from real output is worse than none. This task adds the review command and the reports/ directory to each, and its gate replays the tool and requires every printed line of the documented transcript to appear verbatim in what the tool actually produces. It also proves the existing commands never moved.",
       "files": [
         "docs/runstat-cli.md",
         "docs/runstat.md"
@@ -130,7 +130,7 @@
         "T5"
       ],
       "acceptance": [
-        "docs/runstat-cli.md gains a runstat review <run-dir> section containing a shell transcript block whose every output line is exactly what the tool prints for the fixture run 20260817-120000 — the table, all eight totals lines including coherence, and the findings.",
+        "docs/runstat-cli.md gains a runstat review <run-dir> section containing a shell transcript block whose every output line is exactly what the tool prints for the fixture run 20260817-120000 \u2014 the table, all eight totals lines including coherence, and the findings.",
         "docs/runstat-cli.md documents reports/NNN-verdict.json in its input layout, and its exit-code table covers the review command's exit 1: a valid run directory with no verdicts.",
         "docs/runstat.md documents the reports/ directory field by field (task, verdict, criteria with criterion, met and evidence, findings, notes), states that a missing reports/ is a run with no verdicts rather than malformed input while a malformed verdict is a hard failure, and describes each of the five coherence checks.",
         "Both documents say that reports/NNN-proposal.json is deliberately not read.",
@@ -142,5 +142,6 @@
       "attempts": 0,
       "notes": ""
     }
-  ]
+  ],
+  "branch": "004-runstat-review"
 }

@@ -102,6 +102,44 @@ mobile reading, never edited as the source of truth"
 
 Render on demand without a run: `loop/render-plan.sh`.
 
+## Merging, and who owns `loop/state.json`
+
+`loop/state.json` and `loop/journals/<plan-id>.md` belong to the **branch**. One
+rule is load-bearing:
+
+> **Merging main into a branch must preserve the branch's state.**
+
+The reverse direction does not matter. Whatever `state.json` ends up on `main`
+is just whatever the last squash left there — nothing reads it, and a branch
+that inherits it resets it (below).
+
+This is deliberately *not* enforced by a merge driver. `merge=ours` looks like
+the answer and is a trap: `ours` means *the side doing the merging*, so it
+preserves the branch when you merge main in, and **discards** the branch's state
+when you squash the branch into main. Correct in one direction, silently
+destructive in the other. (`merge=union` is safe by comparison — it is built
+into git, needs no per-clone config, and is what `loop/journals/` uses.)
+
+So a conflict here is left loud and resolved by hand. On the branch:
+
+```bash
+git checkout --ours loop/state.json   # --ours == this branch, during a merge
+loop/render-plan.sh                   # plan.md is derived — regenerate, never merge
+git add loop/state.json loop/plan.md
+```
+
+### A branch that inherits foreign state
+
+A branch cut from `main` picks up whatever `state.json` was last squashed there
+— another plan, belonging to another branch. The driver stamps every plan with
+the branch that owns it and checks on startup:
+
+- **with a brief** — resets and plans fresh, saying so.
+- **without a brief** — refuses, naming the owning branch and plan, rather than
+  resuming someone else's work.
+
+A resumed run re-stamps the current branch, so renaming a branch self-heals.
+
 ## Evidence
 
 ```
