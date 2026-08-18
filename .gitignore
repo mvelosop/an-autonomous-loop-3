@@ -10,3 +10,6 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.egg-info/
+
+# Runtime lock: one loop per working tree. Machine-specific (holds a pid).
+loop/.running

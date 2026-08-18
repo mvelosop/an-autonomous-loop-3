@@ -235,6 +235,40 @@ print_signals() {
   say "  estimated spend:       \$$(printf '%.2f' "$(sig_spend)") (estimate, not a bill)"
 }
 
+# --------------------------------------------------------------- lock -------
+#
+# Parallel loops are supported, one per git WORKTREE. Git already guarantees
+# those are on different branches — it refuses to check one branch out twice —
+# so the only thing left to prevent is two loops in the SAME working tree,
+# where they would share loop/state.json and, far worse, loop/proposal.json:
+# one loop's review session reading the other loop's proposal is exactly the
+# stale-handoff failure the driver clears per-iteration to avoid.
+#
+# A lock that can brick the loop is worse than no lock, so it records a pid and
+# a dead one is cleared rather than obeyed.
+LOCK="$LOOP_DIR/.running"
+
+acquire_lock() {
+  if [[ -f "$LOCK" ]]; then
+    local pid other started
+    pid="$(jq -r '.pid // ""' "$LOCK" 2>/dev/null)"
+    other="$(jq -r '.branch // "?"' "$LOCK" 2>/dev/null)"
+    started="$(jq -r '.started // "?"' "$LOCK" 2>/dev/null)"
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      die "a loop is already running in this working tree.
+  pid $pid · branch '$other' · started $started
+  Two loops in one tree share loop/state.json and loop/proposal.json, so one
+  can mark a task done on the other's evidence. To run in parallel, give each
+  its own worktree:
+    git worktree add ../<dir> <branch>"
+    fi
+    warn "clearing a stale lock (pid ${pid:-unknown} is gone)"
+  fi
+  jq -nc --arg p "$$" --arg b "$BRANCH" --arg t "$(ts)" --arg r "$RUN_PATH" \
+    '{pid: $p, branch: $b, started: $t, run: $r}' >"$LOCK"
+  trap 'rm -f "$LOCK"' EXIT
+}
+
 # ------------------------------------------------------------- preflight ----
 
 preflight() {
@@ -288,6 +322,7 @@ preflight() {
 # ------------------------------------------------------------------- run ----
 
 mkdir -p "$SESSIONS"
+acquire_lock
 : >"$RUN_DIR/loop.log"
 : >"$ITERATIONS"
 preflight

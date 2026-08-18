@@ -102,6 +102,36 @@ mobile reading, never edited as the source of truth"
 
 Render on demand without a run: `loop/render-plan.sh`.
 
+## Running loops in parallel
+
+**One loop per git worktree.** Not per branch, and definitely not per
+directory-you-happen-to-be-in:
+
+```bash
+git worktree add ../loop-002 002-some-plan
+cd ../loop-002 && loop/run.sh docs/briefs/000N-....md
+```
+
+Git refuses to check the same branch out in two worktrees, so separate
+worktrees are necessarily separate branches. That is what makes the rest work:
+each has its own `loop/state.json`, its own `loop/journals/<plan-id>.md`, and
+its own `loop/runs/<branch>/<timestamp>/`, so nothing collides while running
+and nothing conflicts at merge time.
+
+**Two loops in one working tree is the case to prevent.** They would share
+`loop/state.json`, and — much worse — `loop/proposal.json` and
+`loop/verdict.json`, so one loop's review session can read the *other* loop's
+proposal and pass a task on another task's evidence. That is the stale-handoff
+failure the driver clears per iteration to avoid, reappearing across runs where
+nothing clears it.
+
+So the driver takes a lock. `loop/.running` holds the pid, branch, start time
+and run path; a second loop in the same tree refuses and prints the
+`git worktree add` remedy. The lock records a **pid** rather than merely
+existing, because a lock that a crashed run can leave behind forever is worse
+than no lock — a dead pid is cleared with a warning, not obeyed. It is
+gitignored: it is machine-specific runtime state, not a record.
+
 ## Merging, and who owns `loop/state.json`
 
 `loop/state.json` and `loop/journals/<plan-id>.md` belong to the **branch**. One
