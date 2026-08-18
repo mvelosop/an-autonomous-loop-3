@@ -305,22 +305,31 @@ open_journal() {
 }
 
 # A branch cut from main inherits whatever state.json the last squash left
-# there. That state belongs to another branch's plan and must never be resumed
-# as if it were this one's. Reset it when a brief says "start a plan"; refuse
-# loudly otherwise, because a stale branch stamp must not silently destroy a
-# live plan.
+# there — another branch's plan. It must never be resumed as if it were this
+# branch's work.
+#
+# The discriminator is the BRIEF, not the branch. A branch name cannot tell an
+# inherited plan from your own plan on a branch you renamed, and guessing wrong
+# in the destructive direction loses a run. The brief names which plan you are
+# asking for, so it answers the question directly.
 if [[ -f "$STATE" ]]; then
+  STATE_BRIEF="$(state_get '.brief // ""')"
   STATE_BRANCH="$(state_get '.branch // ""')"
-  if [[ -n "$STATE_BRANCH" && "$STATE_BRANCH" != "$BRANCH" ]]; then
-    if [[ -n "$BRIEF" ]]; then
-      say "state.json belongs to branch '$STATE_BRANCH'; you are on '$BRANCH'"
-      say "  a brief was given — resetting and planning fresh"
+  if [[ -n "$BRIEF" ]]; then
+    if [[ -n "$STATE_BRIEF" && "$STATE_BRIEF" != "$BRIEF" ]]; then
+      say "state.json holds plan $(state_get .run_id) for '$STATE_BRIEF'"
+      say "  you asked for '$BRIEF' — resetting and planning fresh"
       rm -f "$STATE" "$LOOP_DIR/plan.md"
-    else
-      die "state.json belongs to branch '$STATE_BRANCH' (plan $(state_get .run_id)), but you are on '$BRANCH'.
-  This is another branch's plan and will not be resumed here.
-  Pass a brief to start a new plan, or check out '$STATE_BRANCH' to resume that one."
     fi
+    # Same brief: this is the plan you asked for. Resume it whatever branch it
+    # was stamped on — that is how a renamed branch recovers, without the
+    # operator having to reach for the one flag that would destroy the run.
+  elif [[ -n "$STATE_BRANCH" && "$STATE_BRANCH" != "$BRANCH" ]]; then
+    die "state.json holds plan $(state_get .run_id), stamped on branch '$STATE_BRANCH'; you are on '$BRANCH'.
+  With no brief there is no way to tell an inherited plan from your own on a
+  renamed branch, and the two want opposite things. Say which you mean:
+    resume it            loop/run.sh $STATE_BRIEF
+    start a new plan     loop/run.sh docs/briefs/<other>.md"
   fi
 fi
 
@@ -346,7 +355,11 @@ if [[ ! -f "$STATE" ]]; then
   bad_dep="$(state_get '[.tasks[].id] as $ids | [.tasks[]|.depends_on[]?|select(($ids|index(.))==null)] | length')"
   [[ "$bad_dep" -eq 0 ]] || die "$bad_dep dependency reference(s) name a task that does not exist"
 
-  state_edit --arg b "$BRANCH" '.branch = $b'
+  # The driver stamps both, rather than trusting the plan session to record
+  # them: which branch and which brief a plan belongs to are facts the driver
+  # already holds, and the brief is now what decides whether a later run
+  # resumes this plan or resets it.
+  state_edit --arg b "$BRANCH" --arg f "$BRIEF" '.branch = $b | .brief = $f'
   say "planned: $(state_get '"\(.run_id) — \(.tasks|length) tasks"')"
   open_journal
 

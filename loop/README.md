@@ -131,14 +131,25 @@ git add loop/state.json loop/plan.md
 ### A branch that inherits foreign state
 
 A branch cut from `main` picks up whatever `state.json` was last squashed there
-— another plan, belonging to another branch. The driver stamps every plan with
-the branch that owns it and checks on startup:
+— another plan, belonging to another branch.
 
-- **with a brief** — resets and plans fresh, saying so.
-- **without a brief** — refuses, naming the owning branch and plan, rather than
-  resuming someone else's work.
+**The discriminator is the brief, not the branch.** A branch name cannot
+separate *someone else's inherited plan* from *your plan on a branch you
+renamed*: the two look identical and want opposite things, and guessing wrong
+in the destructive direction loses a run. The brief names which plan you are
+asking for, so it answers the question directly. The driver stamps both the
+branch and the brief onto every plan it creates — facts it already holds, not
+ones an agent is trusted to record.
 
-A resumed run re-stamps the current branch, so renaming a branch self-heals.
+| You run | State holds | What happens |
+| --- | --- | --- |
+| `run.sh <brief>` | a plan for **the same** brief | **resumes it**, whatever branch it was stamped on — this is how a renamed branch recovers |
+| `run.sh <brief>` | a plan for a **different** brief | resets and plans fresh, saying so |
+| `run.sh` (no brief) | a plan stamped on **this** branch | resumes it |
+| `run.sh` (no brief) | a plan stamped on **another** branch | **refuses** — with no brief there is nothing to disambiguate with, and the two cases want opposite things. It prints both remedies. |
+
+Note the asymmetry: passing a brief is never destructive to *that* brief's
+plan, and the only destructive path is explicitly asking for a different plan.
 
 ## Evidence
 

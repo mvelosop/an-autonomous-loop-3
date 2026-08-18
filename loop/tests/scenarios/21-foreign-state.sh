@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
 # A branch cut from main inherits whatever loop/state.json the last squash left
-# there — another branch's plan, usually finished. Resuming it as if it were
-# this branch's work would be silent nonsense: the loop would report a complete
-# plan that has nothing to do with the brief in front of it.
+# there. Resuming that as if it were this branch's work is silent nonsense.
 #
-# The rule that replaced "state must survive a merge in both directions":
-#   - merging main INTO a branch preserves the branch's state (a merge concern,
-#     documented in loop/README, deliberately not mechanised — see there)
-#   - a run that FINDS foreign state resets it, or refuses
-#
-# Refusing without a brief matters as much as resetting with one: a stale branch
-# stamp must never silently destroy a live plan.
+# The discriminator is the BRIEF, not the branch. A branch name cannot separate
+# "someone else's inherited plan" from "my plan, on a branch I renamed" — the
+# two look identical and want opposite things, and guessing wrong in the
+# destructive direction loses a run. The brief says which plan you are asking
+# for, so it answers directly.
 . "$(dirname "$0")/../lib.sh"
 
 fixture_new
@@ -18,36 +14,40 @@ fixture_plan "$PLAN_TWO"
 fixture_stub_default
 fixture_run docs/briefs/0003-runstat-cli.md
 assert_exit 0
+[[ "$(fx_state '.branch')" == "$(git -C "$FX/repo" branch --show-current)" ]] \
+  && ok "state stamped with its owning branch" || bad "state not stamped"
 
-got="$(fx_state '.branch')"
-want="$(git -C "$FX/repo" branch --show-current)"
-[[ "$got" == "$want" ]] && ok "state stamped with its owning branch ($got)" \
-  || bad "state.branch: got '$got', want '$want'"
-
-note "pretending this state was inherited from another branch"
-( cd "$FX/repo" && jq '.branch = "some-other-branch"' loop/state.json > s.tmp && mv s.tmp loop/state.json )
-
-note "no brief given — must refuse rather than resume it"
-fixture_run
-assert_exit 1
-assert_log "belongs to branch 'some-other-branch'"
-assert_log "will not be resumed here"
-[[ -f "$FX/repo/loop/state.json" ]] && ok "refusing left the state untouched" \
-  || bad "refusing destroyed the state"
-
-note "brief given — explicit intent to start a plan, so reset"
-fixture_run docs/briefs/0003-runstat-cli.md
+note "── a DIFFERENT brief: a different plan, so reset ──"
+( cd "$FX/repo" && cp docs/briefs/0003-runstat-cli.md docs/briefs/0009-other.md )
+fixture_run docs/briefs/0009-other.md
 assert_exit 0
 assert_log "resetting and planning fresh"
-[[ "$(fx_state '.branch')" == "$want" ]] && ok "fresh plan is stamped with this branch" \
-  || bad "reset plan carries the wrong branch"
-
-# The log line above is printed BEFORE the reset, and a resume re-stamps the
-# branch too — so neither distinguishes "reset and re-planned" from "quietly
-# resumed the foreign plan". A plan session only runs when state is actually
-# gone, so that is the assertion that gates it.
 last="$(ls -dt "$FX/repo"/loop/runs/*/*/ | head -1)"
 ls "$last"sessions/*-plan.json >/dev/null 2>&1 \
-  && ok "a plan session ran — state was genuinely reset, not resumed" \
-  || bad "no plan session in the last run: the foreign state was resumed, not reset"
+  && ok "a plan session ran — genuinely reset, not resumed" \
+  || bad "no plan session: the old plan was resumed instead of reset"
+[[ "$(fx_state '.brief')" == "docs/briefs/0009-other.md" ]] \
+  && ok "state now holds the plan that was asked for" || bad "state brief did not change"
+
+note "── same brief, branch RENAMED: must resume, never destroy ──"
+( cd "$FX/repo" && jq '.branch = "the-old-branch-name"' loop/state.json > s.tmp && mv s.tmp loop/state.json )
+before="$(fx_state '.run_id')"
+fixture_run docs/briefs/0009-other.md
+assert_exit 0
+assert_no_log "resetting and planning fresh"
+[[ "$(fx_state '.run_id')" == "$before" ]] \
+  && ok "the renamed branch's plan survived ($before)" \
+  || bad "renaming the branch destroyed the plan"
+last="$(ls -dt "$FX/repo"/loop/runs/*/*/ | head -1)"
+ls "$last"sessions/*-plan.json >/dev/null 2>&1 \
+  && bad "it re-planned instead of resuming" \
+  || ok "no plan session — it resumed, as it should"
+
+note "── no brief, and the stamp disagrees: refuse, do not guess ──"
+( cd "$FX/repo" && jq '.branch = "the-old-branch-name"' loop/state.json > s.tmp && mv s.tmp loop/state.json )
+fixture_run
+assert_exit 1
+assert_log "no way to tell an inherited plan"
+[[ -f "$FX/repo/loop/state.json" ]] && ok "refusing left the state untouched" \
+  || bad "refusing destroyed the state"
 finish
