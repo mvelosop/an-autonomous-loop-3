@@ -1,0 +1,8 @@
+{
+  "task": "T5",
+  "outcome": "done",
+  "summary": "Added all five coherence checks to runstat review: a coherence: ok/<n> violation(s) line in the totals block, and a violations section listing each broken check by number, iteration and task.",
+  "files": ["src/runstat/review.py"],
+  "verified": "uv run python -c '...T5 verify script...' printed 'coherence checks ok'; uv run pytest -q passed 40/40.",
+  "notes": "compute_review(run) now also returns violations (a list of (check, iteration, task) tuples, or (check, iteration, task, expected_task) for check 5), computed from run.verdicts plus an iteration->task map built from run.iterations. format_review renders totals['coherence'] right after 'evidence cited', then -- after the existing findings section -- a new violations section: 'coherence checks: no violations' when the list is empty, otherwise one 'check <n>: iteration <i> task <t>' line per violation (check 5's line also names the task iterations.jsonl expected, since the test only requires either task string plus the digit 5 to appear). A verdict can trigger more than one check independently (e.g. a PASS with met:false AND empty evidence fires both check 1 and check 4) -- each fires and reports separately, per the brief's 'each is a statement... either true or false' framing. Checks never touch the exit code, matching the brief."
+}

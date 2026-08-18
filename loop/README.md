@@ -102,6 +102,85 @@ mobile reading, never edited as the source of truth"
 
 Render on demand without a run: `loop/render-plan.sh`.
 
+## Running loops in parallel
+
+**One loop per git worktree.** Not per branch, and definitely not per
+directory-you-happen-to-be-in:
+
+```bash
+git worktree add ../loop-002 002-some-plan
+cd ../loop-002 && loop/run.sh docs/briefs/000N-....md
+```
+
+Git refuses to check the same branch out in two worktrees, so separate
+worktrees are necessarily separate branches. That is what makes the rest work:
+each has its own `loop/state.json`, its own `loop/journals/<plan-id>.md`, and
+its own `loop/runs/<branch>/<timestamp>/`, so nothing collides while running
+and nothing conflicts at merge time.
+
+**Two loops in one working tree is the case to prevent.** They would share
+`loop/state.json`, and — much worse — `loop/proposal.json` and
+`loop/verdict.json`, so one loop's review session can read the *other* loop's
+proposal and pass a task on another task's evidence. That is the stale-handoff
+failure the driver clears per iteration to avoid, reappearing across runs where
+nothing clears it.
+
+So the driver takes a lock. `loop/.running` holds the pid, branch, start time
+and run path; a second loop in the same tree refuses and prints the
+`git worktree add` remedy. The lock records a **pid** rather than merely
+existing, because a lock that a crashed run can leave behind forever is worse
+than no lock — a dead pid is cleared with a warning, not obeyed. It is
+gitignored: it is machine-specific runtime state, not a record.
+
+## Merging, and who owns `loop/state.json`
+
+`loop/state.json` and `loop/journals/<plan-id>.md` belong to the **branch**. One
+rule is load-bearing:
+
+> **Merging main into a branch must preserve the branch's state.**
+
+The reverse direction does not matter. Whatever `state.json` ends up on `main`
+is just whatever the last squash left there — nothing reads it, and a branch
+that inherits it resets it (below).
+
+This is deliberately *not* enforced by a merge driver. `merge=ours` looks like
+the answer and is a trap: `ours` means *the side doing the merging*, so it
+preserves the branch when you merge main in, and **discards** the branch's state
+when you squash the branch into main. Correct in one direction, silently
+destructive in the other. (`merge=union` is safe by comparison — it is built
+into git, needs no per-clone config, and is what `loop/journals/` uses.)
+
+So a conflict here is left loud and resolved by hand. On the branch:
+
+```bash
+git checkout --ours loop/state.json   # --ours == this branch, during a merge
+loop/render-plan.sh                   # plan.md is derived — regenerate, never merge
+git add loop/state.json loop/plan.md
+```
+
+### A branch that inherits foreign state
+
+A branch cut from `main` picks up whatever `state.json` was last squashed there
+— another plan, belonging to another branch.
+
+**The discriminator is the brief, not the branch.** A branch name cannot
+separate *someone else's inherited plan* from *your plan on a branch you
+renamed*: the two look identical and want opposite things, and guessing wrong
+in the destructive direction loses a run. The brief names which plan you are
+asking for, so it answers the question directly. The driver stamps both the
+branch and the brief onto every plan it creates — facts it already holds, not
+ones an agent is trusted to record.
+
+| You run | State holds | What happens |
+| --- | --- | --- |
+| `run.sh <brief>` | a plan for **the same** brief | **resumes it**, whatever branch it was stamped on — this is how a renamed branch recovers |
+| `run.sh <brief>` | a plan for a **different** brief | resets and plans fresh, saying so |
+| `run.sh` (no brief) | a plan stamped on **this** branch | resumes it |
+| `run.sh` (no brief) | a plan stamped on **another** branch | **refuses** — with no brief there is nothing to disambiguate with, and the two cases want opposite things. It prints both remedies. |
+
+Note the asymmetry: passing a brief is never destructive to *that* brief's
+plan, and the only destructive path is explicitly asking for a different plan.
+
 ## Evidence
 
 ```

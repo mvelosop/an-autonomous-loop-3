@@ -1,0 +1,8 @@
+{
+  "task": "T1",
+  "outcome": "done",
+  "summary": "Added write_review_fixture_run and write_incoherent_fixture_run to tests/fixtures.py, materializing the brief's worked-example review run (three verdicts, one FAIL with two findings) and a second run with exactly one incoherent verdict.",
+  "files": ["tests/fixtures.py", "tests/test_review_fixtures.py"],
+  "verified": "Ran the task's verify command (fixture assertions on both builders) and `uv run pytest -q`: both passed, 34 tests total.",
+  "notes": "write_review_fixture_run(dest) returns dest/20260817-120000 with reports/001-003-verdict.json plus a matching iterations.jsonl (records 1,2,3 -> T1,T2,T2), mirroring the field set write_fixture_run already uses for iteration records. write_incoherent_fixture_run(dest) treats dest itself as the run directory (no extra run-id subdirectory, since the brief doesn't pin a name for this fixture) and writes a single 001-verdict.json (PASS, second of three criteria met:false, all evidence non-empty, findings []) plus a one-line iterations.jsonl for iteration 1/T1 so check 5 (task mismatch) does not also fire. Tests for both builders live in the new tests/test_review_fixtures.py; the existing tests/test_fixtures.py (which only covers write_fixture_run) was left untouched."
+}

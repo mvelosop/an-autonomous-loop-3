@@ -28,10 +28,24 @@ class Session:
 
 
 @dataclass(frozen=True)
+class Verdict:
+    iteration: int
+    task: str
+    verdict: str
+    criteria: list
+    findings: list
+    path: Path
+
+
+@dataclass(frozen=True)
 class Run:
     run_id: str
     sessions: list
     iterations: list
+    verdicts: list
+
+
+_VERDICT_REQUIRED_KEYS = ("task", "verdict", "criteria", "findings")
 
 
 def load_run(path: Path) -> Run:
@@ -73,4 +87,28 @@ def load_run(path: Path) -> Run:
                     f"malformed record in iterations.jsonl: {line!r}"
                 ) from exc
 
-    return Run(run_id=path.name, sessions=sessions, iterations=iterations)
+    verdicts = []
+    reports_dir = path / "reports"
+    if reports_dir.is_dir():
+        for verdict_path in sorted(reports_dir.glob("*-verdict.json")):
+            try:
+                data = json.loads(verdict_path.read_text())
+            except json.JSONDecodeError as exc:
+                raise RunError(f"malformed verdict file: {verdict_path.name}") from exc
+            missing = [key for key in _VERDICT_REQUIRED_KEYS if key not in data]
+            if missing:
+                raise RunError(
+                    f"malformed verdict file: {verdict_path.name} (missing {', '.join(missing)})"
+                )
+            verdicts.append(
+                Verdict(
+                    iteration=int(verdict_path.name.split("-", 1)[0]),
+                    task=data["task"],
+                    verdict=data["verdict"],
+                    criteria=data["criteria"],
+                    findings=data["findings"],
+                    path=verdict_path,
+                )
+            )
+
+    return Run(run_id=path.name, sessions=sessions, iterations=iterations, verdicts=verdicts)

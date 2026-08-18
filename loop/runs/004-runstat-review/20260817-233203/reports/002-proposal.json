@@ -1,0 +1,8 @@
+{
+  "task": "T2",
+  "outcome": "done",
+  "summary": "Extended load_run to also read reports/NNN-verdict.json into a new Verdict dataclass exposed as Run.verdicts, ordered by file name, with reports/NNN-proposal.json never read.",
+  "files": ["src/runstat/loader.py", "tests/test_loader_verdicts.py"],
+  "verified": "uv run python -c \"...verdicts...\" (loader verdicts ok) && uv run pytest -q (40 passed) && git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py (clean) all exited 0.",
+  "notes": "Verdict is a new frozen dataclass (iteration, task, verdict, criteria, findings, path); Run gained a verdicts field as its fourth constructor arg (verified it's the only construction call site, so no other breakage). Missing/empty reports/ loads verdicts == []. A verdict file is read only via glob('*-verdict.json'), so proposal.json siblings are ignored even if malformed. Malformed JSON or a missing required key (task/verdict/criteria/findings) raises RunError naming the file, mirroring the existing session-file error style. New tests live in tests/test_loader_verdicts.py (test_loader.py untouched, per plan)."
+}

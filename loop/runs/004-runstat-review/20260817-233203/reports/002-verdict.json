@@ -1,0 +1,14 @@
+{
+  "task": "T2",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "load_run returns a Run whose verdicts attribute holds one entry per reports/NNN-verdict.json, ordered by file name.", "met": true, "evidence": "src/runstat/loader.py:93 iterates sorted(reports_dir.glob('*-verdict.json')) and appends one Verdict per file, in that sorted order."},
+    {"criterion": "Each entry exposes iteration (the integer parsed from the NNN in the file name), task, verdict, criteria (the list of dicts as written, each carrying criterion, met and evidence) and findings.", "met": true, "evidence": "src/runstat/loader.py:103-112 builds Verdict(iteration=int(verdict_path.name.split('-',1)[0]), task=data['task'], verdict=data['verdict'], criteria=data['criteria'], findings=data['findings'], path=verdict_path)."},
+    {"criterion": "A run directory with no reports/ directory, or an empty one, loads with verdicts == [] and with its sessions and iterations exactly as before — a missing reports/ is not malformed input.", "met": true, "evidence": "src/runstat/loader.py:92 guards on reports_dir.is_dir(); tests/test_loader_verdicts.py test_plain_fixture_has_no_verdicts_and_is_unaffected and test_empty_reports_directory_is_not_malformed cover both cases and pass."},
+    {"criterion": "A verdict file that is not valid JSON, or that is missing any of task, verdict, criteria or findings, raises loader.RunError naming the offending file. It is never skipped.", "met": true, "evidence": "src/runstat/loader.py:94-102: JSONDecodeError re-raised as RunError naming verdict_path.name; missing keys checked against _VERDICT_REQUIRED_KEYS and also raise RunError naming the file. Covered by test_malformed_verdict_json_raises_naming_the_file and test_verdict_missing_required_key_raises_naming_the_file."},
+    {"criterion": "reports/NNN-proposal.json is not read.", "met": true, "evidence": "src/runstat/loader.py:93 globs only '*-verdict.json'; test_proposal_files_are_not_read plants an invalid 001-proposal.json alongside and load_run still succeeds."},
+    {"criterion": "New tests live in a new test file under tests/; no existing tests/test_*.py file is modified, the whole suite passes, and summary, signals and compare produce the output they produce today.", "met": true, "evidence": "New file tests/test_loader_verdicts.py; git status shows no existing tests/test_*.py modified; `uv run pytest -q` -> 40 passed; `git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py` exits clean, confirming summary/signals/compare output is unchanged."}
+  ],
+  "findings": [],
+  "notes": "Clean, minimal extension of load_run reusing the existing session/iteration pattern (glob, try/except JSONDecodeError -> RunError, append dataclass). No absolute paths introduced. Scope matches files touched (loader.py) plus the required new test file."
+}

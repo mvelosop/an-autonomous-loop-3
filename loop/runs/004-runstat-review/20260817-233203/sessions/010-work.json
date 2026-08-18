@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 106614,
+  "num_turns": 14,
+  "stop_reason": "end_turn",
+  "session_id": "f2dac5ff-3179-4a8a-b4ba-24fde2b62e0d",
+  "total_cost_usd": 0.6004497,
+  "usage": {
+    "input_tokens": 1522,
+    "cache_creation_input_tokens": 41300,
+    "cache_read_input_tokens": 629229,
+    "output_tokens": 10621,
+    "output_tokens_details": {
+      "thinking_tokens": 5208
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 41300,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 87,
+        "cache_read_input_tokens": 64912,
+        "cache_creation_input_tokens": 706,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 706
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 1522,
+      "outputTokens": 10621,
+      "cacheReadInputTokens": 629229,
+      "cacheCreationInputTokens": 41300,
+      "webSearchRequests": 0,
+      "costUSD": 0.6004497,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T5 is done: `runstat review` now reports all five coherence checks — a `coherence: ok`/`<n> violation(s)` totals line plus a violations section naming each broken check, iteration and task. Verify command and the full test suite (40 tests) both pass.",
+  "ttft_ms": 1890,
+  "ttft_stream_ms": 1290,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 109705,
+  "uuid": "eac5d8b4-c835-4ed5-b3b8-ca9a1172a812",
+  "phase": "work",
+  "iteration": 5
+}

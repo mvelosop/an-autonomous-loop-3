@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 97544,
+  "num_turns": 20,
+  "stop_reason": "end_turn",
+  "session_id": "358e380c-7f7f-4fd1-b150-fceba14a1f3a",
+  "total_cost_usd": 0.7065264,
+  "usage": {
+    "input_tokens": 38,
+    "cache_creation_input_tokens": 42661,
+    "cache_read_input_tokens": 1050988,
+    "output_tokens": 9010,
+    "output_tokens_details": {
+      "thinking_tokens": 3471
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 42661,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 99,
+        "cache_read_input_tokens": 66140,
+        "cache_creation_input_tokens": 839,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 839
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 38,
+      "outputTokens": 9010,
+      "cacheReadInputTokens": 1050988,
+      "cacheCreationInputTokens": 42661,
+      "webSearchRequests": 0,
+      "costUSD": 0.7065264,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T3 is done: the `runstat review` command now exists with the per-iteration table and totals block, exit codes 0/1/2 matching brief 0003's contract, all reusing the existing loader. Verify command passes and the full suite (40 tests) is green. Report written to `loop/proposal.json`.",
+  "ttft_ms": 1905,
+  "ttft_stream_ms": 1366,
+  "time_to_request_ms": 18,
+  "type": "result",
+  "duration_ms": 101020,
+  "uuid": "a19eff87-3b4d-4861-82bc-cf6fc1bc6fbe",
+  "phase": "work",
+  "iteration": 3
+}

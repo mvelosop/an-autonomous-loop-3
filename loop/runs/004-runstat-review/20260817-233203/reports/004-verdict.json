@@ -1,0 +1,28 @@
+{
+  "task": "T4",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "After the totals block, every finding in the run is printed verbatim, grouped by the iteration it came from.",
+      "met": true,
+      "evidence": "review.py:71-77 iterates review['rows'] in order and prints each row's finding_texts (verbatim strings from verdict.findings) under its own group; manual run of the fixture printed 'missing error handling on empty input' and 'off-by-one in the range check' verbatim under the iteration 2 heading."
+    },
+    {
+      "criterion": "Each group sits under a heading line containing the word 'iteration', the iteration number, and the task id — for the fixture run, a heading naming iteration 2 and task T2.",
+      "met": true,
+      "evidence": "review.py:75 `f\"iteration {row['iteration']} ({row['task']}):\"`; manual run printed 'iteration 2 (T2):' as required."
+    },
+    {
+      "criterion": "When the run recorded no findings at all, the command prints a line containing the words 'no findings'; that line does not appear when there are findings.",
+      "met": true,
+      "evidence": "review.py:69-70 appends 'no findings recorded' only when totals['findings']==0; the fixture run (2 findings) shows no such line, confirmed in the manual run's stdout above."
+    },
+    {
+      "criterion": "The table and the totals block are unchanged, and the exit-code contract is unchanged.",
+      "met": true,
+      "evidence": "git diff HEAD -- src/runstat/cli.py is empty; the table/totals rendering code in review.py:45-66 is untouched (only a new 'finding_texts' key was added to the row dict, which the table doesn't display); manual run and gate both exit 0 for the passing fixture."
+    }
+  ],
+  "findings": [],
+  "notes": "Gate (T4.log) passed with 'findings section ok'; full suite (uv run pytest -q) passes 40/40; scope is limited to src/runstat/review.py as declared in state.json's files list, with no absolute paths introduced."
+}

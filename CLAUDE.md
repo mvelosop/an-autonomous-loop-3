@@ -13,7 +13,7 @@ of them share memory. All continuity lives in files:
 
 | Path | Role |
 | --- | --- |
-| `loop/state.json` | **Single source of truth.** Tasks, acceptance criteria, verify commands, status, attempts. |
+| `loop/state.json` | **Single source of truth.** Tasks, acceptance criteria, verify commands, status, attempts. Belongs to the branch that planned it — see `loop/README.md`. |
 | `loop/journals/<plan-id>.md` | Append-only, **one per plan**. One entry per iteration. A view, never the source of truth. |
 | `loop/proposal.json` | Transient. The work session's report on the task it just did. |
 | `loop/verdict.json` | Transient. The review session's independent verdict. |

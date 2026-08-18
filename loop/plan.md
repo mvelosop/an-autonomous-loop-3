@@ -1,532 +1,156 @@
-# Plan — 0003-runstat-cli
+# Plan — 0004-runstat-review
 
 <!-- Rendered from loop/state.json by loop/render-plan.sh.
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is loop/state.json. -->
 
-**Status:** complete · **11/11 done** · iteration 11
+**Status:** complete · **6/6 done** · iteration 6
 
-**Brief:** `docs/briefs/0003-runstat-cli.md` · **Updated:** 2026-08-16T15:00:00Z
+**Brief:** `docs/briefs/0004-runstat-review.md` · **Updated:** 2026-08-17T23:01:25Z
 
 ## Progress
 
-- [x] **T1** — Scaffold the runstat package with uv, src layout and pytest
-- [x] **T2** — Write the fixture-run generator for the brief's worked example
-- [x] **T3** — Load a run directory strictly, failing loudly on malformed input
-- [x] **T4** — Compute the eight run-level signals as numbers, and format them separately
-- [x] **T5** — Build the CLI entry points and the summary command
-- [x] **T6** — Add the signals command
-- [x] **T7** — Add the compare command
-- [x] **T8** — Enforce the exit-code and error-output contract across all commands
-- [x] **T9** — Add the end-to-end worked-example acceptance test
-- [x] **T10** — Write the runstat usage doc, with every documented example matching real output
-- [x] **T11** — Document the telemetry contract and the cross-check against the driver
+- [x] **T1** — Add the review fixtures to tests/fixtures.py
+- [x] **T2** — Load reports/NNN-verdict.json in the existing loader
+- [x] **T3** — Add the runstat review command: per-iteration table, totals block, exit codes
+- [x] **T4** — Print every finding verbatim, grouped by iteration
+- [x] **T5** — Report the five coherence checks
+- [x] **T6** — Document review and the reports/ directory in both docs
 
 ## Tasks
 
-### T1 — Scaffold the runstat package with uv, src layout and pytest
+### T1 — Add the review fixtures to tests/fixtures.py
 
 `done` · depends on: none
 
-Nothing can be built until there is a project uv can install and a test suite pytest can collect. This task creates the packaging skeleton — pyproject.toml, src/runstat/, and one real test — so that every later task can be verified by running the installed package rather than by poking at loose files. It also fixes the names later tasks depend on: the distribution is runstat and the console script points at runstat.cli:main.
+Every gate for this brief replays the tool against a fixed run directory, so that directory has to exist before anything else can be verified. This task adds two builders beside the existing write_fixture_run: the brief's worked-example run (three verdicts, one of them a FAIL carrying two findings) and a second run holding exactly one incoherent verdict. Their numbers are the arbiter for every later task's verify command, which is why they are pinned here rather than left to the code that consumes them.
 
 **Acceptance**
 
-- pyproject.toml declares a project named runstat, requires-python >=3.13, an empty runtime dependency list, and pytest as the only dev dependency.
-- The build is configured so that `uv run python -c "import runstat"` imports the package from src/runstat/ — an src/ layout that is actually installed, not a path hack.
-- pyproject.toml declares the console script entry point `runstat = "runstat.cli:main"` (the module it names is written in a later task).
-- tests/test_smoke.py contains at least one test that passes, so `uv run pytest -q` exits 0 rather than 5 for an empty suite.
-- No runtime dependency outside the standard library is added anywhere.
+- tests/fixtures.py gains write_review_fixture_run(dest): it creates <dest>/20260817-120000/ containing reports/001-verdict.json, reports/002-verdict.json and reports/003-verdict.json, and returns the path to that run directory.
+- The three verdicts carry exactly the brief's worked-example numbers: tasks T1, T2, T2; verdicts PASS, FAIL, PASS; three criteria each; exactly one criterion ruled met false, in 002; every criterion carrying non-empty evidence; findings of length 0, 2 and 0, each finding a non-empty one-line string.
+- Each verdict file is a JSON object with the keys task, verdict, criteria, findings and notes, and every criteria entry has criterion, met and evidence.
+- That run directory also carries an iterations.jsonl whose records for iterations 1, 2 and 3 name tasks T1, T2 and T2, matching the three verdict files, so the run is coherent under all five of the brief's checks.
+- tests/fixtures.py gains write_incoherent_fixture_run(dest), which creates a run directory holding exactly one verdict: a PASS whose second criterion is met false, with every criterion carrying evidence, an empty findings list, and a task matching its iterations.jsonl record — so it violates the brief's coherence check 1 and nothing else.
+- Tests covering both builders live in a new test file under tests/; tests/fixtures.py is added to rather than rewritten, no existing tests/test_*.py file is modified, and nothing outside tests/ is changed.
 
 <details><summary>verify command</summary>
 
 ```sh
-uv run python -c "import runstat; print(runstat.__name__)" && uv run pytest -q
+uv run python -c "import json,pathlib,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_incoherent_fixture_run, write_review_fixture_run; d=pathlib.Path(tempfile.mkdtemp()); r=write_review_fixture_run(d); assert r.name=='20260817-120000', r; vp=sorted((r/'reports').glob('*-verdict.json')); assert [p.name for p in vp]==['001-verdict.json','002-verdict.json','003-verdict.json'], vp; v=[json.loads(p.read_text()) for p in vp]; assert [x['task'] for x in v]==['T1','T2','T2'], v; assert [x['verdict'] for x in v]==['PASS','FAIL','PASS'], v; assert [len(x['criteria']) for x in v]==[3,3,3], v; assert [sum(1 for c in x['criteria'] if not c['met']) for x in v]==[0,1,0], v; assert [sum(1 for c in x['criteria'] if str(c['evidence']).strip()) for x in v]==[3,3,3], v; assert [len(x['findings']) for x in v]==[0,2,0], v; assert all(isinstance(s,str) and s.strip() for x in v for s in x['findings']), v; m=dict((json.loads(l)['iteration'],json.loads(l)['task']) for l in (r/'iterations.jsonl').read_text().splitlines() if l.strip()); assert [(k,m[k]) for k in sorted(m)][:3]==[(1,'T1'),(2,'T2'),(3,'T2')], m; assert all(m.get(int(p.name[:3]))==json.loads(p.read_text())['task'] for p in vp), m; r2=write_incoherent_fixture_run(d/'b'); vp2=sorted((r2/'reports').glob('*-verdict.json')); v2=[json.loads(p.read_text()) for p in vp2]; bad=[x for x in v2 if x['verdict']=='PASS' and any(not c['met'] for c in x['criteria'])]; assert len(bad)==1, v2; assert not bad[0]['criteria'][1]['met'], bad; assert all(str(c['evidence']).strip() for x in v2 for c in x['criteria']), v2; assert all(not x['findings'] for x in v2 if x['verdict']=='PASS'), v2; m2=dict((json.loads(l)['iteration'],json.loads(l)['task']) for l in (r2/'iterations.jsonl').read_text().splitlines() if l.strip()); assert all(m2.get(int(p.name[:3]))==json.loads(p.read_text())['task'] for p in vp2), m2; print('review fixtures ok')" && uv run pytest -q
 ```
 
 </details>
 
-### T2 — Write the fixture-run generator for the brief's worked example
+### T2 — Load reports/NNN-verdict.json in the existing loader
 
 `done` · depends on: T1
 
-Every later task is verified against the worked example in docs/briefs/0003-runstat-cli.md: seven sessions and three iterations.jsonl records with exact costs, turns and durations. Building that run directory once, as a reusable test helper, is what keeps the tests hermetic (nothing ever reads a real loop/runs/ directory) and what lets each later verify command construct the same input. The numbers here are the arbiter for the whole run, so they must match the brief's table exactly.
+The verdicts are already on disk and nothing can read them. The brief requires reuse of the existing loader and error types rather than a second way to read a run, so this extends load_run instead of adding a parallel reader. It unblocks every later task: the review command, the findings section and the coherence checks all consume what this returns.
 
 **Acceptance**
 
-- tests/fixtures.py defines write_fixture_run(dest) taking a directory path, creating <dest>/20260814-101500/ with sessions/ and iterations.jsonl inside it, and returning the path to that run directory.
-- The seven session files are named 001-plan.json, 002-work.json, 003-review.json, 004-work.json, 005-review.json, 006-work.json, 007-review.json, so they sort by name into phase order.
-- Each session file is a JSON object carrying at least phase, iteration, total_cost_usd, num_turns, duration_ms, is_error and permission_denials, with the values from the brief's session table; all seven have is_error false and an empty permission_denials list.
-- iterations.jsonl holds exactly the brief's three records, one JSON object per line, in iteration order.
-- The helper writes only under the directory it is given and creates it if needed; a test in tests/test_fixtures.py exercises it via pytest's tmp_path and nothing else.
+- load_run returns a Run whose verdicts attribute holds one entry per reports/NNN-verdict.json, ordered by file name.
+- Each entry exposes iteration (the integer parsed from the NNN in the file name), task, verdict, criteria (the list of dicts as written, each carrying criterion, met and evidence) and findings.
+- A run directory with no reports/ directory, or an empty one, loads with verdicts == [] and with its sessions and iterations exactly as before — a missing reports/ is not malformed input.
+- A verdict file that is not valid JSON, or that is missing any of task, verdict, criteria or findings, raises loader.RunError naming the offending file. It is never skipped.
+- reports/NNN-proposal.json is not read.
+- New tests live in a new test file under tests/; no existing tests/test_*.py file is modified, the whole suite passes, and summary, signals and compare produce the output they produce today.
 
 <details><summary>verify command</summary>
 
 ```sh
-uv run python -c "
-import sys,json,pathlib,tempfile
-sys.path.insert(0,'tests')
-from fixtures import write_fixture_run
-r=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-assert r.name=='20260814-101500', r
-f=sorted((r/'sessions').glob('*.json'))
-assert [p.name for p in f]==['001-plan.json','002-work.json','003-review.json','004-work.json','005-review.json','006-work.json','007-review.json'], f
-o=[json.loads(p.read_text()) for p in f]
-assert [x['phase'] for x in o]==['plan','work','review','work','review','work','review']
-assert [x['iteration'] for x in o]==[0,1,1,2,2,3,3]
-assert [round(x['total_cost_usd'],2) for x in o]==[1.98,0.5,0.2,0.52,0.2,0.48,0.2]
-assert [x['num_turns'] for x in o]==[12,6,3,7,3,5,3]
-assert [x['duration_ms'] for x in o]==[141000,68000,24000,72000,24000,64000,24000]
-assert all(x['is_error'] is False and x['permission_denials']==[] for x in o), o
-rec=[json.loads(l) for l in (r/'iterations.jsonl').read_text().splitlines() if l.strip()]
-assert [(x['iteration'],x['task'],x['outcome'],x['attempts'],x['tasks_done'],x['tasks_total']) for x in rec]==[(1,'T1','done',0,1,8),(2,'T2','gate_fail',1,1,8),(3,'T2','done',1,2,8)], rec
-print('fixture ok')
-"
+uv run python -c "import pathlib,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_fixture_run, write_review_fixture_run; from runstat.loader import load_run; d=pathlib.Path(tempfile.mkdtemp()); run=load_run(write_review_fixture_run(d)); assert [v.iteration for v in run.verdicts]==[1,2,3], run.verdicts; assert [v.task for v in run.verdicts]==['T1','T2','T2'], run.verdicts; assert [v.verdict for v in run.verdicts]==['PASS','FAIL','PASS'], run.verdicts; assert [len(v.criteria) for v in run.verdicts]==[3,3,3], run.verdicts; assert [len(v.findings) for v in run.verdicts]==[0,2,0], run.verdicts; assert all(set(('criterion','met','evidence'))<=set(c) for v in run.verdicts for c in v.criteria), run.verdicts; plain=load_run(write_fixture_run(d/'plain')); assert list(plain.verdicts)==[], plain.verdicts; assert len(plain.sessions)==7 and len(plain.iterations)==3, plain; print('loader verdicts ok')" && uv run pytest -q && git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py
 ```
 
 </details>
 
-### T3 — Load a run directory strictly, failing loudly on malformed input
+### T3 — Add the runstat review command: per-iteration table, totals block, exit codes
 
-`done` · depends on: T1, T2
+`done` · depends on: T2
 
-Both reports read the same two things off disk: sessions/*.json and iterations.jsonl. Putting that in one loader gives the commands a single definition of what a run is, and — more importantly — a single place where a malformed file becomes a hard error instead of a silent skip. The brief is explicit that undercounting silently is worse than refusing loudly, so the loader raises with the offending path rather than dropping a record.
+This is the command the brief is about: it turns the verdicts the loader now reads into the per-iteration table and the totals block, and it inherits brief 0003's exit-code contract exactly. Two parts of the output land in later tasks and are deliberately not required here: the findings text (T4) and the coherence line and violations (T5). A reviewer should not fail this task for their absence.
 
 **Acceptance**
 
-- runstat.loader.load_run(path) returns an object exposing run_id (the run directory's own name), sessions (session records sorted by file name) and iterations (the iterations.jsonl records as dicts, in file order).
-- Each session record exposes phase, iteration, total_cost_usd, num_turns, duration_ms, is_error, permission_denials and the path it was read from.
-- runstat.loader.RunError is raised when the run directory does not exist, when any sessions/*.json file is not valid JSON, and when any non-blank line of iterations.jsonl is not valid JSON.
-- The RunError message names the offending file — the session file's name for a bad session, iterations.jsonl for a bad record line.
-- A run directory that exists but has no session files loads successfully with an empty sessions list; deciding what that means is the CLI's job, not the loader's. A missing iterations.jsonl is treated as zero records.
-- Tests cover the good fixture and each malformed case, writing only inside tmp_path.
+- runstat review <run-dir> prints one row per verdict carrying the iteration, the task, the verdict, how many criteria were ruled on, how many were ruled met false, the number of findings, and the count of criteria with non-empty evidence over the total. Column layout is the implementation's choice.
+- It then prints a totals block of key: value lines whose values on the fixture run 20260817-120000 are exactly: reviews 3, passed 2, failed 1, criteria ruled 9, criteria not met 1, findings 2, evidence cited 9/9.
+- A run directory that is valid but has no verdicts exits 1, with a message on stderr and empty stdout.
+- A missing run directory exits 2, and so does a malformed verdict — with the offending file named on stderr, stdout empty and no traceback.
+- The command reuses load_run and the existing RunError / EmptyRunError contract rather than reading the run directory a second way.
+- Both python -m runstat review and the runstat console script work, and summary, signals and compare are unchanged.
 
 <details><summary>verify command</summary>
 
 ```sh
-uv run python -c "
-import sys,pathlib,tempfile
-sys.path.insert(0,'tests')
-from fixtures import write_fixture_run
-from runstat.loader import load_run, RunError
-r=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-run=load_run(r)
-assert len(run.sessions)==7 and len(run.iterations)==3, (len(run.sessions),len(run.iterations))
-assert [s.phase for s in run.sessions]==['plan','work','review','work','review','work','review']
-assert [s.iteration for s in run.sessions]==[0,1,1,2,2,3,3]
-assert [s.num_turns for s in run.sessions]==[12,6,3,7,3,5,3]
-assert [s.duration_ms for s in run.sessions]==[141000,68000,24000,72000,24000,64000,24000]
-assert round(sum(s.total_cost_usd for s in run.sessions),2)==4.08
-assert all(s.is_error is False and s.permission_denials==[] for s in run.sessions)
-assert [i['outcome'] for i in run.iterations]==['done','gate_fail','done']
-assert run.iterations[2]['tasks_done']==2 and run.iterations[2]['tasks_total']==8
-b=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-p=sorted((b/'sessions').glob('*.json'))[2]
-p.write_text('{ not json')
-try:
-    load_run(b)
-except RunError as e:
-    assert p.name in str(e), e
-else:
-    raise AssertionError('malformed session file did not raise RunError')
-c=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-j=c/'iterations.jsonl'
-j.write_text(j.read_text()+'oops'+chr(10))
-try:
-    load_run(c)
-except RunError as e:
-    assert 'iterations.jsonl' in str(e), e
-else:
-    raise AssertionError('malformed iterations.jsonl line did not raise RunError')
-try:
-    load_run(pathlib.Path(tempfile.mkdtemp())/'nope')
-except RunError:
-    pass
-else:
-    raise AssertionError('missing run directory did not raise RunError')
-print('loader ok')
-"
+uv run python -c "import pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_fixture_run, write_review_fixture_run; R=lambda p: subprocess.run([sys.executable,'-m','runstat','review',str(p)],capture_output=True,text=True); d=pathlib.Path(tempfile.mkdtemp()); p=R(write_review_fixture_run(d)); assert p.returncode==0, p.stderr; L=p.stdout.splitlines(); val=lambda k: next((l.split(':',1)[1].strip() for l in L if l.split(':',1)[0].strip().lower()==k), None); exp={'reviews':'3','passed':'2','failed':'1','criteria ruled':'9','criteria not met':'1','findings':'2','evidence cited':'9/9'}; assert all(val(k)==w for k,w in exp.items()), (p.stdout, [(k,val(k),w) for k,w in exp.items() if val(k)!=w]); assert any('T1' in l and 'PASS' in l for l in L), p.stdout; assert any('T2' in l and 'FAIL' in l for l in L), p.stdout; assert sum(1 for l in L if 'PASS' in l or 'FAIL' in l)>=3, p.stdout; q=R(write_fixture_run(d/'plain')); assert (q.returncode,q.stdout)==(1,''), q; assert q.stderr.strip() and 'Traceback' not in q.stderr, q.stderr; n=R(d/'nope'); assert (n.returncode,n.stdout)==(2,''), n; assert n.stderr.strip() and 'Traceback' not in n.stderr, n.stderr; b=write_review_fixture_run(d/'bad'); (b/'reports'/'002-verdict.json').write_text('{ not json'); m=R(b); assert (m.returncode,m.stdout)==(2,''), m; assert '002-verdict.json' in m.stderr and 'Traceback' not in m.stderr, m.stderr; b2=write_review_fixture_run(d/'bad2'); (b2/'reports'/'003-verdict.json').write_text('{\"task\": \"T2\", \"verdict\": \"PASS\"}'); k=R(b2); assert (k.returncode,k.stdout)==(2,''), k; assert '003-verdict.json' in k.stderr and 'Traceback' not in k.stderr, k.stderr; print('review command ok')"
 ```
 
 </details>
 
-### T4 — Compute the eight run-level signals as numbers, and format them separately
+### T4 — Print every finding verbatim, grouped by iteration
 
 `done` · depends on: T3
 
-Write runstat.signals.compute_signals(run), returning the eight signals as NUMBERS (ints, floats, and None for an undefined ratio) rather than display strings, plus format_signals(signals) returning the ordered (label, display) pairs the CLI prints. Keeping computation numeric is what lets compare do arithmetic on deltas instead of parsing its own output back into numbers; keeping formatting in one function is what keeps the printed values identical everywhere they appear.
+The findings are the point of this command — a count of them is not, because the whole question the brief asks is what the reviewers actually caught. This adds the section that prints each finding's text under the iteration it came from, and the line that says plainly when a run recorded no findings at all, which is the result a reader most needs to not miss.
 
 **Acceptance**
 
-- compute_signals returns a mapping with numeric keys: iterations, tasks_done, tasks_total, iterations_per_closed, gate_failures, review_rejections, attempts_burned, no_progress_streak, estimated_spend
-- No value returned by compute_signals is a string
-- iterations_per_closed is None when no task has closed, and a float otherwise
-- attempts_burned counts records whose outcome is not 'done' — never the sum of the attempts field, which is a cumulative per-task counter
-- no_progress_streak counts trailing records that did not increase tasks_done, and is 0 for an empty run
-- format_signals returns exactly eight (label, display) pairs in the brief's order
-- format_signals renders the fixture as 3, 2/8, 1.50, 1, 0, 1, 0, $4.08
-- format_signals renders an undefined ratio as 'n/a' and money with two decimals and a leading $
+- After the totals block, every finding in the run is printed verbatim, grouped by the iteration it came from.
+- Each group sits under a heading line containing the word 'iteration', the iteration number, and the task id — for the fixture run, a heading naming iteration 2 and task T2.
+- When the run recorded no findings at all, the command prints a line containing the words 'no findings'; that line does not appear when there are findings.
+- The table and the totals block are unchanged, and the exit-code contract is unchanged.
 
 <details><summary>verify command</summary>
 
 ```sh
-uv run python - <<'PY'
-import sys, pathlib, tempfile
-sys.path.insert(0, 'tests')
-from fixtures import write_fixture_run
-from runstat.loader import load_run
-from runstat.signals import compute_signals, format_signals
-
-r = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-s = compute_signals(load_run(r))
-assert s['iterations'] == 3, s
-assert s['tasks_done'] == 2 and s['tasks_total'] == 8, s
-assert abs(s['iterations_per_closed'] - 1.5) < 1e-9, s
-assert s['gate_failures'] == 1 and s['review_rejections'] == 0, s
-assert s['attempts_burned'] == 1 and s['no_progress_streak'] == 0, s
-assert abs(s['estimated_spend'] - 4.08) < 1e-9, s
-assert not any(isinstance(v, str) for v in s.values()), s
-
-assert format_signals(s) == [
-    ('iterations', '3'),
-    ('tasks closed', '2/8'),
-    ('iterations per closed', '1.50'),
-    ('gate failures', '1'),
-    ('review rejections', '0'),
-    ('attempts burned', '1'),
-    ('no-progress streak', '0'),
-    ('estimated spend', '$4.08'),
-], format_signals(s)
-
-b = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-j = b / 'iterations.jsonl'
-keep = [l for l in j.read_text().splitlines() if l.strip()][:-1]
-j.write_text('\n'.join(keep) + '\n')
-s2 = compute_signals(load_run(b))
-assert s2['iterations'] == 2 and s2['tasks_done'] == 1, s2
-assert abs(s2['iterations_per_closed'] - 2.0) < 1e-9, s2
-assert s2['no_progress_streak'] == 1, s2
-assert dict(format_signals(s2))['iterations per closed'] == '2.00', s2
-
-c = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-(c / 'iterations.jsonl').write_text('')
-s3 = compute_signals(load_run(c))
-assert s3['iterations'] == 0 and s3['tasks_done'] == 0 and s3['tasks_total'] == 0, s3
-assert s3['iterations_per_closed'] is None, s3
-assert s3['no_progress_streak'] == 0, s3
-assert dict(format_signals(s3))['iterations per closed'] == 'n/a', s3
-print('signals ok')
-PY
+uv run python -c "import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_review_fixture_run; R=lambda p: subprocess.run([sys.executable,'-m','runstat','review',str(p)],capture_output=True,text=True); d=pathlib.Path(tempfile.mkdtemp()); r=write_review_fixture_run(d); p=R(r); assert p.returncode==0, p.stderr; f=json.loads((r/'reports'/'002-verdict.json').read_text())['findings']; assert len(f)==2, f; assert all(x in p.stdout for x in f), (f, p.stdout); pre=[l for l in p.stdout.split(f[0])[0].splitlines() if l.strip()]; cand=[l for l in pre if 'T2' in l]; assert cand, pre; assert 'iteration' in cand[-1].lower() and '2' in cand[-1].replace('T2',''), cand[-1]; assert 'no finding' not in p.stdout.lower(), p.stdout; z=write_review_fixture_run(d/'nf'); w=json.loads((z/'reports'/'002-verdict.json').read_text()); w['findings']=[]; (z/'reports'/'002-verdict.json').write_text(json.dumps(w)); q=R(z); assert q.returncode==0, q.stderr; assert 'no finding' in q.stdout.lower(), q.stdout; assert next((l.split(':',1)[1].strip() for l in q.stdout.splitlines() if l.split(':',1)[0].strip().lower()=='findings'), None)=='0', q.stdout; print('findings section ok')"
 ```
 
 </details>
 
-### T5 — Build the CLI entry points and the summary command
+### T5 — Report the five coherence checks
 
-`done` · depends on: T3
+`done` · depends on: T4
 
-This is the first thing an operator actually runs. It brings up the argument parser, the console script and python -m runstat, and implements summary: a per-phase rollup of sessions, cost, turns and wall time with a total row. The error and denial callouts are not decoration — a permission denial nobody sees is a fence in the wrong place, so a session with is_error true or a non-empty permission_denials list has to be named in the output.
+This is the part of the brief worth more than the summary: a verdict that passes a task while marking one of its own criteria not met is self-contradictory, and nothing checks for that today. Each check is a statement about one verdict that is either true or false; every violation is reported with its iteration and task. Violations are reported, never enforced — this command describes a finished run, and a run cannot be un-run.
 
 **Acceptance**
 
-- Both `uv run runstat summary <run-dir>` and `uv run python -m runstat summary <run-dir>` work and produce the same output.
-- summary prints one row per phase present (plan, work, review) plus a total row, each carrying session count, total cost, total turns and total wall time.
-- On the brief's fixture the rows pair up exactly as the brief's table does: plan with $1.98 / 12 turns / 141s, work with $1.50 / 18 / 204s, review with $0.60 / 9 / 72s, and total with 7 sessions / $4.08 / 39 / 417s.
-- Costs print to two decimals with a dollar sign; wall time prints as whole seconds with an s suffix (141s, not 141.0s and not 2m21s). Column widths, padding and separators are free choices.
-- The output states somewhere that dollar figures are an estimate, not a bill.
-- Any session with is_error true, or with a non-empty permission_denials list, is called out in the output by its session file name; the command still exits 0.
-- Tests drive the CLI over the fixture inside tmp_path and assert on content, not on column alignment.
+- All five of the brief's checks are implemented, keeping its numbering: 1 a PASS with any criterion met false; 2 a PASS with a non-empty findings list; 3 a FAIL with no criterion met false and no findings; 4 any criterion with empty evidence; 5 a verdict whose task disagrees with that iteration's task in iterations.jsonl, where that iteration exists.
+- Every violation is reported on its own line containing the literal text 'check <n>' with the brief's number, plus the iteration and the task id.
+- The totals block gains a coherence line: its value is 'ok' when there are no violations, and something other than 'ok' when there are.
+- The fixture run 20260817-120000 reports coherence: ok, and the incoherent fixture reports exactly one violation, naming check 1, its iteration and its task.
+- Violations never change the exit code — a run with violations still exits 0.
+- A verdict for an iteration that has no record in iterations.jsonl is not a check 5 violation.
 
 <details><summary>verify command</summary>
 
 ```sh
-uv run python -c "
-import sys,json,pathlib,tempfile,subprocess
-sys.path.insert(0,'tests')
-from fixtures import write_fixture_run
-r=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-p=subprocess.run(['runstat','summary',str(r)],capture_output=True,text=True)
-assert p.returncode==0, (p.returncode,p.stderr)
-lines=[l for l in p.stdout.splitlines() if l.strip()]
-def toks(l):
-    return ''.join(ch if (ch.isdigit() or ch=='.') else ' ' for ch in l).split()
-def row(name):
-    c=[l for l in lines if name in l.lower() and any(ch.isdigit() for ch in l)]
-    assert c, (name,p.stdout)
-    return set(toks(c[-1]))
-assert set(['1.98','12','141']) <= row('plan'), p.stdout
-assert set(['1.50','18','204']) <= row('work'), p.stdout
-assert set(['0.60','9','72']) <= row('review'), p.stdout
-assert set(['7','4.08','39','417']) <= row('total'), p.stdout
-assert 'estimat' in p.stdout.lower(), p.stdout
-v=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-a=v/'sessions'/'004-work.json'
-d=json.loads(a.read_text()); d['is_error']=True; a.write_text(json.dumps(d))
-b=v/'sessions'/'006-work.json'
-d=json.loads(b.read_text()); d['permission_denials']=[{'tool_name':'WebFetch'}]; b.write_text(json.dumps(d))
-q=subprocess.run(['runstat','summary',str(v)],capture_output=True,text=True)
-assert q.returncode==0, (q.returncode,q.stderr)
-assert '004-work.json' in q.stdout and '006-work.json' in q.stdout, q.stdout
-print('summary ok')
-"
+uv run python -c "import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_incoherent_fixture_run, write_review_fixture_run; R=lambda p: subprocess.run([sys.executable,'-m','runstat','review',str(p)],capture_output=True,text=True); cv=lambda o: next((l.split(':',1)[1].strip().lower() for l in o.splitlines() if l.split(':',1)[0].strip().lower()=='coherence'), None); T=pathlib.Path(tempfile.mkdtemp()); ok=R(write_review_fixture_run(T)); assert ok.returncode==0, ok.stderr; assert cv(ok.stdout)=='ok', ok.stdout; inc=R(write_incoherent_fixture_run(T/'inc')); assert inc.returncode==0, inc.stderr; assert cv(inc.stdout) not in (None,'ok'), inc.stdout; h1=[l for l in inc.stdout.splitlines() if 'check 1' in l.lower()]; assert len(h1)==1 and 'T1' in h1[0] and '1' in h1[0].replace('T1',''), inc.stdout; d=T/'five'/'20260817-140000'; (d/'reports').mkdir(parents=True); C=lambda met,ev: {'criterion':'c','met':met,'evidence':ev}; V=[{'task':'T1','verdict':'PASS','criteria':[C(True,'e'),C(False,'e')],'findings':[],'notes':'n'},{'task':'T2','verdict':'PASS','criteria':[C(True,'e')],'findings':['a defect nobody blocked on'],'notes':'n'},{'task':'T3','verdict':'FAIL','criteria':[C(True,'e')],'findings':[],'notes':'n'},{'task':'T4','verdict':'PASS','criteria':[C(True,'')],'findings':[],'notes':'n'},{'task':'T9','verdict':'PASS','criteria':[C(True,'e')],'findings':[],'notes':'n'}]; [(d/'reports'/('%03d-verdict.json'%i)).write_text(json.dumps(v)) for i,v in enumerate(V,1)]; (d/'iterations.jsonl').write_text(''.join(json.dumps({'iteration':i,'task':('T%d'%i),'outcome':'done','attempts':0,'tasks_done':i,'tasks_total':5})+chr(10) for i in range(1,6))); a=R(d); assert a.returncode==0, a.stderr; hit=lambda n: [l for l in a.stdout.splitlines() if ('check %d'%n) in l.lower()]; assert all(hit(n) for n in (1,2,3,4,5)), a.stdout; assert all(any(('T%d'%n) in l for l in hit(n)) for n in (1,2,3,4)), a.stdout; assert any(('T9' in l or 'T5' in l) and '5' in l for l in hit(5)), a.stdout; assert cv(a.stdout) not in (None,'ok'), a.stdout; print('coherence checks ok')"
 ```
 
 </details>
 
-### T6 — Add the signals command
+### T6 — Document review and the reports/ directory in both docs
 
-`done` · depends on: T4, T5
+`done` · depends on: T5
 
-This is the command the operator reads after a run to decide whether it converged, and the one brief 0002 checks against the driver's own inline numbers. It is a thin printer over compute_signals: eight key: value lines, in the brief's order, with the brief's exact labels. The values are the contract; the padding between the colon and the value is not.
+Both documents describe the telemetry contract and the commands, and a reader trusts them — so an example that has drifted from real output is worse than none. This task adds the review command and the reports/ directory to each, and its gate replays the tool and requires every printed line of the documented transcript to appear verbatim in what the tool actually produces. It also proves the existing commands never moved.
 
 **Acceptance**
 
-- `uv run runstat signals <run-dir>` prints exactly eight lines and nothing else, one per signal, in the brief's order.
-- Each line is `<label>: <value>` using the labels iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend.
-- On the brief's fixture the values are exactly 3, 2/8, 1.50, 1, 0, 1, 0 and $4.08.
-- The values come from compute_signals — the command formats and prints, it does not recompute any derivation.
-- The label estimated spend is what marks the money as an estimate; the command exits 0 on a readable run.
-- A test drives the command over the fixture in tmp_path and asserts all eight values exactly.
+- docs/runstat-cli.md gains a runstat review <run-dir> section containing a shell transcript block whose every output line is exactly what the tool prints for the fixture run 20260817-120000 — the table, all eight totals lines including coherence, and the findings.
+- docs/runstat-cli.md documents reports/NNN-verdict.json in its input layout, and its exit-code table covers the review command's exit 1: a valid run directory with no verdicts.
+- docs/runstat.md documents the reports/ directory field by field (task, verdict, criteria with criterion, met and evidence, findings, notes), states that a missing reports/ is a run with no verdicts rather than malformed input while a malformed verdict is a hard failure, and describes each of the five coherence checks.
+- Both documents say that reports/NNN-proposal.json is deliberately not read.
+- The existing summary, signals and compare sections of both documents are unchanged and still accurate.
+- The whole test suite passes, and tests/test_worked_example.py and tests/test_cli_contract.py are byte-identical to their state at commit ba3d62f.
 
 <details><summary>verify command</summary>
 
 ```sh
-uv run python -c "
-import sys,pathlib,tempfile,subprocess
-sys.path.insert(0,'tests')
-from fixtures import write_fixture_run
-r=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-p=subprocess.run(['runstat','signals',str(r)],capture_output=True,text=True)
-assert p.returncode==0, (p.returncode,p.stderr)
-lines=[l for l in p.stdout.splitlines() if l.strip()]
-pairs=[(l.split(':',1)[0].strip(),l.split(':',1)[1].strip()) for l in lines]
-assert pairs==[('iterations','3'),('tasks closed','2/8'),('iterations per closed','1.50'),('gate failures','1'),('review rejections','0'),('attempts burned','1'),('no-progress streak','0'),('estimated spend','\$4.08')], pairs
-print('signals cmd ok')
-"
-```
-
-</details>
-
-### T7 — Add the compare command
-
-`done` · depends on: T6
-
-This is the repeatability check: two runs of the same plan side by side, so a large divergence in cost or iterations is visible as the finding it is. It reuses the same eight signals rather than inventing a second set, and adds a delta column. Only signals that are numbers get a delta — tasks closed is a pair like 2/8 and subtracting it would be meaningless, so its delta stays blank.
-
-**Acceptance**
-
-- `uv run runstat compare <run-a> <run-b>` prints all eight signals as rows, each showing the value for run A, the value for run B, and a delta.
-- The delta is run B minus run A, signed, for signals whose values are numeric (including the dollar figure); it is blank for non-numeric signals such as tasks closed.
-- Comparing the brief's fixture against a variant with its last iteration record removed shows iterations 3 then 2 with a delta of -1, and iterations per closed 1.50 then 2.00 with a positive delta.
-- The command exits 0 when both run directories are readable.
-- Both runs' signals are the ones compute_signals produces — compare does not define its own derivations.
-- A test compares the fixture with a variant it builds inside tmp_path and asserts at least one numeric delta.
-
-<details><summary>verify command</summary>
-
-```sh
-uv run python -c "
-import sys,pathlib,tempfile,subprocess
-sys.path.insert(0,'tests')
-from fixtures import write_fixture_run
-a=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-b=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-j=b/'iterations.jsonl'
-keep=[l for l in j.read_text().splitlines() if l.strip()][:-1]
-j.write_text(chr(10).join(keep)+chr(10))
-p=subprocess.run(['runstat','compare',str(a),str(b)],capture_output=True,text=True)
-assert p.returncode==0, (p.returncode,p.stderr)
-out=p.stdout
-low=out.lower()
-for k in ['iterations','tasks closed','iterations per closed','gate failures','review rejections','attempts burned','no-progress streak','estimated spend']:
-    assert k in low, (k,out)
-lines=[l for l in out.splitlines() if l.strip()]
-def toks(l):
-    return ''.join(ch if (ch.isdigit() or ch=='.' or ch=='-' or ch=='+') else ' ' for ch in l).split()
-it=[l for l in lines if l.strip().lower().startswith('iterations') and not l.strip().lower().startswith('iterations per')]
-assert it, out
-t=toks(it[-1])
-assert '3' in t and '2' in t and any(x.startswith('-1') for x in t), (t,out)
-pc=[l for l in lines if l.strip().lower().startswith('iterations per')]
-assert pc, out
-t2=toks(pc[-1])
-assert '1.50' in t2 and '2.00' in t2, (t2,out)
-tc=[l for l in lines if l.strip().lower().startswith('tasks closed')]
-assert tc and '2/8' in tc[-1] and '1/8' in tc[-1], (tc,out)
-print('compare ok')
-"
-```
-
-</details>
-
-### T8 — Enforce the exit-code and error-output contract across all commands
-
-`done` · depends on: T5, T6, T7
-
-The three commands exist by now, but their behaviour on bad input is what decides whether a report can be trusted: 0 on success, 1 for a valid run directory with no sessions, 2 for a usage error, a missing directory or malformed input. A partial result that looks complete is the exact failure this brief was written against, so a bad file is a hard stop naming the offending path. No traceback ever reaches the user and stdout stays empty whenever the command fails.
-
-**Acceptance**
-
-- Exit 2 for: a missing run directory, any malformed session file, any malformed iterations.jsonl line, an unknown subcommand, and a missing or extra positional argument.
-- Exit 1 when the run directory exists and is well-formed but contains no session files.
-- Exit 0 on success for all three commands.
-- On every failing path stdout is completely empty and the explanation goes to stderr.
-- The stderr message for malformed input names the offending file — the session file's name, or iterations.jsonl.
-- No Python traceback ever reaches stderr, for any of these cases.
-- Tests cover each exit code for each command where it applies, driving the CLI as a subprocess inside tmp_path.
-
-<details><summary>verify command</summary>
-
-```sh
-uv run python -c "
-import sys,pathlib,tempfile,subprocess
-sys.path.insert(0,'tests')
-from fixtures import write_fixture_run
-base=pathlib.Path(tempfile.mkdtemp())
-def cli(*a):
-    return subprocess.run([sys.executable,'-m','runstat']+list(a),capture_output=True,text=True)
-def bad(p,code):
-    assert p.returncode==code, (p.returncode,code,p.stdout,p.stderr)
-    assert p.stdout=='', p.stdout
-    assert p.stderr.strip(), 'error path wrote nothing to stderr'
-    assert 'Traceback' not in p.stderr, p.stderr
-missing=str(base/'nope')
-bad(cli('summary',missing),2)
-bad(cli('signals',missing),2)
-bad(cli('compare',missing,missing),2)
-empty=base/'empty-run'
-(empty/'sessions').mkdir(parents=True)
-(empty/'iterations.jsonl').write_text('')
-bad(cli('summary',str(empty)),1)
-bad(cli('signals',str(empty)),1)
-m=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-f=m/'sessions'/'003-review.json'
-f.write_text('{ not json')
-p=cli('summary',str(m))
-bad(p,2)
-assert '003-review.json' in p.stderr, p.stderr
-n=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-j=n/'iterations.jsonl'
-j.write_text(j.read_text()+'oops'+chr(10))
-q=cli('signals',str(n))
-bad(q,2)
-assert 'iterations.jsonl' in q.stderr, q.stderr
-bad(cli(),2)
-bad(cli('bogus',str(m)),2)
-bad(cli('summary'),2)
-ok=write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-z=cli('signals',str(ok))
-assert z.returncode==0 and z.stdout.strip(), (z.returncode,z.stderr)
-print('contract ok')
-"
-```
-
-</details>
-
-### T9 — Add the end-to-end worked-example acceptance test
-
-`done` · depends on: T8
-
-Each earlier task was verified in isolation, which is exactly how an implementation drifts from the documented behaviour while every part still passes. This test replays the brief's transcript end to end against the installed CLI — summary, signals and compare over one fixture — so the whole is checked, not the pieces. The brief calls this the one test that catches that drift.
-
-**Acceptance**
-
-- tests/test_worked_example.py defines test_summary, test_signals and test_compare, each invoking the installed CLI as a subprocess rather than calling Python functions directly.
-- test_summary asserts the brief's per-phase pairing — plan $1.98/12/141s, work $1.50/18/204s, review $0.60/9/72s, total 7/$4.08/39/417s — on content, not on column alignment, and asserts the estimate wording is present.
-- test_signals asserts all eight key: value lines exactly, values included.
-- test_compare builds a variant of the fixture and asserts at least one numeric delta.
-- Every test writes only inside pytest's tmp_path; no test reads loop/runs/ or any other real run directory.
-- The full suite `uv run pytest -q` passes.
-
-<details><summary>verify command</summary>
-
-```sh
-uv run pytest -q tests/test_worked_example.py::test_summary tests/test_worked_example.py::test_signals tests/test_worked_example.py::test_compare
-```
-
-</details>
-
-### T10 — Write the runstat usage doc, with every documented example matching real output
-
-`done` · depends on: T9
-
-Write README.md covering what runstat is, how to install and run it, the three commands, the exit-code contract, and the input layout it reads. Every example must show output captured from the tool as it actually behaves. A README whose examples have drifted from the code is worse than none, so the gate replays what the tool prints and requires each line to appear verbatim in the document.
-
-**Acceptance**
-
-- docs/runstat-cli.md documents runstat summary, runstat signals and runstat compare, each with a worked example
-- Every line the signals command prints for the fixture run appears verbatim in the document
-- The exit-code contract (0 success, 1 no sessions, 2 usage or malformed) is documented
-- The input layout it reads (sessions/*.json and iterations.jsonl) is described
-- Install and run instructions use uv
-- Any dollar figure in the README is labelled an estimate
-
-<details><summary>verify command</summary>
-
-```sh
-uv run python - <<'PY'
-import pathlib, subprocess, sys, tempfile
-sys.path.insert(0, 'tests')
-from fixtures import write_fixture_run
-
-t = pathlib.Path('docs/runstat-cli.md').read_text()
-for cmd in ['runstat summary', 'runstat signals', 'runstat compare']:
-    assert cmd in t, cmd
-for token in ['sessions/', 'iterations.jsonl', 'uv']:
-    assert token in t, token
-assert 'estimate' in t.lower(), 'no estimate wording for money'
-for code in ['0', '1', '2']:
-    assert code in t
-r = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-p = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)
-assert p.returncode == 0, (p.returncode, p.stderr)
-for line in [l.strip() for l in p.stdout.splitlines() if l.strip()]:
-    assert line in t, 'README does not match real output: ' + line
-print('readme ok')
-PY
-```
-
-</details>
-
-### T11 — Document the telemetry contract and the cross-check against the driver
-
-`done` · depends on: T9
-
-Write docs/runstat.md: the on-disk telemetry contract runstat consumes, field by field, and how each of the eight signals is derived. This is the document that keeps the loop driver and runstat from drifting apart — brief 0002 acceptance item 6 requires them to agree, and a derivation recorded in only one of the two implementations is how that agreement quietly breaks.
-
-**Acceptance**
-
-- docs/runstat.md documents every field runstat reads from a session record and from an iterations record
-- Each of the eight signals has its derivation stated
-- The attempts-burned derivation explicitly warns against summing the cumulative attempts field
-- The document states that loop/run.sh computes the same signals and that the two must agree
-- Every signal label used in the document matches the label the CLI actually prints
-- No absolute paths appear anywhere in the document
-
-<details><summary>verify command</summary>
-
-```sh
-uv run python - <<'PY'
-import pathlib, subprocess, sys, tempfile
-sys.path.insert(0, 'tests')
-from fixtures import write_fixture_run
-
-t = pathlib.Path('docs/runstat.md').read_text()
-for k in ['sessions/', 'iterations.jsonl', 'phase', 'iteration', 'total_cost_usd',
-          'num_turns', 'duration_ms', 'is_error', 'permission_denials',
-          'outcome', 'attempts', 'tasks_done', 'tasks_total']:
-    assert k in t, k
-assert 'run.sh' in t, 'does not mention the driver it must agree with'
-assert '/Users/' not in t, 'absolute path in the document'
-r = write_fixture_run(pathlib.Path(tempfile.mkdtemp()))
-p = subprocess.run(['runstat', 'signals', str(r)], capture_output=True, text=True)
-assert p.returncode == 0, (p.returncode, p.stderr)
-labels = [l.split(':', 1)[0].strip() for l in p.stdout.splitlines() if l.strip()]
-assert len(labels) == 8, labels
-for lab in labels:
-    assert lab in t, 'label not documented: ' + lab
-print('docs ok')
-PY
+uv run python -c "import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tests'); from fixtures import write_review_fixture_run; F=chr(96)*3; D=chr(36); d=pathlib.Path(tempfile.mkdtemp()); r=write_review_fixture_run(d); p=subprocess.run([sys.executable,'-m','runstat','review',str(r)],capture_output=True,text=True); assert p.returncode==0, p.stderr; real=[l.rstrip() for l in p.stdout.splitlines()]; cli=pathlib.Path('docs/runstat-cli.md').read_text(); tel=pathlib.Path('docs/runstat.md').read_text(); blocks=[b for b in cli.split(F)[1::2] if 'runstat review' in b and any(l.lstrip().startswith(D) for l in b.splitlines())]; assert blocks, 'docs/runstat-cli.md has no runstat review transcript block'; ex=[l.rstrip() for l in blocks[0].splitlines() if l.strip() and not l.lstrip().startswith(D)]; assert len(ex)>=12, ex; missing=[l for l in ex if l not in real]; assert not missing, missing; keys=('reviews','passed','failed','criteria ruled','criteria not met','findings','evidence cited','coherence'); tot=[l for l in real if l.split(':',1)[0].strip().lower() in keys]; assert len(tot)==8, tot; absent=[l for l in tot if l.strip() not in cli]; assert not absent, absent; assert any(x in cli for x in json.loads((r/'reports'/'002-verdict.json').read_text())['findings']), 'the review example does not show the findings the tool prints'; assert all(k in cli for k in ('reports/','verdict.json','runstat review')), 'docs/runstat-cli.md does not document the reports/ input'; assert all(k in tel for k in ('reports/','verdict.json','coherence','criteria')), 'docs/runstat.md does not document verdicts or the coherence checks'; print('docs ok')" && uv run pytest -q && git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py
 ```
 
 </details>

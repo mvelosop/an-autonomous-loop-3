@@ -32,8 +32,15 @@ CASES="$HERE/cases"
 WORK="${CALIBRATION_DIR:-$REPO_ROOT/../an-autonomous-loop-3-calibration}"
 MODEL="${LOOP_WORK_MODEL:-sonnet}"
 
-pass=0; miss=0; invalid=0
+pass=0; miss=0; invalid=0; CASE_N=0
 declare -a RESULTS=()
+
+# Verdicts are written run-shaped — reports/, sessions/, iterations.jsonl — so
+# `runstat review` reads a calibration exactly as it reads a real run, and the
+# reviewer's behaviour on planted defects can be compared with its behaviour on
+# real work using one tool instead of two.
+CAL_RUN="$HERE/results/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$CAL_RUN/reports" "$CAL_RUN/sessions"
 
 say() { printf '\033[36m[cal]\033[0m %s\n' "$*"; }
 
@@ -151,15 +158,17 @@ run_case() {
   ( cd "$WORK" && bash "$dir/plant.sh" ) || { say "  plant failed"; return; }
 
   # A single-task plan describing what the work was supposed to achieve.
-  jq -n --slurpfile t "$dir/task.json" \
+  CASE_N=$((CASE_N + 1))
+  local tid="T$CASE_N"
+  jq -n --slurpfile t "$dir/task.json" --arg id "$tid" \
     '{run_id:"calibration", brief:"docs/briefs/0003-runstat-cli.md",
       status:"running", iteration:1,
       created:"2026-08-16T00:00:00Z", updated:"2026-08-16T00:00:00Z",
-      tasks:[ $t[0] + {status:"pending", attempts:0, notes:""} ]}' \
+      tasks:[ $t[0] + {id:$id, status:"pending", attempts:0, notes:""} ]}' \
     >"$WORK/loop/state.json"
 
   # The report a work session would have written, claiming success.
-  jq -n '{task:"T1", outcome:"done",
+  jq -n --arg id "$tid" '{task:$id, outcome:"done",
           summary:"Implemented the task and verified it.",
           files:[], verified:"gate command exits 0", notes:"none"}' \
     >"$WORK/loop/proposal.json"
@@ -181,7 +190,7 @@ run_case() {
   say "  gate passes (as designed) — handing to the reviewer"
 
   rm -f "$WORK/loop/verdict.json"
-  ( cd "$WORK" && claude -p "/loop-review T1" \
+  ( cd "$WORK" && claude -p "/loop-review $tid" \
       --model "$MODEL" --permission-mode auto \
       --setting-sources project --strict-mcp-config \
       --output-format json >"$WORK/review.json" 2>"$WORK/review.err" )
@@ -197,6 +206,11 @@ run_case() {
   local cost
   cost="$(jq -r '.total_cost_usd // 0 | .*100 | round / 100' "$WORK/review.json" 2>/dev/null)"
 
+  # tasks_done counts work the review ACCEPTED — i.e. defects it MISSED. A
+  # caught defect closes nothing. Using the caught count here would report a
+  # perfect calibration as "3/4 closed", which is exactly backwards.
+  local outcome_rec closed_before=$miss
+  [[ "$verdict" == "FAIL" ]] && outcome_rec=review_fail || outcome_rec=done
   if [[ "$verdict" == "FAIL" ]]; then
     say "  CAUGHT — FAIL, $findings finding(s), \$$cost"
     jq -r '(.findings // [])[] | "      - " + .' "$WORK/loop/verdict.json" 2>/dev/null | head -4
@@ -209,9 +223,18 @@ run_case() {
   # about an unmasked path carries that path into a tracked file. (Case 01
   # found exactly that in this harness's gate log — and then this copy leaked
   # it again.)
-  mkdir -p "$HERE/results"
-  sed -e "s#${HOME}#~#g" -e "s#$(basename "$HOME")#USER#g" \
-    <"$WORK/loop/verdict.json" >"$HERE/results/$name.verdict.json" 2>/dev/null
+  local nnn; nnn="$(printf '%03d' "$CASE_N")"
+  local m=(-e "s#${HOME}#~#g" -e "s#$(basename "$HOME")#USER#g" -e "s#${WORK}#<workdir>#g")
+  sed "${m[@]}" <"$WORK/loop/verdict.json" >"$CAL_RUN/reports/$nnn-verdict.json" 2>/dev/null
+  jq --arg p review --argjson i "$CASE_N" '. + {phase:$p, iteration:$i}' "$WORK/review.json" 2>/dev/null \
+    | sed "${m[@]}" >"$CAL_RUN/sessions/$nnn-review.json"
+  # A caught defect means the review rejected the work; a missed one means it
+  # accepted it. That maps onto the loop's own outcomes exactly.
+  jq -nc --argjson i "$CASE_N" --arg t "$tid" --arg o "$outcome_rec" \
+     --argjson d "$closed_before" --argjson n "${#targets[@]}" \
+     '{iteration:$i, task:$t, outcome:$o, attempts:1, tasks_done:$d, tasks_total:$n}' \
+     >>"$CAL_RUN/iterations.jsonl"
+  printf '%s\t%s\t%s\n' "$nnn" "$tid" "$name" >>"$CAL_RUN/cases.tsv"
 }
 
 # The driver refuses to start in an untrusted workspace because `claude -p`
@@ -256,6 +279,8 @@ for c in "${targets[@]}"; do run_case "$c"; done
 
 printf '\n────────────────────────\n'
 printf '%s\n' "${RESULTS[@]}"
+printf '\nrun-shaped verdicts: %s\n' "${CAL_RUN#$REPO_ROOT/}"
+printf '  read them with: runstat review %s\n' "${CAL_RUN#$REPO_ROOT/}"
 printf '\ncaught %d / %d' "$pass" "$((pass + miss))"
 [[ $invalid -gt 0 ]] && printf '  (%d invalid — gate failed, not scored)' "$invalid"
 printf '\n'

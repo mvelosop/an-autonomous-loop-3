@@ -1,0 +1,38 @@
+{
+  "task": "T1",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "tests/fixtures.py gains write_review_fixture_run(dest): it creates <dest>/20260817-120000/ containing reports/001-verdict.json, reports/002-verdict.json and reports/003-verdict.json, and returns the path to that run directory.",
+      "met": true,
+      "evidence": "tests/fixtures.py: write_review_fixture_run builds run_dir = dest / REVIEW_RUN_ID ('20260817-120000'), writes the three files from _VERDICTS into reports/, and returns run_dir."
+    },
+    {
+      "criterion": "The three verdicts carry exactly the brief's worked-example numbers: tasks T1, T2, T2; verdicts PASS, FAIL, PASS; three criteria each; exactly one criterion ruled met false, in 002; every criterion carrying non-empty evidence; findings of length 0, 2 and 0, each finding a non-empty one-line string.",
+      "met": true,
+      "evidence": "_VERDICTS list matches: (T1, PASS, [T,T,T], []), (T2, FAIL, [T,F,T], [two strings]), (T2, PASS, [T,T,T], []); each criteria dict sets a non-empty 'evidence' string via an f-string."
+    },
+    {
+      "criterion": "Each verdict file is a JSON object with the keys task, verdict, criteria, findings and notes, and every criteria entry has criterion, met and evidence.",
+      "met": true,
+      "evidence": "record dict in write_review_fixture_run has exactly task/verdict/criteria/findings/notes; each criteria entry has criterion/met/evidence."
+    },
+    {
+      "criterion": "That run directory also carries an iterations.jsonl whose records for iterations 1, 2 and 3 name tasks T1, T2 and T2, matching the three verdict files, so the run is coherent under all five of the brief's checks.",
+      "met": true,
+      "evidence": "_REVIEW_ITERATIONS has iteration 1->T1, 2->T2, 3->T2, matching 001/002/003. Manually checked all five coherence checks against the fixture: none fire (002 is a FAIL that does have a not-met criterion and findings, so check 3 does not apply)."
+    },
+    {
+      "criterion": "tests/fixtures.py gains write_incoherent_fixture_run(dest), which creates a run directory holding exactly one verdict: a PASS whose second criterion is met false, with every criterion carrying evidence, an empty findings list, and a task matching its iterations.jsonl record — so it violates the brief's coherence check 1 and nothing else.",
+      "met": true,
+      "evidence": "write_incoherent_fixture_run writes a single 001-verdict.json (PASS, criteria[1].met=False, all evidence non-empty, findings=[]) plus a one-line iterations.jsonl for iteration 1/T1. Checked against all five checks: only check 1 (PASS with a met:false criterion) fires; findings empty (check 2 clear), not a FAIL (check 3 n/a), evidence all present (check 4 clear), task matches iterations.jsonl (check 5 clear)."
+    },
+    {
+      "criterion": "Tests covering both builders live in a new test file under tests/; tests/fixtures.py is added to rather than rewritten, no existing tests/test_*.py file is modified, and nothing outside tests/ is changed.",
+      "met": true,
+      "evidence": "git status shows only tests/fixtures.py modified (98 lines added, 0 removed) and tests/test_review_fixtures.py added; no existing tests/test_*.py touched; nothing outside tests/ changed (loop telemetry files are driver-generated, not task output)."
+    }
+  ],
+  "findings": [],
+  "notes": "Ran the task's verify command and `uv run pytest -q` myself: both pass (34 tests). Reasoned through all five coherence checks by hand against both fixtures to confirm the coherent run stays coherent and the incoherent run trips exactly check 1 — the gate only checks check 1 for the incoherent fixture, so this needed independent verification. No absolute paths found in changed files."
+}

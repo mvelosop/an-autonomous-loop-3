@@ -75,9 +75,13 @@ SESSION_N=0
 USER_NAME="$(basename "$HOME")"
 mask() { sed -e "s#${HOME}#~#g" -e "s#${USER_NAME}#USER#g"; }
 
-say()  { printf '\033[36m[loop]\033[0m %s\n' "$*" | tee -a "$RUN_DIR/loop.log" >&2; }
-warn() { printf '\033[33m[loop]\033[0m %s\n' "$*" | tee -a "$RUN_DIR/loop.log" >&2; }
-die()  { printf '\033[31m[loop] %s\033[0m\n' "$*" >&2; exit 1; }
+# Everything the driver persists goes through mask() — including its own log,
+# which is committed as evidence. An absolute path reaching a message is a
+# mistake waiting to happen, so the backstop sits here rather than at each
+# call site.
+say()  { printf '\033[36m[loop]\033[0m %s\n' "$(printf '%s' "$*" | mask)" | tee -a "$RUN_DIR/loop.log" >&2; }
+warn() { printf '\033[33m[loop]\033[0m %s\n' "$(printf '%s' "$*" | mask)" | tee -a "$RUN_DIR/loop.log" >&2; }
+die()  { printf '\033[31m[loop] %s\033[0m\n' "$(printf '%s' "$*" | mask)" >&2; exit 1; }
 ts()   { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 # All state access goes through jq. Never grep/sed/awk over the state file — a
@@ -235,6 +239,40 @@ print_signals() {
   say "  estimated spend:       \$$(printf '%.2f' "$(sig_spend)") (estimate, not a bill)"
 }
 
+# --------------------------------------------------------------- lock -------
+#
+# Parallel loops are supported, one per git WORKTREE. Git already guarantees
+# those are on different branches — it refuses to check one branch out twice —
+# so the only thing left to prevent is two loops in the SAME working tree,
+# where they would share loop/state.json and, far worse, loop/proposal.json:
+# one loop's review session reading the other loop's proposal is exactly the
+# stale-handoff failure the driver clears per-iteration to avoid.
+#
+# A lock that can brick the loop is worse than no lock, so it records a pid and
+# a dead one is cleared rather than obeyed.
+LOCK="$LOOP_DIR/.running"
+
+acquire_lock() {
+  if [[ -f "$LOCK" ]]; then
+    local pid other started
+    pid="$(jq -r '.pid // ""' "$LOCK" 2>/dev/null)"
+    other="$(jq -r '.branch // "?"' "$LOCK" 2>/dev/null)"
+    started="$(jq -r '.started // "?"' "$LOCK" 2>/dev/null)"
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      die "a loop is already running in this working tree.
+  pid $pid · branch '$other' · started $started
+  Two loops in one tree share loop/state.json and loop/proposal.json, so one
+  can mark a task done on the other's evidence. To run in parallel, give each
+  its own worktree:
+    git worktree add ../<dir> <branch>"
+    fi
+    warn "clearing a stale lock (pid ${pid:-unknown} is gone)"
+  fi
+  jq -nc --arg p "$$" --arg b "$BRANCH" --arg t "$(ts)" --arg r "$RUN_PATH" \
+    '{pid: $p, branch: $b, started: $t, run: $r}' >"$LOCK"
+  trap 'rm -f "$LOCK"' EXIT
+}
+
 # ------------------------------------------------------------- preflight ----
 
 preflight() {
@@ -288,6 +326,7 @@ preflight() {
 # ------------------------------------------------------------------- run ----
 
 mkdir -p "$SESSIONS"
+acquire_lock
 : >"$RUN_DIR/loop.log"
 : >"$ITERATIONS"
 preflight
@@ -303,6 +342,35 @@ open_journal() {
   [[ -f "$JOURNAL" ]] || printf '# Journal — %s\n\nAppend-only narrative of this plan. Rendered state lives in loop/plan.md.\n' \
     "$(state_get .run_id)" >"$JOURNAL"
 }
+
+# A branch cut from main inherits whatever state.json the last squash left
+# there — another branch's plan. It must never be resumed as if it were this
+# branch's work.
+#
+# The discriminator is the BRIEF, not the branch. A branch name cannot tell an
+# inherited plan from your own plan on a branch you renamed, and guessing wrong
+# in the destructive direction loses a run. The brief names which plan you are
+# asking for, so it answers the question directly.
+if [[ -f "$STATE" ]]; then
+  STATE_BRIEF="$(state_get '.brief // ""')"
+  STATE_BRANCH="$(state_get '.branch // ""')"
+  if [[ -n "$BRIEF" ]]; then
+    if [[ -n "$STATE_BRIEF" && "$STATE_BRIEF" != "$BRIEF" ]]; then
+      say "state.json holds plan $(state_get .run_id) for '$STATE_BRIEF'"
+      say "  you asked for '$BRIEF' — resetting and planning fresh"
+      rm -f "$STATE" "$LOOP_DIR/plan.md"
+    fi
+    # Same brief: this is the plan you asked for. Resume it whatever branch it
+    # was stamped on — that is how a renamed branch recovers, without the
+    # operator having to reach for the one flag that would destroy the run.
+  elif [[ -n "$STATE_BRANCH" && "$STATE_BRANCH" != "$BRANCH" ]]; then
+    die "state.json holds plan $(state_get .run_id), stamped on branch '$STATE_BRANCH'; you are on '$BRANCH'.
+  With no brief there is no way to tell an inherited plan from your own on a
+  renamed branch, and the two want opposite things. Say which you mean:
+    resume it            loop/run.sh $STATE_BRIEF
+    start a new plan     loop/run.sh docs/briefs/<other>.md"
+  fi
+fi
 
 if [[ ! -f "$STATE" ]]; then
   if [[ -z "$BRIEF" ]]; then
@@ -326,6 +394,11 @@ if [[ ! -f "$STATE" ]]; then
   bad_dep="$(state_get '[.tasks[].id] as $ids | [.tasks[]|.depends_on[]?|select(($ids|index(.))==null)] | length')"
   [[ "$bad_dep" -eq 0 ]] || die "$bad_dep dependency reference(s) name a task that does not exist"
 
+  # The driver stamps both, rather than trusting the plan session to record
+  # them: which branch and which brief a plan belongs to are facts the driver
+  # already holds, and the brief is now what decides whether a later run
+  # resumes this plan or resets it.
+  state_edit --arg b "$BRANCH" --arg f "$BRIEF" '.branch = $b | .brief = $f'
   say "planned: $(state_get '"\(.run_id) — \(.tasks|length) tasks"')"
   open_journal
 
@@ -345,7 +418,7 @@ if [[ ! -f "$STATE" ]]; then
   git add -A && git commit -q -m "[loop] plan $(state_get .run_id)" && say "committed the plan"
 else
   say "resuming $(state_get .run_id) — $(state_get '[.tasks[]|select(.status=="done")]|length')/$(state_get '.tasks|length') done"
-  state_edit --arg t "$(ts)" '.status="running" | .updated=$t'
+  state_edit --arg t "$(ts)" --arg b "$BRANCH" '.status="running" | .updated=$t | .branch=$b'
   open_journal
 fi
 
@@ -558,7 +631,7 @@ for p in plan work review; do
 done
 say ""
 case "$status" in
-  complete)       say "plan complete. journal: $JOURNAL" ;;
+  complete)       say "plan complete. journal: ${JOURNAL#$REPO/}" ;;
   blocked)        say "a human is needed. read the blocked task's notes in loop/state.json" ;;
   stalled)        say "no recorded progress twice running — read loop/runs/$RUN_PATH/" ;;
   max_iterations) say "iteration budget spent. resumable: re-run loop/run.sh" ;;

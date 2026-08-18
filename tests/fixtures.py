@@ -50,3 +50,101 @@ def write_fixture_run(dest: Path) -> Path:
     (run_dir / "iterations.jsonl").write_text("\n".join(lines) + "\n")
 
     return run_dir
+
+
+REVIEW_RUN_ID = "20260817-120000"
+
+# (file name, task, verdict, criteria met flags, findings)
+_VERDICTS = [
+    (
+        "001-verdict.json",
+        "T1",
+        "PASS",
+        [True, True, True],
+        [],
+    ),
+    (
+        "002-verdict.json",
+        "T2",
+        "FAIL",
+        [True, False, True],
+        ["missing error handling on empty input", "off-by-one in the range check"],
+    ),
+    (
+        "003-verdict.json",
+        "T2",
+        "PASS",
+        [True, True, True],
+        [],
+    ),
+]
+
+_REVIEW_ITERATIONS = [
+    {"iteration": 1, "task": "T1", "outcome": "done", "attempts": 0, "tasks_done": 1, "tasks_total": 6},
+    {"iteration": 2, "task": "T2", "outcome": "done", "attempts": 0, "tasks_done": 2, "tasks_total": 6},
+    {"iteration": 3, "task": "T2", "outcome": "done", "attempts": 1, "tasks_done": 2, "tasks_total": 6},
+]
+
+
+def write_review_fixture_run(dest: Path) -> Path:
+    """Write the brief's worked-example review run (reports/ + iterations.jsonl) under dest."""
+    run_dir = dest / REVIEW_RUN_ID
+    reports_dir = run_dir / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    for name, task, verdict, met_flags, findings in _VERDICTS:
+        record = {
+            "task": task,
+            "verdict": verdict,
+            "criteria": [
+                {
+                    "criterion": f"criterion {i + 1} for {task}",
+                    "met": met,
+                    "evidence": f"seen in the {task} acceptance check {i + 1}",
+                }
+                for i, met in enumerate(met_flags)
+            ],
+            "findings": findings,
+            "notes": "none",
+        }
+        (reports_dir / name).write_text(json.dumps(record))
+
+    lines = [json.dumps(record) for record in _REVIEW_ITERATIONS]
+    (run_dir / "iterations.jsonl").write_text("\n".join(lines) + "\n")
+
+    return run_dir
+
+
+def write_incoherent_fixture_run(dest: Path) -> Path:
+    """Write a run directory holding exactly one, singly-incoherent verdict.
+
+    The verdict is a PASS whose second criterion is met: false, violating
+    coherence check 1 (a PASS with any criterion met false) and nothing else.
+    """
+    reports_dir = dest / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    record = {
+        "task": "T1",
+        "verdict": "PASS",
+        "criteria": [
+            {"criterion": "first criterion for T1", "met": True, "evidence": "seen in the T1 acceptance check 1"},
+            {"criterion": "second criterion for T1", "met": False, "evidence": "seen in the T1 acceptance check 2"},
+            {"criterion": "third criterion for T1", "met": True, "evidence": "seen in the T1 acceptance check 3"},
+        ],
+        "findings": [],
+        "notes": "none",
+    }
+    (reports_dir / "001-verdict.json").write_text(json.dumps(record))
+
+    iteration_record = {
+        "iteration": 1,
+        "task": "T1",
+        "outcome": "done",
+        "attempts": 0,
+        "tasks_done": 1,
+        "tasks_total": 1,
+    }
+    (dest / "iterations.jsonl").write_text(json.dumps(iteration_record) + "\n")
+
+    return dest

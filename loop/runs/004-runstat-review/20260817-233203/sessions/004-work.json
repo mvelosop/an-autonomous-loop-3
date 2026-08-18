@@ -1,0 +1,70 @@
+{
+  "is_error": false,
+  "duration_api_ms": 56247,
+  "num_turns": 16,
+  "stop_reason": "end_turn",
+  "session_id": "e91ec779-6b20-42bd-8e78-315c7dd58339",
+  "total_cost_usd": 0.5363954999999999,
+  "usage": {
+    "input_tokens": 32,
+    "cache_creation_input_tokens": 36248,
+    "cache_read_input_tokens": 822355,
+    "output_tokens": 4807,
+    "output_tokens_details": {
+      "thinking_tokens": 389
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 36248,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 121,
+        "cache_read_input_tokens": 59906,
+        "cache_creation_input_tokens": 660,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 660
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 32,
+      "outputTokens": 4807,
+      "cacheReadInputTokens": 822355,
+      "cacheCreationInputTokens": 36248,
+      "webSearchRequests": 0,
+      "costUSD": 0.5363954999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T2 is done: `load_run` now reads `reports/NNN-verdict.json` into `Run.verdicts` (a new `Verdict` dataclass), with proposal files ignored and malformed/missing-key verdicts raising `RunError` naming the file. Verify command and full suite (40 tests) pass; `loop/proposal.json` is written for the driver.",
+  "ttft_ms": 2054,
+  "ttft_stream_ms": 1483,
+  "time_to_request_ms": 15,
+  "type": "result",
+  "duration_ms": 58152,
+  "uuid": "fbadf50d-885f-49f3-88c0-7e5d63b55db9",
+  "phase": "work",
+  "iteration": 2
+}

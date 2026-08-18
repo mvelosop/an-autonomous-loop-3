@@ -1,0 +1,14 @@
+{
+  "task": "T5",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "All five of the brief's checks are implemented, keeping its numbering: 1 a PASS with any criterion met false; 2 a PASS with a non-empty findings list; 3 a FAIL with no criterion met false and no findings; 4 any criterion with empty evidence; 5 a verdict whose task disagrees with that iteration's task in iterations.jsonl, where that iteration exists.", "met": true, "evidence": "src/runstat/review.py _violations() implements all five conditions in order, matching the brief's numbering exactly (checks 1-5 at lines appending (1,...) through (5,...))."},
+    {"criterion": "Every violation is reported on its own line containing the literal text 'check <n>' with the brief's number, plus the iteration and the task id.", "met": true, "evidence": "format_review renders `f\"check {check}: iteration {iteration} task {task}\"` (and the 4-tuple variant for check 5), one violation per line."},
+    {"criterion": "The totals block gains a coherence line: its value is 'ok' when there are no violations, and something other than 'ok' when there are.", "met": true, "evidence": "compute_review sets totals['coherence'] = 'ok' if not violations else f'{len(violations)} violation(s)'; format_review appends `coherence: {totals['coherence']}` right after evidence cited."},
+    {"criterion": "The fixture run 20260817-120000 reports coherence: ok, and the incoherent fixture reports exactly one violation, naming check 1, its iteration and its task.", "met": true, "evidence": "gates/T5.log reads 'coherence checks ok', produced by the task's own verify script which asserts exactly this on both fixtures."},
+    {"criterion": "Violations never change the exit code — a run with violations still exits 0.", "met": true, "evidence": "src/runstat/cli.py _cmd_review only calls _require_verdicts before printing and always returns 0; the diff does not touch cli.py, and format_review/compute_review have no return-code side effects."},
+    {"criterion": "A verdict for an iteration that has no record in iterations.jsonl is not a check 5 violation.", "met": true, "evidence": "_violations() does `want = expected_task.get(v.iteration); if want is not None and want != v.task: ...` — an iteration absent from the map yields want=None and is skipped."}
+  ],
+  "findings": [],
+  "notes": "Scope stayed to src/runstat/review.py as declared; cli.py, loader.py and tests were untouched, consistent with T3/T4 which also didn't add dedicated unit tests for review.py and relied on the CLI-level verify scripts. No absolute paths introduced."
+}

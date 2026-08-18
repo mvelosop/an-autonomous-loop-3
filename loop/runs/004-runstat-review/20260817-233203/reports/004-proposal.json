@@ -1,0 +1,8 @@
+{
+  "task": "T4",
+  "outcome": "done",
+  "summary": "Added the findings section to runstat review: every finding is printed verbatim under a heading naming its iteration and task, and a plain 'no findings recorded' line appears instead when the run has none.",
+  "files": ["src/runstat/review.py"],
+  "verified": "The task's verify command (per-iteration findings grouping, heading text, 'no findings' line) printed 'findings section ok'; uv run pytest -q passed 40/40.",
+  "notes": "compute_review's per-row dict gained finding_texts (the verbatim list) alongside the existing findings count, so format_review renders both from the same rows without a second pass over run.verdicts. The findings section is appended directly after the totals block with a blank-line separator; heading format is 'iteration <n> (<task>):' followed by indented finding lines, one per finding. When totals['findings'] == 0 the whole section collapses to a single 'no findings recorded' line instead of empty group headings. T5 (coherence checks) should append after this section, following the same pattern of extending format_review's output list rather than restructuring it."
+}

@@ -1,0 +1,8 @@
+{
+  "task": "T3",
+  "outcome": "done",
+  "summary": "Added the runstat review command: src/runstat/review.py computes per-verdict rows and the seven-line totals block from run.verdicts, and cli.py wires it up as a new review subparser reusing load_run and a new _require_verdicts (EmptyRunError) for the no-verdicts case.",
+  "files": ["src/runstat/review.py", "src/runstat/cli.py"],
+  "verified": "uv run python -m runstat review <fixture run> matches the brief's worked totals exactly (reviews 3, passed 2, failed 1, criteria ruled 9, criteria not met 1, findings 2, evidence cited 9/9); the task's verify one-liner (table + totals + exit 0/1/2 cases including malformed-file naming) printed 'review command ok'; uv run pytest -q passed 40/40.",
+  "notes": "compute_review/format_review live in a new src/runstat/review.py, mirroring summary.py's split of a pure compute_* dict-builder and a format_* renderer -- T4 (findings section) and T5 (coherence line + violations) should extend format_review's totals list and add sections after it rather than restructuring compute_review's shape. Deliberately did not print a findings section or a coherence line here, per the task's goal that their absence shouldn't fail this task. _require_verdicts mirrors _require_sessions exactly (EmptyRunError -> exit 1) and only checks run.verdicts, so a run with sessions but no reports/ still exits 1 for review specifically. Per-row evidence column is rendered as 'cited/total' (e.g. '3/3'); column layout otherwise is unpinned by the brief so free to change in later tasks if needed."
+}

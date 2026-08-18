@@ -1,0 +1,38 @@
+{
+  "task": "T6",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "docs/runstat-cli.md gains a runstat review <run-dir> section containing a shell transcript block whose every output line is exactly what the tool prints for the fixture run 20260817-120000 — the table, all eight totals lines including coherence, and the findings.",
+      "met": true,
+      "evidence": "docs/runstat-cli.md new '### runstat review <run-dir>' section (git diff) contains a fenced transcript; ran the tool live against write_review_fixture_run's output and it matches the doc line-for-line, including the table rows, all eight 'key: value' totals lines (reviews, passed, failed, criteria ruled, criteria not met, findings, evidence cited, coherence), and both findings for iteration 2."
+    },
+    {
+      "criterion": "docs/runstat-cli.md documents reports/NNN-verdict.json in its input layout, and its exit-code table covers the review command's exit 1: a valid run directory with no verdicts.",
+      "met": true,
+      "evidence": "diff adds 'reports/NNN-verdict.json' and 'reports/NNN-proposal.json' to the run-directory layout, and the exit-code table row is reworded to '1 | the run directory is valid but has no session files (summary, signals, compare) or no verdict files (review)', matching cli.py's _require_verdicts gate."
+    },
+    {
+      "criterion": "docs/runstat.md documents the reports/ directory field by field (task, verdict, criteria with criterion, met and evidence, findings, notes), states that a missing reports/ is a run with no verdicts rather than malformed input while a malformed verdict is a hard failure, and describes each of the five coherence checks.",
+      "met": true,
+      "evidence": "new '### reports/NNN-verdict.json' section has a field table covering task, verdict, criteria[].criterion/met/evidence, findings, notes; a paragraph stating a missing reports/ is 'a run with no verdicts (exits 1)' vs a present-but-invalid verdict being a hard failure; and a '### The five coherence checks' section enumerating all five, matching loader.py's _VERDICT_REQUIRED_KEYS and review.py's _violations exactly."
+    },
+    {
+      "criterion": "Both documents say that reports/NNN-proposal.json is deliberately not read.",
+      "met": true,
+      "evidence": "docs/runstat-cli.md: 'reports/NNN-proposal.json, the work session's own report on the same iteration, is deliberately not read'; docs/runstat.md: '... is present alongside the verdict but is deliberately not read by runstat'."
+    },
+    {
+      "criterion": "The existing summary, signals and compare sections of both documents are unchanged and still accurate.",
+      "met": true,
+      "evidence": "git diff shows only additions to the input-layout block, a new review section, and the exit-code/malformed-input wording; the summary, signals and compare sections have no diff hunks touching them."
+    },
+    {
+      "criterion": "The whole test suite passes, and tests/test_worked_example.py and tests/test_cli_contract.py are byte-identical to their state at commit ba3d62f.",
+      "met": true,
+      "evidence": "loop/runs/.../gates/T6.log shows 'docs ok' and '40 passed in 0.84s'; `git diff --quiet ba3d62f -- tests/test_worked_example.py tests/test_cli_contract.py` exits 0, confirmed independently."
+    }
+  ],
+  "findings": [],
+  "notes": "Verified the documented transcript against a fresh live run of `runstat review` (not just trusting the gate) and cross-checked the coherence-check wording and exit-1 semantics against review.py/loader.py/cli.py source; everything lines up. No absolute paths, no scope creep beyond the two docs files."
+}
