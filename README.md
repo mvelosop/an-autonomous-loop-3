@@ -31,7 +31,7 @@ executable bit that a `git clone` preserves.)
 
 The loop is **vendored** — copied in, not linked. It merges `.claude/settings.json`
 and `CLAUDE.md` rather than overwriting them, stamps `loop/.installed` with the
-source commit, and finishes by running its own 22-scenario suite in your repo to
+source commit, and finishes by running its own 24-check suite in your repo to
 prove the install works. Verified on a Go repo with no Python present.
 
 It is only ~1% stack-coupled, because the loop never names a test runner: each
@@ -108,6 +108,19 @@ look identical from outside. So the defect was planted instead of waited for —
 review session work that passes its gate but violates its acceptance criteria.
 **4 of 4 caught**, including the two shapes a gate structurally cannot see: work
 that is correct but out of scope, and criteria no test asserts.
+
+## What it weighs
+
+| | lines |
+| --- | --- |
+| prose contracts (three skills + `CLAUDE.md`) | 391 |
+| the driver and its helpers | 1,115 |
+| tests (24 offline checks + the calibration harness) | 1,386 |
+
+The first row is the point. The mature prose loop this was rebuilt from carries
+3,280 lines of contract for the same job, because its orchestration is prose an
+agent interprets. Here it is 672 lines of `run.sh`, and the instructions shrink
+to what genuinely needs judgement.
 
 ## Layout
 

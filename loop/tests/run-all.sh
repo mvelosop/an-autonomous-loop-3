@@ -30,6 +30,14 @@ for s in scenarios/*.sh; do
 done
 
 # Free and offline like the scenarios, so it belongs in the same gate.
+# Briefs marked "ready to plan" are checked structurally; anything else is
+# skipped. Free and offline, so it belongs in the same gate.
+if compgen -G "../../docs/briefs/*.md" >/dev/null 2>&1; then
+  printf '\n\033[1mcheck-brief\033[0m\n'
+  if ( cd ../.. && loop/check-brief.sh loop/brief-template.md docs/briefs/*.md >/dev/null 2>&1 ); then pass=$((pass + 1))
+  else fail=$((fail + 1)); failed+=("check-brief.sh"); fi
+fi
+
 printf '\n\033[1mcheck-docs\033[0m\n'
 if bash ./check-docs.sh; then pass=$((pass + 1))
 else fail=$((fail + 1)); failed+=("check-docs.sh"); fi

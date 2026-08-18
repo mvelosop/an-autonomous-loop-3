@@ -1,8 +1,8 @@
 # Brief 0004 — `runstat review`
 
-**Status:** ready to plan
-**Extends:** `docs/briefs/0003-runstat-cli.md` — same tool, one more command
-**Role:** the first *incremental* target. Runs 1 and 2 built `runstat` from
+- **Status:** ready to plan
+- **Extends:** `docs/briefs/0003-runstat-cli.md` — same tool, one more command
+- **Role:** the first *incremental* target. Runs 1 and 2 built `runstat` from
 nothing; this one changes code the loop already wrote.
 
 ---

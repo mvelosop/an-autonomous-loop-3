@@ -1,8 +1,8 @@
 # Brief 0003 — `runstat`, a run-telemetry CLI
 
-**Status:** ready to plan
-**Consumed by:** the loop defined in `docs/briefs/0002-next-generation-autonomous-loop.md`
-**Role:** the first real target the loop builds. The program is the proof the loop ran.
+- **Status:** ready to plan
+- **Consumed by:** the loop defined in `docs/briefs/0002-next-generation-autonomous-loop.md`
+- **Role:** the first real target the loop builds. The program is the proof the loop ran.
 
 ---
 

@@ -648,6 +648,12 @@ case "$status" in
   session_error)  say "a claude session failed. see loop/runs/$RUN_PATH/" ;;
 esac
 render_plan
+
+# Every session writes a stderr file; almost all are empty, and committing 36
+# empty files per run buries the ones that are not. A non-empty stderr is the
+# evidence you want when a session dies, so keep those and drop the rest.
+find "$RUN_DIR" -name '*.stderr' -empty -delete 2>/dev/null
+
 {
   printf '\n## Run ended — %s\n\n' "$status"
   printf -- '- **Run:** `%s` · %s iteration(s) this run\n' "$RUN_ID" "$run_iters"

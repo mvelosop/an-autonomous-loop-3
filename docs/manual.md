@@ -55,8 +55,7 @@ physically cannot inherit the implementer's rationalisation. Isolation is a
 property of the operating system, not of prompt discipline.
 
 **The orchestrator is deterministic.** Task selection, gates, attempt counting,
-stop conditions and halting are bash. That is why there are 23 scenarios that
-run free and offline with a stubbed `claude` on `PATH` — including ones for the
+stop conditions and halting are bash. That is why there are 24 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
 attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
 stub the Task tool.** Every mechanical bug found in this loop was found by those
 tests, not by a run.
@@ -134,7 +133,7 @@ The installer handles three classes of file differently:
 | **yours** — everything else | never touched |
 
 It stamps `loop/.installed` with the source commit, and finishes by **running
-the loop's own suite in the target** — 22 scenarios, free and offline, no model.
+the loop's own suite in the target** — 24 checks, free and offline, no model.
 That is the install test: a copied artefact that can prove it works where it
 landed.
 
@@ -150,7 +149,7 @@ Re-run it to update; it is idempotent.
 2. `CLAUDE.md` — the loop's rules land between `loop:begin`/`loop:end` markers.
    Add a toolchain note of your own.
 
-Verified end to end on a Go repo with no Python present: 23 checks pass, and a
+Verified end to end on a Go repo with no Python present: 24 checks pass, and a
 re-install over a customised consumer preserved their allow/deny entries, their
 `env` block, and their own `CLAUDE.md` content.
 
@@ -187,6 +186,28 @@ disagree.
 becomes a measurable finding rather than a matter of taste.
 
 **Say roughly how many tasks you expect.** It calibrates decomposition.
+
+Start from the template, which is a filled-in skeleton of the shape below:
+
+```bash
+cp loop/brief-template.md docs/briefs/0001-my-thing.md
+```
+
+Check it before you spend anything:
+
+```bash
+loop/check-brief.sh docs/briefs/0001-your-brief.md
+```
+
+It verifies the structure a brief needs: a worked example with concrete values,
+a non-empty out-of-scope list, constraints, an expected task count, pinned exit
+or status codes, no absolute paths, and that every path it references resolves.
+Briefs are only checked if they say `**Status:** ready to plan` — a discussion
+document is not a worse brief, it is a different kind of document.
+
+**It cannot check the thing that matters most**, which is whether the brief pins
+decisions and leaves mechanics open. A brief can pass every check and still be
+bad. That judgement is what the list above is for.
 
 See [brief 0003](briefs/0003-runstat-cli.md) (greenfield) and
 [brief 0004](briefs/0004-runstat-review.md) (incremental) as worked examples.

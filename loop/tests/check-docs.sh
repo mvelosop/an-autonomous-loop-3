@@ -60,5 +60,19 @@ for entry in "${retired[@]}"; do
   fi
 done
 
+# 3. counts claimed in prose must match reality. Four documents drifted to
+#    three different numbers in two days; nothing else would have caught it.
+actual=$(( $(ls loop/tests/scenarios/*.sh 2>/dev/null | wc -l) + 2 ))
+claimed="$(grep -rhoE '[0-9]+[ -](scenario|check)s?' --include='*.md' . 2>/dev/null \
+  | grep -v './docs/references/' | grep -oE '^[0-9]+' | sort -u)"
+for c in $claimed; do
+  if [[ "$c" != "$actual" ]]; then
+    echo "  docs claim $c checks, the suite has $actual"
+    grep -rn "$c scenario\|$c check\|$c-scenario\|$c-check" --include='*.md' . 2>/dev/null \
+      | grep -v './docs/references/\|./loop/runs/\|./loop/journals/' | sed 's/^/      /'
+    fail=1
+  fi
+done
+
 [[ $fail -eq 0 ]] && echo "docs ok — every path resolves, no retired layout described" || echo "docs FAILED"
 exit $fail

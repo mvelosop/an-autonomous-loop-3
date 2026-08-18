@@ -45,7 +45,7 @@ for f in "$SRC"/loop/*.sh; do
   cp "$f" "$TARGET/loop/$(basename "$f")"
   chmod +x "$TARGET/loop/$(basename "$f")"
 done
-cp "$SRC/loop/README.md" "$TARGET/loop/README.md"
+cp "$SRC/loop/README.md" "$SRC/loop/brief-template.md" "$TARGET/loop/"
 rm -rf "$TARGET/loop/tests"
 cp -R "$SRC/loop/tests" "$TARGET/loop/tests"
 for s in loop-plan loop-work loop-review; do
