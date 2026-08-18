@@ -1,5 +1,8 @@
 # The loop
 
+Reference for the machinery. For how to *use* it end to end, see the
+[USER MANUAL](../docs/manual.md).
+
 ```
 docs/briefs/NNNN-*.md
         │
@@ -45,7 +48,18 @@ left one line in a log as its only trace.
 Agents never set status and never commit. The work session *proposes*; the gate
 and the review *dispose*. One commit per iteration, made by the driver, covering
 code, state, journal and telemetry together — so the history records what the
-loop decided, not what an agent claimed.
+loop decided, not what a session claimed.
+
+## Amending a plan between runs
+
+```bash
+loop/amend.sh check                      # validate + re-render after any edit
+loop/amend.sh verify|reset|note|drop <id> [arg]
+```
+
+State is the driver's during a run and yours between them. Every operation
+validates and re-renders; `check` also warns about pending gates that already
+pass. See the [manual](../docs/manual.md).
 
 ## Stopping
 
@@ -169,7 +183,7 @@ renamed*: the two look identical and want opposite things, and guessing wrong
 in the destructive direction loses a run. The brief names which plan you are
 asking for, so it answers the question directly. The driver stamps both the
 branch and the brief onto every plan it creates — facts it already holds, not
-ones an agent is trusted to record.
+ones a session is trusted to record.
 
 | You run | State holds | What happens |
 | --- | --- | --- |
@@ -184,7 +198,7 @@ plan, and the only destructive path is explicitly asking for a different plan.
 ## Evidence
 
 ```
-loop/runs/<run-id>/
+loop/runs/<branch>/<run-id>/
   loop.log                     what the operator saw
   sessions/NNN-<phase>.json    every session's result, stamped with phase + iteration
   iterations.jsonl             one record per iteration — what runstat reads
@@ -201,7 +215,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-loop/tests/run-all.sh          # all 19 scenarios
+loop/tests/run-all.sh          # all 25 checks
 loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 
@@ -231,6 +245,7 @@ input and an expected exit code end an argument that a paragraph cannot
 | `16-review-fails-closed` | an unusable review verdict fails, never passes |
 | `17-stale-handoff` | a silent work session cannot inherit the previous report |
 | `18-preflight-untrusted` | an untrusted workspace is refused before any spend |
+| `23-git-identity` | a repo with no git identity is refused before any spend |
 | `19-session-error` | a dead session is an infrastructure failure, not a task's |
 
 Scenario 12 is the one that keeps the control plane and the analysis plane

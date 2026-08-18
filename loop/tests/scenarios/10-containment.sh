@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Hard rules 1 and 2: nothing written outside the repo, and nothing persisted
-# names the machine — even when an agent emits an absolute path, which is the
-# case agents cannot be trusted to prevent.
+# names the machine — even when a session emits an absolute path, which is the
+# case sessions cannot be trusted to prevent.
 . "$(dirname "$0")/../lib.sh"
 fixture_new
 fixture_plan "$PLAN_ONE"
@@ -12,7 +12,7 @@ $PLAN_ONE
 PLANJSON
     ;;
   work) touch "\$TASK.out"
-    # An agent leaking an absolute path into its own report.
+    # A session leaking an absolute path into its own report.
     jq -nc --arg t "\$TASK" --arg p "\$HOME/secret/file.py" \
       '{task:\$t,outcome:"done",summary:("wrote "+\$p),files:[\$p],verified:"ok",notes:"none"}' > loop/proposal.json ;;
   review) jq -nc --arg t "\$TASK" '{task:\$t,verdict:"PASS",criteria:[],findings:[],notes:"none"}' > loop/verdict.json ;;

@@ -19,6 +19,31 @@ loop's **behaviour** rather than its bytes. Every decision in it is either a
 measured result from a prior run or a rule from the vendored design notes in
 [`docs/references/`](docs/references/).
 
+## Using it in your own repo
+
+```bash
+git clone https://github.com/mvelosop/an-autonomous-loop-3
+bash an-autonomous-loop-3/loop/install.sh /path/to/your-repo
+```
+
+(Invoked via `bash` so it works even from a downloaded ZIP, which loses the
+executable bit that a `git clone` preserves.)
+
+The loop is **vendored** — copied in, not linked. It merges `.claude/settings.json`
+and `CLAUDE.md` rather than overwriting them, stamps `loop/.installed` with the
+source commit, and finishes by running its own 25-check suite in your repo to
+prove the install works. Verified on a Go repo with no Python present.
+
+It is only ~1% stack-coupled, because the loop never names a test runner: each
+task carries its own verify command, so the gate list belongs to your plan.
+
+> **Why not a plugin?** Because the loop is two things with different homes —
+> skills that must sit at `.claude/skills/`, and a driver you run from a
+> terminal. A Claude Code plugin can carry the first but not the second. The
+> intended evolution is **a plugin for the skills plus a properly installed CLI
+> for the driver**; see the manual for the four changes that needs. Vendoring is
+> the honest answer until there is a second real consumer.
+
 ## How the loop works
 
 ```
@@ -38,7 +63,7 @@ loop/state.json          tasks, acceptance criteria, verify commands
 
 Every session is a fresh `claude -p` with **no memory of any other**. Files are
 the entire continuity. The driver owns every mechanical decision — which task is
-next, whether a task is really done, attempts, when to stop; agents do the work
+next, whether a task is really done, attempts, when to stop; sessions do the work
 and give opinions, and never set status or commit.
 
 Details: [`loop/README.md`](loop/README.md).
@@ -84,6 +109,19 @@ review session work that passes its gate but violates its acceptance criteria.
 **4 of 4 caught**, including the two shapes a gate structurally cannot see: work
 that is correct but out of scope, and criteria no test asserts.
 
+## What it weighs
+
+| | lines |
+| --- | --- |
+| prose contracts (three skills + `CLAUDE.md`) | 391 |
+| the driver and its helpers | 1,115 |
+| tests (24 offline checks + the calibration harness) | 1,386 |
+
+The first row is the point. The mature prose loop this was rebuilt from carries
+3,280 lines of contract for the same job, because its orchestration is prose an
+agent interprets. Here it is 672 lines of `run.sh`, and the instructions shrink
+to what genuinely needs judgement.
+
 ## Layout
 
 | Path | What it is |
@@ -112,6 +150,10 @@ others. A squash on `main` destroys the only record of that.
 | `003-reviewer-calibration` | the planted-defect harness |
 
 ## Running it
+
+**[→ The user manual](docs/manual.md)** — end to end: writing a brief, checking
+the plan before you spend, watching a run, reading what happened, running
+several at once, and changing the loop itself.
 
 ```bash
 loop/run.sh docs/briefs/0003-runstat-cli.md   # plan, then iterate

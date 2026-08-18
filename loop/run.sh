@@ -57,9 +57,17 @@ BRIEF="${1:-}"
 BRANCH="$(git branch --show-current 2>/dev/null)"
 [[ -n "$BRANCH" ]] || BRANCH="detached-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 BRANCH_SAFE="${BRANCH//\//-}"
-RUN_ID="$(date +%Y%m%d-%H%M%S)"
-# Grouped by branch: two loops running in parallel write to different paths, so
-# their telemetry can never collide even if they start in the same second.
+# Grouped by branch, so two loops running in parallel write to different paths.
+# Within one branch the timestamp is only second-resolution, and two runs can
+# land in the same second — a quick preflight failure followed by a re-run, or
+# a test firing several in a row. A collision would have the later run truncate
+# the earlier one's telemetry, so make the directory unique rather than assume.
+RUN_STAMP="$(date +%Y%m%d-%H%M%S)"
+RUN_ID="$RUN_STAMP"
+_n=1
+while [[ -d "$LOOP_DIR/runs/$BRANCH_SAFE/$RUN_ID" ]]; do
+  _n=$((_n + 1)); RUN_ID="$RUN_STAMP-$_n"
+done
 RUN_PATH="$BRANCH_SAFE/$RUN_ID"
 RUN_DIR="$LOOP_DIR/runs/$RUN_PATH"
 SESSIONS="$RUN_DIR/sessions"
@@ -165,7 +173,7 @@ archive_transcript() {
 # ------------------------------------------------------------------ gates ---
 
 # Re-run the verify command of every task named. This is the whole point of the
-# external gate: "done" has to survive a command the agent neither runs nor can
+# external gate: "done" has to survive a command the session neither runs nor can
 # edit. Echoes the ids that failed.
 gate_ids() {
   local id cmd rc failed=()
@@ -302,6 +310,25 @@ preflight() {
     say "  [x] settings.json parses — $(jq '.permissions.allow|length' .claude/settings.json) allow, $(jq '.permissions.deny|length' .claude/settings.json) deny rules"
   else
     say "  [ ] .claude/settings.json missing or invalid"; ok=0
+  fi
+
+  # The driver makes one commit per iteration. A repo with no identity
+  # configured fails at the END of iteration 1, after both sessions have been
+  # paid for: the most expensive place to find a one-line setup problem.
+  if git config user.email >/dev/null 2>&1 && git config user.name >/dev/null 2>&1; then
+    say "  [x] git identity ($(git config user.email))"
+  else
+    say "  [ ] git user.name/user.email not set - the first commit would fail"
+    say "      fix: git config user.email you@example.com && git config user.name 'Your Name'"
+    ok=0
+  fi
+
+  # A hook that rejects the driver's commit fails in the same place. We cannot
+  # know whether it would pass, only that it is there to be considered.
+  hookdir="$(git config core.hooksPath 2>/dev/null || echo .git/hooks)"
+  if [[ -x "$hookdir/pre-commit" ]]; then
+    warn "  [!] a pre-commit hook is active ($hookdir/pre-commit)"
+    warn "      if it rejects the driver's commit, the run stops after paying for a task"
   fi
 
   [[ -n "$HOME" && -n "$USER_NAME" ]] \
@@ -581,7 +608,7 @@ while true; do
   [[ -f "$PROPOSAL" ]] && mask <"$PROPOSAL" >"$RUN_DIR/reports/$(printf '%03d' "$iter")-proposal.json"
   [[ -f "$VERDICT" ]]  && mask <"$VERDICT"  >"$RUN_DIR/reports/$(printf '%03d' "$iter")-verdict.json"
 
-  # The journal's prose is the agents'; assembling it is the driver's, so the
+  # The journal's prose is the sessions'; assembling it is the driver's, so the
   # entry always carries the verdict and always passes through the mask.
   {
     printf '\n## %s — %s\n\n' "$task" "$(state_get --arg id "$task" '.tasks[]|select(.id==$id)|.title')"
@@ -595,7 +622,7 @@ while true; do
 
   # 6. commit — one per iteration, driver-owned, covering code + state +
   # journal + telemetry together. Agents never commit, so the history is a
-  # record of what the loop decided rather than of what an agent claimed.
+  # record of what the loop decided rather than of what a session claimed.
   git add -A >/dev/null 2>&1
   if ! git diff --cached --quiet 2>/dev/null; then
     git commit -q -m "[loop] $task: $outcome" && say "   committed $(git rev-parse --short HEAD)"
@@ -640,6 +667,12 @@ case "$status" in
   session_error)  say "a claude session failed. see loop/runs/$RUN_PATH/" ;;
 esac
 render_plan
+
+# Every session writes a stderr file; almost all are empty, and committing 36
+# empty files per run buries the ones that are not. A non-empty stderr is the
+# evidence you want when a session dies, so keep those and drop the rest.
+find "$RUN_DIR" -name '*.stderr' -empty -delete 2>/dev/null
+
 {
   printf '\n## Run ended — %s\n\n' "$status"
   printf -- '- **Run:** `%s` · %s iteration(s) this run\n' "$RUN_ID" "$run_iters"

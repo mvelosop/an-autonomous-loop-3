@@ -1,8 +1,8 @@
 # Brief 0003 — `runstat`, a run-telemetry CLI
 
-**Status:** ready to plan
-**Consumed by:** the loop defined in `docs/briefs/0002-next-generation-autonomous-loop.md`
-**Role:** the first real target the loop builds. The program is the proof the loop ran.
+- **Status:** ready to plan
+- **Consumed by:** the loop defined in `docs/briefs/0002-next-generation-autonomous-loop.md`
+- **Role:** the first real target the loop builds. The program is the proof the loop ran.
 
 ---
 
@@ -195,11 +195,11 @@ numeric signal must be asserted.
 
 Two documents, both gated on being true rather than on existing:
 
-- **`README.md`** — what runstat is, install and run with `uv`, each of the three
+- **`docs/runstat-cli.md`** — what runstat is, install and run with `uv`, each of the three
   commands with a worked example, the exit-code contract, and the input layout
   it reads. **Every documented example must show output the tool actually
   produces**, and the gate replays the tool and requires each printed line to
-  appear verbatim. A README whose examples have drifted is worse than none,
+  appear verbatim. A usage doc whose examples have drifted is worse than none,
   because a reader trusts it.
 - **`docs/runstat.md`** — the telemetry contract, field by field, and each
   signal's derivation. This is the document that keeps the loop driver and

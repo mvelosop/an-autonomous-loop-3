@@ -1,7 +1,7 @@
 # Brief 0002 — The next-generation autonomous loop
 
-**Status:** ready to execute
-**Supersedes:** the "create a basic autonomous loop" prompt used to seed
+- **Status:** implemented — this is now a design record, not a plannable brief
+- **Supersedes:** the "create a basic autonomous loop" prompt used to seed
 `a-basic-autonomous-loop`, `an-autonomous-loop`, and `an-autonomous-loop-2`.
 
 ---
@@ -424,7 +424,37 @@ arbiter, not whichever implementation is louder.
 
 ---
 
-## 15. Sources
+## 15. What it came to
+
+Measured 2026-08-18, after three runs. §2 said the scale of the mature prose
+loop was "deliberately not starting at", so here is where it actually landed:
+
+| | this loop | `exploring-claude` |
+| --- | --- | --- |
+| **prose contracts** (skills + `CLAUDE.md`) | **391** | 3,280 |
+| loop machinery (shell) | 1,115 | 1,816 |
+| tests | 1,386 | 1,363 |
+
+The number that matters is the first row. **Orchestration that lives in 3,280
+lines of prose an agent interprets, lives here in 672 lines of `run.sh` that
+tests exercise 24 ways for free.** The instructions are small because the
+mechanics are code: nothing has to tell a session which task is next, whether a
+gate passed, or how many attempts remain, because a session has no say in any
+of it.
+
+The shell totals are close, but they are not the same kind of shell.
+`exploring-claude`'s scripts are helpers *around* a prose orchestrator; these
+1,115 lines *are* the orchestrator.
+
+**Not a like-for-like comparison of capability.** `exploring-claude` carries an
+acceptance agent, telemetry extraction, a guidelines corpus and 139 archived
+plans that this loop has no equivalent of. The claim is narrower and only about
+shape: the same orchestration expressed as testable code rather than as prose
+with a reviewer.
+
+---
+
+## 16. Sources
 
 **Vendored into `docs/references/`** — readable without the source repo, with
 snapshot provenance in that folder's `README.md`:
