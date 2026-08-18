@@ -312,6 +312,25 @@ preflight() {
     say "  [ ] .claude/settings.json missing or invalid"; ok=0
   fi
 
+  # The driver makes one commit per iteration. A repo with no identity
+  # configured fails at the END of iteration 1, after both sessions have been
+  # paid for: the most expensive place to find a one-line setup problem.
+  if git config user.email >/dev/null 2>&1 && git config user.name >/dev/null 2>&1; then
+    say "  [x] git identity ($(git config user.email))"
+  else
+    say "  [ ] git user.name/user.email not set - the first commit would fail"
+    say "      fix: git config user.email you@example.com && git config user.name 'Your Name'"
+    ok=0
+  fi
+
+  # A hook that rejects the driver's commit fails in the same place. We cannot
+  # know whether it would pass, only that it is there to be considered.
+  hookdir="$(git config core.hooksPath 2>/dev/null || echo .git/hooks)"
+  if [[ -x "$hookdir/pre-commit" ]]; then
+    warn "  [!] a pre-commit hook is active ($hookdir/pre-commit)"
+    warn "      if it rejects the driver's commit, the run stops after paying for a task"
+  fi
+
   [[ -n "$HOME" && -n "$USER_NAME" ]] \
     && say "  [x] masking active (\$HOME and username)" \
     || { say "  [ ] masking cannot resolve \$HOME"; ok=0; }

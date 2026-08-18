@@ -215,7 +215,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-loop/tests/run-all.sh          # all 24 checks
+loop/tests/run-all.sh          # all 25 checks
 loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 
@@ -245,6 +245,7 @@ input and an expected exit code end an argument that a paragraph cannot
 | `16-review-fails-closed` | an unusable review verdict fails, never passes |
 | `17-stale-handoff` | a silent work session cannot inherit the previous report |
 | `18-preflight-untrusted` | an untrusted workspace is refused before any spend |
+| `23-git-identity` | a repo with no git identity is refused before any spend |
 | `19-session-error` | a dead session is an infrastructure failure, not a task's |
 
 Scenario 12 is the one that keeps the control plane and the analysis plane
