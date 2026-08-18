@@ -23,7 +23,7 @@ One iteration: driver picks the next ready task → **work session** does it →
 driver runs the **gate** (every done task's verify command) → **review session**
 gives an independent verdict → driver applies it, journals, commits.
 
-## Rules for any agent working here
+## Rules for any session working here
 
 1. **All durable state stays in this repo.** Never write session state, memory,
    or config to `~/.claude` or any other global location. Drift there is

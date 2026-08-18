@@ -24,7 +24,7 @@ the rest of the run.
 
 **Every `verify` command must be authored now, before any implementation
 exists.** That is what stops a later session from grading its own homework — an
-agent that writes both the test and the gate has a gate that means nothing.
+session that writes both the test and the gate has a gate that means nothing.
 
 Each `verify` command must be:
 

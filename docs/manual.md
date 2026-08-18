@@ -25,164 +25,77 @@ brief ──▶ PLAN ──▶ state.json ──▶ ┌─ pick next ready task
 The one thing to internalise: **the driver decides everything mechanical.**
 Which task is next, whether a task is really done, how many attempts it has
 burned, when to stop. Agents do work and give opinions. They never set status
-and never commit. If you are wondering "could an agent have faked this?", the
+and never commit. If you are wondering "could a session have faked this?", the
 answer is almost always no, because it has no way to express the claim.
 
-## 2. One-time setup
+## Sessions, not subagents
 
-```bash
-jq --version && uv --version && claude --version   # required
-```
-
-**Trust the workspace.** Run `claude` interactively in the repo once and accept
-the trust dialog. Without it `claude -p` *silently ignores* `.claude/settings.json`,
-so a run executes under the wrong permission surface. Preflight refuses to start
-until this is done — it is the single most common way to waste a run.
-
-## 3. Writing a brief
-
-The brief is the highest-leverage artefact in the system. Everything downstream
-is measured against gates the planner writes *from it*.
-
-**Pin decisions, leave mechanics open.** Name the behaviour, the exit codes, the
-output format, the worked example. Do not name the module layout — that is the
-implementation's to choose, and pinning it buys nothing.
-
-**Include a worked example with exact expected values.** It becomes the
-end-to-end acceptance test, and it is the arbiter when two implementations
-disagree.
-
-**Write an out-of-scope list.** It is not decoration: it is how scope creep
-becomes a measurable finding rather than a matter of taste.
-
-**Say roughly how many tasks you expect.** It calibrates decomposition.
-
-See [brief 0003](briefs/0003-runstat-cli.md) (greenfield) and
-[brief 0004](briefs/0004-runstat-review.md) (incremental) as worked examples.
-
-## 4. Planning, and checking the plan before you spend
-
-```bash
-LOOP_MAX_ITERATIONS=0 loop/run.sh docs/briefs/000N-....md
-```
-
-Runs the plan phase alone and stops at the budget (exit 4, resumable). ~$2–4.
-**Do this on anything unfamiliar.** The plan authors every `verify` command, and
-a weak one silently lowers the bar for the whole run.
-
-Then read `loop/plan.md` and the top of the plan's journal. The planner's report
-ends with **what it interpreted rather than read** — that list is your one cheap
-chance to catch a misreading before every iteration inherits it.
-
-To amend before running: edit `loop/state.json` (it is yours between runs; the
-driver owns it during one), then `loop/render-plan.sh`. Record what you changed
-in the journal — the loop will not know otherwise.
-
-Continue with no state edit:
-
-```bash
-loop/run.sh
-```
-
-## 5. Running
-
-```bash
-loop/run.sh docs/briefs/000N-....md   # plan, then iterate
-loop/run.sh                           # resume
-```
-
-Budgets are **per-run** and checked **between iterations**, so raising one and
-re-running always works with no state edit. Defaults: 30 iterations, $40,
-3 attempts per task, halt above 3.0 iterations-per-closed-task.
-
-| Variable | Default |
-| --- | --- |
-| `LOOP_MAX_ITERATIONS` · `LOOP_COST_CEILING` | 30 · 40 |
-| `LOOP_MAX_ATTEMPTS` · `LOOP_STALL_LIMIT` | 3 · 2 |
-| `LOOP_CONVERGENCE_MAX` · `LOOP_CONVERGENCE_MIN` | 3.0 · 6 |
-| `LOOP_PLAN_MODEL` · `LOOP_WORK_MODEL` | opus · sonnet |
-| `LOOP_ARCHIVE_TRANSCRIPTS` | 0 |
-
-Expect **~$1 per iteration** on a greenfield plan. Incremental work inverts the
-profile — planning was 42% of run 3's cost, because the planner must read
-existing code before it can write gates against it.
-
-## 6. Watching it
-
-After every iteration:
+Claude Code has a subagent mechanism — `.claude/agents/`, spawned with the Task
+tool from inside a running session. **This loop deliberately does not use it.**
+There is no `.claude/agents/` directory here. Each phase is a separate
+`claude -p` process, started by a bash driver, reading a skill.
 
 ```
-iterations · tasks closed · iterations per closed · gate failures
-review rejections · attempts burned · no-progress streak · estimated spend
+subagents                          this loop
+─────────                          ─────────
+one session                        one OS process per phase
+  ├─ Task(implementer)             driver ──▶ claude -p /loop-work   (exits)
+  ├─ Task(reviewer)                driver ──▶ gate                   (no model)
+  └─ decides what to do next       driver ──▶ claude -p /loop-review (exits)
+context accumulates                driver decides what to do next
+an LLM orchestrates                a shell script orchestrates
 ```
 
-**Healthy is `iterations per closed` near 1.0.** Climbing means re-work; above
-3.0 (after 6 iterations) the run halts itself. These exist because every other
-mechanism judges a tick against its task, and nothing else judges the run
-against the point of the run.
+### Why
 
-## 7. When it stops
+**No shared memory, by construction.** A subagent's parent accumulates every
+subagent's output and frames the next prompt. Here the work session and the
+review session are separate processes that cannot see each other — the reviewer
+physically cannot inherit the implementer's rationalisation. Isolation is a
+property of the operating system, not of prompt discipline.
 
-| Status | Exit | What to do |
-| --- | --- | --- |
-| complete | 0 | read the journal, open a PR |
-| preflight failed | 1 | fix what it named — it names one thing |
-| blocked | 2 | a task burned its attempts; read its `notes` in `state.json` |
-| stalled | 3 | two iterations with no recorded progress; read the run dir |
-| max iterations | 4 | raise `LOOP_MAX_ITERATIONS`, re-run |
-| not converging | 5 | **stop and look** — the run is going nowhere |
-| cost ceiling | 6 | raise `LOOP_COST_CEILING`, re-run |
-| session error | 7 | a `claude` session died; see the run dir |
+**The orchestrator is deterministic.** Task selection, gates, attempt counting,
+stop conditions and halting are bash. That is why there are 23 scenarios that
+run free and offline with a stubbed `claude` on `PATH` — including ones for the
+attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
+stub the Task tool.** Every mechanical bug found in this loop was found by those
+tests, not by a run.
 
-Complete, max-iterations, stalled and cost-ceiling resume by just re-running.
-Blocked, not-converging and session-error want a human first.
+**Per-phase telemetry falls out for free.** `claude -p --output-format json`
+returns cost, turns, duration and permission denials per session, which is the
+entire basis for the run-level signals. Subagent accounting rolls up into the
+parent.
 
-## 8. Reading what happened
+**Structural honesty.** A session has no way to set task status or commit — the
+driver owns both. A subagent returns text to a parent that then decides, so
+"the implementer marked it done" becomes a thing you must guard against.
+`exploring-claude` needs a fabrication check and a verdict-guard script (in
+that repo, not this one) for exactly that; here it is unrepresentable.
 
-| | |
-| --- | --- |
-| `loop/plan.md` | **where are we** — every task, status, attempts, criteria, gate |
-| `loop/journals/<plan-id>.md` | **what happened** — planner's report,one entry per iteration, outcome and signals |
-| `runstat summary <run-dir>` | per-phase cost, turns, wall time; flags errors and permission denials |
-| `runstat signals <run-dir>` | the eight run-level signals |
-| `runstat review <run-dir>` | what the reviews ruled, their findings, and coherence checks |
-| `runstat compare <a> <b>` | two runs side by side |
+### What it costs
 
-Run dirs are `loop/runs/<branch>/<timestamp>/`.
+**Money and latency.** Every session re-reads its context from scratch — no
+cache reuse across iterations. Measured: ~$1 per iteration, ~$0.50 of it the
+work session. Subagents share the parent's cached context and would be cheaper
+per step.
 
-## 9. Running several loops at once
+**It runs outside Claude.** You start it from a terminal, not from a
+conversation. There is no mid-run steering, and it cannot ship as a single
+plugin (see *Using the loop in another repo*).
 
-**One loop per git worktree.**
+**No cross-phase judgement.** Nothing weighs "the reviewer keeps raising the
+same thing" — because nothing is holding both. That is deliberate; the run-level
+signals exist to replace it, and `exploring-claude`'s own design notes record
+that per-tick judgement is exactly what fails to notice a globally stuck run.
 
-```bash
-git worktree add ../loop-006 006-some-plan
-cd ../loop-006 && loop/run.sh docs/briefs/0006-....md
-```
+### When the other choice is right
 
-Git refuses to check one branch out twice, so separate worktrees are necessarily
-separate branches. Two loops in **one** working tree share `loop/proposal.json`,
-so one's review could pass a task on the other's evidence — the driver takes a
-lock (`loop/.running`) and refuses.
+If the work is short enough that context accumulation is a feature rather than a
+liability, subagents are simpler and cheaper — one session, no driver, no
+install. The fresh-session bet only pays off when a run is long enough that you
+would not *want* iteration 11 to remember iteration 1.
 
-## 10. Merging
-
-Branches are **squash-merged and never deleted** — they hold the per-iteration
-commits, which are the evidence each task was done by a separate fresh session.
-
-`loop/state.json` belongs to the branch. Merging main *into* a branch must
-preserve the branch's copy; main's copy is meaningless. This is deliberately not
-mechanised — see `loop/README.md` for why `merge=ours` is a trap — so resolve by
-hand:
-
-```bash
-git checkout --ours loop/state.json && loop/render-plan.sh
-git add loop/state.json loop/plan.md
-```
-
-A branch that inherits foreign state resets it when you pass a brief, and
-refuses when you do not. **The brief, not the branch, decides.**
-
-## 11. Using the loop in another repo
+## 2. Installing it
 
 ```bash
 loop/install.sh /path/to/target-repo
@@ -221,6 +134,202 @@ Re-run it to update; it is idempotent.
 Verified end to end on a Go repo with no Python present: 23 checks pass, and a
 re-install over a customised consumer preserved their allow/deny entries, their
 `env` block, and their own `CLAUDE.md` content.
+
+## 3. One-time setup
+
+**In this repo**, everything is already in place. **In any other repo**, install
+it first — see the previous section — then come back here.
+
+```bash
+jq --version && git --version && claude --version   # required
+```
+
+`uv` is only needed if *your* gates use it. The loop never names a test runner.
+
+**Trust the workspace.** Run `claude` interactively in the repo once and accept
+the trust dialog. Without it `claude -p` *silently ignores* `.claude/settings.json`,
+so a run executes under the wrong permission surface. Preflight refuses to start
+until this is done — it is the single most common way to waste a run.
+
+## 4. Writing a brief
+
+The brief is the highest-leverage artefact in the system. Everything downstream
+is measured against gates the planner writes *from it*.
+
+**Pin decisions, leave mechanics open.** Name the behaviour, the exit codes, the
+output format, the worked example. Do not name the module layout — that is the
+implementation's to choose, and pinning it buys nothing.
+
+**Include a worked example with exact expected values.** It becomes the
+end-to-end acceptance test, and it is the arbiter when two implementations
+disagree.
+
+**Write an out-of-scope list.** It is not decoration: it is how scope creep
+becomes a measurable finding rather than a matter of taste.
+
+**Say roughly how many tasks you expect.** It calibrates decomposition.
+
+See [brief 0003](briefs/0003-runstat-cli.md) (greenfield) and
+[brief 0004](briefs/0004-runstat-review.md) (incremental) as worked examples.
+
+## 5. Planning, and checking the plan before you spend
+
+```bash
+LOOP_MAX_ITERATIONS=0 loop/run.sh docs/briefs/000N-....md
+```
+
+Runs the plan phase alone and stops at the budget (exit 4, resumable). ~$2–4.
+**Do this on anything unfamiliar.** The plan authors every `verify` command, and
+a weak one silently lowers the bar for the whole run.
+
+Then read `loop/plan.md` and the top of the plan's journal. The planner's report
+ends with **what it interpreted rather than read** — that list is your one cheap
+chance to catch a misreading before every iteration inherits it.
+
+### Amending the plan
+
+The plan is yours **between** runs and the driver's **during** one. Use
+`loop/amend.sh` rather than editing JSON blind — every operation validates and
+re-renders, so a mistake surfaces now instead of several minutes into the run:
+
+```bash
+loop/amend.sh show                       # the plan, or `show T4` for one task
+loop/amend.sh verify T4 'uv run pytest -q tests/test_x.py'
+loop/amend.sh reset  T4                  # back to pending, attempts 0
+loop/amend.sh note   T4 'the fixture moved to tests/data'
+loop/amend.sh drop   T4                  # refuses if anything depends on it
+loop/amend.sh check                      # after ANY hand-edit
+```
+
+`check` is the important one. It verifies the schema, that every task has a gate
+and criteria, that dependencies resolve and contain no cycle, that no ids are
+duplicated — and it **runs every pending task's gate to warn you about any that
+already pass**, because a gate that is green before the work exists proves
+nothing.
+
+Hand-editing `loop/state.json` is still fine — it is only JSON — but run
+`loop/amend.sh check` afterwards.
+
+Anything structural (re-scoping, adding tasks) is better done by editing the
+brief and re-planning than by patching state.
+
+Continue with no state edit:
+
+```bash
+loop/run.sh
+```
+
+## 6. Running
+
+```bash
+loop/run.sh docs/briefs/000N-....md   # plan, then iterate
+loop/run.sh                           # resume
+```
+
+Budgets are **per-run** and checked **between iterations**, so raising one and
+re-running always works with no state edit. Defaults: 30 iterations, $40,
+3 attempts per task, halt above 3.0 iterations-per-closed-task.
+
+| Variable | Default |
+| --- | --- |
+| `LOOP_MAX_ITERATIONS` · `LOOP_COST_CEILING` | 30 · 40 |
+| `LOOP_MAX_ATTEMPTS` · `LOOP_STALL_LIMIT` | 3 · 2 |
+| `LOOP_CONVERGENCE_MAX` · `LOOP_CONVERGENCE_MIN` | 3.0 · 6 |
+| `LOOP_PLAN_MODEL` · `LOOP_WORK_MODEL` | opus · sonnet |
+| `LOOP_ARCHIVE_TRANSCRIPTS` | 0 |
+
+Expect **~$1 per iteration** on a greenfield plan. Incremental work inverts the
+profile — planning was 42% of run 3's cost, because the planner must read
+existing code before it can write gates against it.
+
+## 7. Watching it
+
+**In the terminal you started it in.** The driver prints a block after every
+iteration:
+
+```
+iterations · tasks closed · iterations per closed · gate failures
+review rejections · attempts burned · no-progress streak · estimated spend
+```
+
+**If you backgrounded it** — and you probably should, since a run takes tens of
+minutes — the same output is on disk. The run announces its own path in the
+preflight block (`telemetry dir loop/runs/<branch>/<timestamp>`):
+
+```bash
+tail -f loop/runs/<branch>/<timestamp>/loop.log     # follow it live
+ls -dt loop/runs/*/*/ | head -1                     # the newest run
+```
+
+**Between runs**, `loop/plan.md` and the plan's journal are re-rendered after
+every iteration, so they are current even mid-run — and they read better on a
+phone than a log does.
+
+**Healthy is `iterations per closed` near 1.0.** Climbing means re-work; above
+3.0 (after 6 iterations) the run halts itself. These exist because every other
+mechanism judges a tick against its task, and nothing else judges the run
+against the point of the run.
+
+## 8. When it stops
+
+| Status | Exit | What to do |
+| --- | --- | --- |
+| complete | 0 | read the journal, open a PR |
+| preflight failed | 1 | fix what it named — it names one thing |
+| blocked | 2 | a task burned its attempts; read its `notes` in `state.json` |
+| stalled | 3 | two iterations with no recorded progress; read the run dir |
+| max iterations | 4 | raise `LOOP_MAX_ITERATIONS`, re-run |
+| not converging | 5 | **stop and look** — the run is going nowhere |
+| cost ceiling | 6 | raise `LOOP_COST_CEILING`, re-run |
+| session error | 7 | a `claude` session died; see the run dir |
+
+Complete, max-iterations, stalled and cost-ceiling resume by just re-running.
+Blocked, not-converging and session-error want a human first.
+
+## 9. Reading what happened
+
+| | |
+| --- | --- |
+| `loop/plan.md` | **where are we** — every task, status, attempts, criteria, gate |
+| `loop/journals/<plan-id>.md` | **what happened** — planner's report,one entry per iteration, outcome and signals |
+| `runstat summary <run-dir>` | per-phase cost, turns, wall time; flags errors and permission denials |
+| `runstat signals <run-dir>` | the eight run-level signals |
+| `runstat review <run-dir>` | what the reviews ruled, their findings, and coherence checks |
+| `runstat compare <a> <b>` | two runs side by side |
+
+Run dirs are `loop/runs/<branch>/<timestamp>/`.
+
+## 10. Running several loops at once
+
+**One loop per git worktree.**
+
+```bash
+git worktree add ../loop-006 006-some-plan
+cd ../loop-006 && loop/run.sh docs/briefs/0006-....md
+```
+
+Git refuses to check one branch out twice, so separate worktrees are necessarily
+separate branches. Two loops in **one** working tree share `loop/proposal.json`,
+so one's review could pass a task on the other's evidence — the driver takes a
+lock (`loop/.running`) and refuses.
+
+## 11. Merging
+
+Branches are **squash-merged and never deleted** — they hold the per-iteration
+commits, which are the evidence each task was done by a separate fresh session.
+
+`loop/state.json` belongs to the branch. Merging main *into* a branch must
+preserve the branch's copy; main's copy is meaningless. This is deliberately not
+mechanised — see `loop/README.md` for why `merge=ours` is a trap — so resolve by
+hand:
+
+```bash
+git checkout --ours loop/state.json && loop/render-plan.sh
+git add loop/state.json loop/plan.md
+```
+
+A branch that inherits foreign state resets it when you pass a brief, and
+refuses when you do not. **The brief, not the branch, decides.**
 
 ## 12. Changing the loop itself
 

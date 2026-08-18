@@ -173,7 +173,7 @@ archive_transcript() {
 # ------------------------------------------------------------------ gates ---
 
 # Re-run the verify command of every task named. This is the whole point of the
-# external gate: "done" has to survive a command the agent neither runs nor can
+# external gate: "done" has to survive a command the session neither runs nor can
 # edit. Echoes the ids that failed.
 gate_ids() {
   local id cmd rc failed=()
@@ -589,7 +589,7 @@ while true; do
   [[ -f "$PROPOSAL" ]] && mask <"$PROPOSAL" >"$RUN_DIR/reports/$(printf '%03d' "$iter")-proposal.json"
   [[ -f "$VERDICT" ]]  && mask <"$VERDICT"  >"$RUN_DIR/reports/$(printf '%03d' "$iter")-verdict.json"
 
-  # The journal's prose is the agents'; assembling it is the driver's, so the
+  # The journal's prose is the sessions'; assembling it is the driver's, so the
   # entry always carries the verdict and always passes through the mask.
   {
     printf '\n## %s — %s\n\n' "$task" "$(state_get --arg id "$task" '.tasks[]|select(.id==$id)|.title')"
@@ -603,7 +603,7 @@ while true; do
 
   # 6. commit — one per iteration, driver-owned, covering code + state +
   # journal + telemetry together. Agents never commit, so the history is a
-  # record of what the loop decided rather than of what an agent claimed.
+  # record of what the loop decided rather than of what a session claimed.
   git add -A >/dev/null 2>&1
   if ! git diff --cached --quiet 2>/dev/null; then
     git commit -q -m "[loop] $task: $outcome" && say "   committed $(git rev-parse --short HEAD)"

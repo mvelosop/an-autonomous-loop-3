@@ -82,7 +82,7 @@ fi
 TC="$TARGET/CLAUDE.md"
 BEGIN='<!-- loop:begin -->'
 END='<!-- loop:end -->'
-rules="$(sed -n "/^## Rules for any agent working here$/,/^## Toolchain$/p" "$SRC/CLAUDE.md" | sed '$d')"
+rules="$(sed -n "/^## Rules for any session working here$/,/^## Toolchain$/p" "$SRC/CLAUDE.md" | sed '$d')"
 block="$BEGIN
 $rules
 Loop docs: \`loop/README.md\`. State lives in \`loop/state.json\`; the driver owns it.

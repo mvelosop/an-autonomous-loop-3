@@ -162,7 +162,7 @@ assert_no_state() {
 
 # Hard rule 1 + 2: nothing outside the repo, and no tracked file names the
 # machine. Scoped to *tracked* files deliberately — loop/proposal.json and
-# loop/verdict.json are raw agent output, masked only on the way into
+# loop/verdict.json are raw session output, masked only on the way into
 # loop/runs/, so the invariant that matters is that they are never committed.
 assert_contained() {
   local hits
@@ -175,7 +175,7 @@ assert_contained() {
     ( cd "$FX/repo" && git check-ignore -q "$f" ) || leaked+=("$f")
   done
   [[ ${#leaked[@]} -eq 0 ]] && ok "transient handoffs are gitignored" \
-    || bad "unmasked agent output is committable: ${leaked[*]}"
+    || bad "unmasked session output is committable: ${leaked[*]}"
 
   # Not just the username: ANY absolute path in a tracked file names the
   # machine. The mask keys on $HOME, so a path that does not sit under it —

@@ -1,7 +1,7 @@
 # The loop
 
 Reference for the machinery. For how to *use* it end to end, see the
-[user manual](../docs/manual.md).
+[USER MANUAL](../docs/manual.md).
 
 ```
 docs/briefs/NNNN-*.md
@@ -48,7 +48,18 @@ left one line in a log as its only trace.
 Agents never set status and never commit. The work session *proposes*; the gate
 and the review *dispose*. One commit per iteration, made by the driver, covering
 code, state, journal and telemetry together — so the history records what the
-loop decided, not what an agent claimed.
+loop decided, not what a session claimed.
+
+## Amending a plan between runs
+
+```bash
+loop/amend.sh check                      # validate + re-render after any edit
+loop/amend.sh verify|reset|note|drop <id> [arg]
+```
+
+State is the driver's during a run and yours between them. Every operation
+validates and re-renders; `check` also warns about pending gates that already
+pass. See the [manual](../docs/manual.md).
 
 ## Stopping
 
@@ -172,7 +183,7 @@ renamed*: the two look identical and want opposite things, and guessing wrong
 in the destructive direction loses a run. The brief names which plan you are
 asking for, so it answers the question directly. The driver stamps both the
 branch and the brief onto every plan it creates — facts it already holds, not
-ones an agent is trusted to record.
+ones a session is trusted to record.
 
 | You run | State holds | What happens |
 | --- | --- | --- |

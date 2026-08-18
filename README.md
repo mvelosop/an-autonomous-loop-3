@@ -19,6 +19,28 @@ loop's **behaviour** rather than its bytes. Every decision in it is either a
 measured result from a prior run or a rule from the vendored design notes in
 [`docs/references/`](docs/references/).
 
+## Using it in your own repo
+
+```bash
+git clone https://github.com/mvelosop/an-autonomous-loop-3
+an-autonomous-loop-3/loop/install.sh /path/to/your-repo
+```
+
+The loop is **vendored** — copied in, not linked. It merges `.claude/settings.json`
+and `CLAUDE.md` rather than overwriting them, stamps `loop/.installed` with the
+source commit, and finishes by running its own 22-scenario suite in your repo to
+prove the install works. Verified on a Go repo with no Python present.
+
+It is only ~1% stack-coupled, because the loop never names a test runner: each
+task carries its own verify command, so the gate list belongs to your plan.
+
+> **Why not a plugin?** Because the loop is two things with different homes —
+> skills that must sit at `.claude/skills/`, and a driver you run from a
+> terminal. A Claude Code plugin can carry the first but not the second. The
+> intended evolution is **a plugin for the skills plus a properly installed CLI
+> for the driver**; see the manual for the four changes that needs. Vendoring is
+> the honest answer until there is a second real consumer.
+
 ## How the loop works
 
 ```
@@ -38,7 +60,7 @@ loop/state.json          tasks, acceptance criteria, verify commands
 
 Every session is a fresh `claude -p` with **no memory of any other**. Files are
 the entire continuity. The driver owns every mechanical decision — which task is
-next, whether a task is really done, attempts, when to stop; agents do the work
+next, whether a task is really done, attempts, when to stop; sessions do the work
 and give opinions, and never set status or commit.
 
 Details: [`loop/README.md`](loop/README.md).
