@@ -13,8 +13,13 @@ fail=0
 # This checks THIS repo's documentation. In a consumer repo the loop's own
 # README legitimately cites briefs and design notes that were never installed,
 # so there is nothing here to check and flagging it would be noise.
-if [[ ! -f docs/references/executable-loop-harness.md ]]; then
-  echo "docs check skipped — not the loop's home repo (no docs/references/)"
+#
+# loop/.installed is the marker because the INSTALLER writes it: its presence
+# positively identifies a vendored copy. Keying on the absence of some file
+# this repo happens to have would mean the check silently stops running here
+# the day that file moves.
+if [[ -f loop/.installed ]]; then
+  echo "docs check skipped — this is an installed copy (loop/.installed present)"
   exit 0
 fi
 
