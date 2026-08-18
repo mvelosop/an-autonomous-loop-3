@@ -75,9 +75,13 @@ SESSION_N=0
 USER_NAME="$(basename "$HOME")"
 mask() { sed -e "s#${HOME}#~#g" -e "s#${USER_NAME}#USER#g"; }
 
-say()  { printf '\033[36m[loop]\033[0m %s\n' "$*" | tee -a "$RUN_DIR/loop.log" >&2; }
-warn() { printf '\033[33m[loop]\033[0m %s\n' "$*" | tee -a "$RUN_DIR/loop.log" >&2; }
-die()  { printf '\033[31m[loop] %s\033[0m\n' "$*" >&2; exit 1; }
+# Everything the driver persists goes through mask() — including its own log,
+# which is committed as evidence. An absolute path reaching a message is a
+# mistake waiting to happen, so the backstop sits here rather than at each
+# call site.
+say()  { printf '\033[36m[loop]\033[0m %s\n' "$(printf '%s' "$*" | mask)" | tee -a "$RUN_DIR/loop.log" >&2; }
+warn() { printf '\033[33m[loop]\033[0m %s\n' "$(printf '%s' "$*" | mask)" | tee -a "$RUN_DIR/loop.log" >&2; }
+die()  { printf '\033[31m[loop] %s\033[0m\n' "$(printf '%s' "$*" | mask)" >&2; exit 1; }
 ts()   { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 # All state access goes through jq. Never grep/sed/awk over the state file — a
@@ -627,7 +631,7 @@ for p in plan work review; do
 done
 say ""
 case "$status" in
-  complete)       say "plan complete. journal: $JOURNAL" ;;
+  complete)       say "plan complete. journal: ${JOURNAL#$REPO/}" ;;
   blocked)        say "a human is needed. read the blocked task's notes in loop/state.json" ;;
   stalled)        say "no recorded progress twice running — read loop/runs/$RUN_PATH/" ;;
   max_iterations) say "iteration budget spent. resumable: re-run loop/run.sh" ;;

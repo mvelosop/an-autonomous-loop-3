@@ -177,6 +177,14 @@ assert_contained() {
   [[ ${#leaked[@]} -eq 0 ]] && ok "transient handoffs are gitignored" \
     || bad "unmasked agent output is committable: ${leaked[*]}"
 
+  # Not just the username: ANY absolute path in a tracked file names the
+  # machine. The mask keys on $HOME, so a path that does not sit under it —
+  # the repo's own location, say — slips straight through. That is exactly how
+  # an absolute journal path reached a committed loop.log.
+  hits="$(cd "$FX/repo" && git ls-files -z | xargs -0 grep -l -- "$FX" 2>/dev/null || true)"
+  [[ -z "$hits" ]] && ok "no absolute sandbox path in any tracked file" \
+    || bad "absolute path leaked into tracked: $hits"
+
   hits="$(find "$FX/testuser" -mindepth 1 -not -name '.claude.json' 2>/dev/null || true)"
   [[ -z "$hits" ]] && ok "nothing written to fake HOME" \
     || bad "wrote outside the repo: $hits"
