@@ -23,8 +23,11 @@ measured result from a prior run or a rule from the vendored design notes in
 
 ```bash
 git clone https://github.com/mvelosop/an-autonomous-loop-3
-an-autonomous-loop-3/loop/install.sh /path/to/your-repo
+bash an-autonomous-loop-3/loop/install.sh /path/to/your-repo
 ```
+
+(Invoked via `bash` so it works even from a downloaded ZIP, which loses the
+executable bit that a `git clone` preserves.)
 
 The loop is **vendored** — copied in, not linked. It merges `.claude/settings.json`
 and `CLAUDE.md` rather than overwriting them, stamps `loop/.installed` with the

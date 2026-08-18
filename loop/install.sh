@@ -38,10 +38,14 @@ say "installing the loop into $(basename "$TARGET")"
 # ---- loop-owned: overwrite ------------------------------------------------
 
 mkdir -p "$TARGET/loop" "$TARGET/.claude/skills" "$TARGET/docs/briefs"
-for f in run.sh render-plan.sh install.sh README.md; do
-  cp "$SRC/loop/$f" "$TARGET/loop/$f"
+# Every script, not a hand-kept list: amend.sh was added after this installer
+# and silently never shipped, so consumers got a manual documenting a file they
+# did not have.
+for f in "$SRC"/loop/*.sh; do
+  cp "$f" "$TARGET/loop/$(basename "$f")"
+  chmod +x "$TARGET/loop/$(basename "$f")"
 done
-chmod +x "$TARGET/loop/run.sh" "$TARGET/loop/render-plan.sh" "$TARGET/loop/install.sh"
+cp "$SRC/loop/README.md" "$TARGET/loop/README.md"
 rm -rf "$TARGET/loop/tests"
 cp -R "$SRC/loop/tests" "$TARGET/loop/tests"
 for s in loop-plan loop-work loop-review; do

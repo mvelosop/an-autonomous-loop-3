@@ -74,10 +74,29 @@ that repo, not this one) for exactly that; here it is unrepresentable.
 
 ### What it costs
 
-**Money and latency.** Every session re-reads its context from scratch — no
-cache reuse across iterations. Measured: ~$1 per iteration, ~$0.50 of it the
-work session. Subagents share the parent's cached context and would be cheaper
-per step.
+**Money and latency — but less than you would think.** Measured across run 1's
+22 sessions:
+
+| | tokens |
+| --- | --- |
+| read from cache | 11,335,654 |
+| written to cache | 766,121 |
+| **fresh (uncached) input** | **32,292** |
+
+**93% of input is served from cache**, and uncached input averages ~20 tokens
+*per session*. A genuinely cold start would pay thousands for the system prompt
+and tool definitions alone, so the shared prefix is plainly not being re-bought
+each time — prompt caching is content-addressed server-side, and separate
+processes with the same prefix hit it.
+
+What a fresh session does not inherit is the **conversation**. It re-reads the
+files it needs and re-derives its understanding, which shows up as the ~35k of
+cache *creation* per session plus its output tokens. So the real cost of the
+fresh-session design is re-deriving context, not re-uploading it.
+
+Measured all-in: ~$1 per iteration, ~$0.50 of it the work session. Subagents
+would still be cheaper per step by sharing the parent's *conversation*, but the
+gap is much narrower than the architecture suggests.
 
 **It runs outside Claude.** You start it from a terminal, not from a
 conversation. There is no mid-run steering, and it cannot ship as a single
