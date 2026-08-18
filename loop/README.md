@@ -1,5 +1,8 @@
 # The loop
 
+Reference for the machinery. For how to *use* it end to end, see the
+[user manual](../docs/manual.md).
+
 ```
 docs/briefs/NNNN-*.md
         │
@@ -184,7 +187,7 @@ plan, and the only destructive path is explicitly asking for a different plan.
 ## Evidence
 
 ```
-loop/runs/<run-id>/
+loop/runs/<branch>/<run-id>/
   loop.log                     what the operator saw
   sessions/NNN-<phase>.json    every session's result, stamped with phase + iteration
   iterations.jsonl             one record per iteration — what runstat reads

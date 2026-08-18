@@ -17,7 +17,7 @@ of them share memory. All continuity lives in files:
 | `loop/journals/<plan-id>.md` | Append-only, **one per plan**. One entry per iteration. A view, never the source of truth. |
 | `loop/proposal.json` | Transient. The work session's report on the task it just did. |
 | `loop/verdict.json` | Transient. The review session's independent verdict. |
-| `loop/runs/<run-id>/` | Telemetry: one JSON per session, plus `iterations.jsonl`. |
+| `loop/runs/<branch>/<run-id>/` | Telemetry: one JSON per session, plus `iterations.jsonl`. Grouped by branch so parallel loops cannot collide. |
 
 One iteration: driver picks the next ready task → **work session** does it →
 driver runs the **gate** (every done task's verify command) → **review session**

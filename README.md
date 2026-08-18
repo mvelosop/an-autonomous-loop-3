@@ -113,6 +113,10 @@ others. A squash on `main` destroys the only record of that.
 
 ## Running it
 
+**[→ The user manual](docs/manual.md)** — end to end: writing a brief, checking
+the plan before you spend, watching a run, reading what happened, running
+several at once, and changing the loop itself.
+
 ```bash
 loop/run.sh docs/briefs/0003-runstat-cli.md   # plan, then iterate
 loop/run.sh                                   # resume from existing state

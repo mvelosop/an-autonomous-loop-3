@@ -29,6 +29,11 @@ for s in scenarios/*.sh; do
   if bash "$s"; then pass=$((pass + 1)); else fail=$((fail + 1)); failed+=("$(basename "$s")"); fi
 done
 
+# Free and offline like the scenarios, so it belongs in the same gate.
+printf '\n\033[1mcheck-docs\033[0m\n'
+if bash ./check-docs.sh; then pass=$((pass + 1))
+else fail=$((fail + 1)); failed+=("check-docs.sh"); fi
+
 printf '\n────────────────────────\n'
 if [[ $fail -eq 0 ]]; then
   printf '\033[32m%d passed\033[0m\n' "$pass"
