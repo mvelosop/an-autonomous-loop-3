@@ -10,6 +10,14 @@ set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
 fail=0
 
+# This checks THIS repo's documentation. In a consumer repo the loop's own
+# README legitimately cites briefs and design notes that were never installed,
+# so there is nothing here to check and flagging it would be noise.
+if [[ ! -f docs/references/executable-loop-harness.md ]]; then
+  echo "docs check skipped — not the loop's home repo (no docs/references/)"
+  exit 0
+fi
+
 # 1. every backticked path must resolve — relative to its own doc, to the repo
 #    root, or as a bare filename that exists somewhere. NNN/<x> are templates.
 python3 - <<'PY' || fail=1

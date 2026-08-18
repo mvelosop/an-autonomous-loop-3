@@ -182,7 +182,47 @@ git add loop/state.json loop/plan.md
 A branch that inherits foreign state resets it when you pass a brief, and
 refuses when you do not. **The brief, not the branch, decides.**
 
-## 11. Changing the loop itself
+## 11. Using the loop in another repo
+
+```bash
+loop/install.sh /path/to/target-repo
+```
+
+The loop is **vendored**, not linked — there is no clean submodule or plugin
+route, because it is two things with different homes: the skills must sit at
+`.claude/skills/` for Claude Code to resolve `/loop-work T3`, and the driver is
+a shell script you run from your terminal.
+
+The installer handles three classes of file differently:
+
+| | |
+| --- | --- |
+| **loop-owned** — `loop/`, `.claude/skills/loop-*` | overwritten; these *are* the loop |
+| **shared** — `.claude/settings.json`, `CLAUDE.md` | **merged**, never clobbered |
+| **yours** — everything else | never touched |
+
+It stamps `loop/.installed` with the source commit, and finishes by **running
+the loop's own suite in the target** — 22 scenarios, free and offline, no model.
+That is the install test: a copied artefact that can prove it works where it
+landed.
+
+Re-run it to update; it is idempotent.
+
+**Two things are yours to set**, and they are the whole stack-specific surface
+(measured: ~1% of the loop's 1,170 lines):
+
+1. `.claude/settings.json` — add the commands your gates need
+   (`Bash(pnpm:*)`, `Bash(go:*)`, `Bash(cargo:*)`…). The loop never names a
+   test runner: each task carries its own verify command, so **the gate list
+   belongs to your plan, not to the loop**.
+2. `CLAUDE.md` — the loop's rules land between `loop:begin`/`loop:end` markers.
+   Add a toolchain note of your own.
+
+Verified end to end on a Go repo with no Python present: 23 checks pass, and a
+re-install over a customised consumer preserved their allow/deny entries, their
+`env` block, and their own `CLAUDE.md` content.
+
+## 12. Changing the loop itself
 
 ```bash
 loop/tests/run-all.sh                                     # free, offline, always
@@ -199,7 +239,7 @@ compare against [the baseline](../loop/tests/reviewer-calibration/RESULTS.md).
 A review contract that stops catching planted defects has regressed, whatever
 its prose says.
 
-## 12. Troubleshooting
+## 13. Troubleshooting
 
 | Symptom | Cause |
 | --- | --- |
