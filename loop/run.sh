@@ -57,9 +57,17 @@ BRIEF="${1:-}"
 BRANCH="$(git branch --show-current 2>/dev/null)"
 [[ -n "$BRANCH" ]] || BRANCH="detached-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 BRANCH_SAFE="${BRANCH//\//-}"
-RUN_ID="$(date +%Y%m%d-%H%M%S)"
-# Grouped by branch: two loops running in parallel write to different paths, so
-# their telemetry can never collide even if they start in the same second.
+# Grouped by branch, so two loops running in parallel write to different paths.
+# Within one branch the timestamp is only second-resolution, and two runs can
+# land in the same second — a quick preflight failure followed by a re-run, or
+# a test firing several in a row. A collision would have the later run truncate
+# the earlier one's telemetry, so make the directory unique rather than assume.
+RUN_STAMP="$(date +%Y%m%d-%H%M%S)"
+RUN_ID="$RUN_STAMP"
+_n=1
+while [[ -d "$LOOP_DIR/runs/$BRANCH_SAFE/$RUN_ID" ]]; do
+  _n=$((_n + 1)); RUN_ID="$RUN_STAMP-$_n"
+done
 RUN_PATH="$BRANCH_SAFE/$RUN_ID"
 RUN_DIR="$LOOP_DIR/runs/$RUN_PATH"
 SESSIONS="$RUN_DIR/sessions"

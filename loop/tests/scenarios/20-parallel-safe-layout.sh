@@ -52,7 +52,11 @@ grep -q '^## T1 —' "$(fx_journal)" && grep -q '^## T2 —' "$(fx_journal)" \
   && ok "both runs' iterations are in one narrative" \
   || bad "the narrative is split across runs"
 
+# Two runs back to back land in the same second. Second-resolution timestamps
+# alone would have them share a directory, and the later one truncates the
+# earlier one's iterations.jsonl — which made scenario 21 flaky before the
+# driver started disambiguating.
 runs_n="$(cd "$FX/repo" && ls -d loop/runs/"$branch"/*/ | wc -l | tr -d ' ')"
-[[ "$runs_n" == "2" ]] && ok "each run still got its own telemetry dir" \
+[[ "$runs_n" == "2" ]] && ok "each run got its own telemetry dir, same second or not" \
   || bad "expected 2 run dirs under the branch, got $runs_n"
 finish
