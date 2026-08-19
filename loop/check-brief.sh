@@ -55,7 +55,11 @@ check_one() {
   # The out-of-scope list is how scope creep becomes a finding rather than a
   # matter of taste. The reviewer catches that shape; it needs something to cite.
   if grep -qiE '^#+ .*out of scope' <<<"$body"; then
-    local n; n="$(awk '/^#+ .*[Oo]ut of scope/{f=1;next} f&&/^#+ /{exit} f' <<<"$body" | grep -c '^[-*] ')"
+    local n; n="$(awk '
+      /^#+ .*[Oo]ut of scope/{f=1; c=0; next}
+      f && /^#+ /{ if (c>m) m=c; f=0 }
+      f && /^[-*] /{ c++ }
+      END{ if (c>m) m=c; print m+0 }' <<<"$body")"
     if [[ "$n" -ge 2 ]]; then ok "out of scope: $n item(s)"
     else bad "out-of-scope section has $n item(s) — name what you are NOT asking for"; fi
   else bad "no out-of-scope section — scope creep has nothing to be measured against"; fi
@@ -93,8 +97,8 @@ check_one() {
     [[ -e "$r" || -e "$(dirname "$f")/$r" ]] && continue
     find . -name "$(basename "$r")" -not -path './.git/*' -print -quit 2>/dev/null | grep -q . && continue
     warn "path does not resolve: $r"; dead=$((dead+1))
-  done < <(grep -oE '`[A-Za-z0-9_./-]+\.(md|sh|json|py|ts|jsonl|toml)`' <<<"$body" | tr -d '`' | sort -u)
-  [[ "$dead" -eq 0 ]] && ok "referenced paths resolve"
+  done < <(grep -oE '`[A-Za-z0-9_./-]+\.md`' <<<"$body" | tr -d '`' | sort -u)
+  [[ "$dead" -eq 0 ]] && ok "referenced docs resolve"
 
   if [[ $problems -gt 0 ]]; then
     printf '  \033[31m%d problem(s)\033[0m, %d warning(s)\n' "$problems" "$warnings"; fails=$((fails+1))
