@@ -102,10 +102,79 @@ at a time. So read the numbers this way:
   This is the number that ratchets — every new rule is surface for the next
   reader to hold and the next amendment to land on.
 - **Resident tokens per tick** = the actual attention load. Smaller, varies by
-  task, and this script does not compute it.
+  task — this is what `--tick` estimates.
 
 Quoting a corpus total as "what the model reads" overstates it. Quoting it as
 "how much instruction this system has accumulated" is exactly right.
+
+## `--tick` — the per-tick resident estimate
+
+```bash
+./corpus-metrics.sh --tick                          # heaviest agent context
+./corpus-metrics.sh --tick --tick-role implementer  # one named role
+./corpus-metrics.sh --tick --plan loop/plan.md      # non-default plan file
+```
+
+Adds a `tick` object answering the question the corpus total *cannot*: **how
+much instruction does one context actually hold?**
+
+The model is three layers:
+
+```
+resident  =  always_resident  +  role definition  +  the task's citations
+             (every context)     (one per role)      (varies per task)
+```
+
+| Layer | What it is | How it's found |
+|---|---|---|
+| `always_resident` | orchestration prose injected into every context | `CLAUDE.md`, `.claude/project-adapter.md` |
+| `roles[]` | one context the loop opens — an agent definition or a `SKILL.md` | `.claude/agents/*.md`, `.claude/skills/**/SKILL.md` |
+| `citations` | files a task's own `**Guidelines:**` / `**Design notes:**` block names — which agent contracts require be read **in full**, not skimmed | parsed per task from the plan file |
+
+`base_tokens` on each role = always-resident + that role's definition. It is the
+**floor**: what the context holds before a single line of task-specific
+material loads.
+
+### Citations
+
+The plan file is auto-detected (`PLAN.md`, then `loop/plan.md`, then `plan.md`;
+`--plan` overrides). Each `- [ ] T<N>` / `- [x] T<N>` task block is scanned for
+a `**Guidelines:**` or `**Design notes:**` label, and every `.md` path in the
+bullets under it is resolved and measured. Output reports `min` / `median` /
+`max` cost across tasks, plus `unresolved` — cited paths that don't exist on
+disk, which is a real defect (an agent contract that says "read this file" and
+the file is missing blocks the task).
+
+A repo with no citation convention reports `tasks: 0`. That is a finding, not a
+gap in the tool: it means the loop's per-tick load doesn't grow with the corpus,
+because there is no corpus to cite.
+
+### `estimate`
+
+| Field | Meaning |
+|---|---|
+| `role` / `role_selected_by` | which role was estimated, and whether you named it |
+| `floor_tokens` | base only — a task citing nothing |
+| `median_tokens` | base + the median task's citations — **the number to quote** |
+| `ceiling_tokens` | base + the heaviest task's citations |
+| `median_share_of_instruction_corpus` | what fraction of the whole corpus a typical context holds |
+
+Without `--tick-role`, the heaviest **agent** context is chosen. That is the
+worst case, not necessarily a per-tick role — a planner agent runs once per
+plan, not once per tick. **Name the role you mean** when the number is going
+anywhere public.
+
+### Two cautions
+
+**Contexts don't sum.** A tick that runs an implementer and then a reviewer
+opens two *separate* windows. Adding them gives a token-spend figure, not an
+attention figure — no single context ever held the sum. Report per-role.
+
+**It's an estimate, not an instrument.** It counts what the contracts say gets
+read. It cannot see tool output, file reads the agent chose on its own, the
+diff under review, or conversation growth across a long tick — all of which are
+real resident tokens. Treat `median_tokens` as a **lower bound on instruction
+load**, and the largest term in it, not as total context use.
 
 ## Ratios
 
