@@ -208,14 +208,56 @@ loop/runs/<branch>/<run-id>/
   reports/NNN-verdict.json     the review session's verdict
 ```
 
+An **operator** session gets a run directory of its own, holding only
+`loop.log` and `sessions/operator.json`. See below.
+
 Everything persisted passes through a mask that strips `$HOME` and the username.
 Transcripts are **not** archived unless `LOOP_ARCHIVE_TRANSCRIPTS=1`; they hold
 absolute paths and full file contents, and they never go inside the repo.
 
+## The operator session
+
+```
+loop/run-claude.sh [claude args...]
+```
+
+Rule 7 says no in-loop gate can detect that a run is going nowhere, so the
+operator has to stay positioned to notice. That judgement gets made in a session
+the loop never sees — and so left no trace, while the sessions it judges were
+measured to four decimal places. `run-claude.sh` wraps one interactive `claude`
+so it lands in the same shape, at
+`loop/runs/<branch>/<run-id>/sessions/operator.json`, and `runstat` reads it as
+a phase called `operator`.
+
+It is **not fenced**. No `--setting-sources`, no `--strict-mcp-config`, no
+forced model: your settings, your MCP servers. Its job is to think *about* the
+run, not to be comparable *with* it. The token counts are exact, but they were
+spent under a different configuration — do not read an operator row against a
+work row.
+
+An interactive session has no `--output-format json` to redirect, so the result
+is reconstructed afterwards from `~/.claude/projects/<cwd-slug>/<id>.jsonl`. The
+id is assigned up front with `--session-id` rather than discovered after, which
+is the only reason the right transcript can be found. `session_id`, `result`,
+`num_turns` and all four usage counters reproduce **exactly** against the
+thirteen sessions of `004-runstat-review/20260817-233203`; `duration_ms` lands
+within 55ms.
+
+Three things do not survive:
+
+| field | why |
+|---|---|
+| `total_cost_usd` | nowhere on disk — it lives in the session's memory and dies with it. Run `/cost` before you exit and paste it when asked; `cost_source` records whether you did |
+| `permission_denials` | not in the transcript. Always `[]`, which is not evidence that none happened |
+| `ttft_ms`, `stop_reason` | not recorded. Omitted rather than faked |
+
+`--no-session-persistence` writes no transcript at all, and there is nothing to
+reconstruct from.
+
 ## Tests
 
 ```bash
-loop/tests/run-all.sh          # all 25 checks
+loop/tests/run-all.sh          # all 26 checks
 loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 
@@ -247,6 +289,7 @@ input and an expected exit code end an argument that a paragraph cannot
 | `18-preflight-untrusted` | an untrusted workspace is refused before any spend |
 | `23-git-identity` | a repo with no git identity is refused before any spend |
 | `19-session-error` | a dead session is an infrastructure failure, not a task's |
+| `24-state-tampering` | a session that edits `loop/state.json` has it restored and the iteration failed |
 
 Scenario 12 is the one that keeps the control plane and the analysis plane
 honest: the same fixture arbitrates `run.sh` and `runstat`.

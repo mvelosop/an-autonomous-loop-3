@@ -1,0 +1,2 @@
+[33mPermission allow rule (../../../../.claude/settings.json): Write(//Users/miguelveloso/source/sigo/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(//Users/miguelveloso/source/sigo/**) instead (Edit rules cover all file-editing tools).[39m
+[33mPermission deny rule (.claude/settings.json): Write(~/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(~/.claude/**) instead (Edit rules cover all file-editing tools).[39m
