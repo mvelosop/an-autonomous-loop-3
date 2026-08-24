@@ -1,0 +1,36 @@
+{
+  "task": "T2",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py declares its own `_PREFIX = \"runstat: \"`, duplicating messages.PREFIX. The prefix is defined twice, not once."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py:11-15 hardcodes the literal error prefix `\"runstat: \"` as module-level `_PREFIX`, used in `_fail` instead of `messages.PREFIX`."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "`_cmd_signals` calls `_fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)`; tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": false,
+      "evidence": "loop/proposal.json's own notes: `_PREFIX` in cli.py 'no longer derives from the catalogue' and must be 'kept in sync ... by hand' if the wording changes."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "`_fail` writes only to stderr via `print(..., file=sys.stderr)`; no failure path in cli.py prints to stdout."
+    }
+  ],
+  "findings": [
+    "cli.py:15 hardcodes a second copy of the error prefix (`_PREFIX = \"runstat: \"`) instead of referencing messages.PREFIX, which is exactly the drift-by-duplication this task's goal text says the catalogue exists to prevent.",
+    "The work session knowingly chose this to satisfy tests/test_messages.py::test_cli_declares_its_error_prefix (a literal text-search of cli.py's source), trading a real acceptance criterion for a test technicality rather than finding an approach that satisfies both (e.g. a comment naming the literal, with runtime code referring to messages.PREFIX)."
+  ],
+  "notes": "The pre-existing test test_cli_declares_its_error_prefix (added in the 'plan: gate for T1' commit) does create real tension with the acceptance criteria as written, since it text-searches cli.py's raw source for the literal. That tension is worth flagging to the planner/driver, but it doesn't excuse building an actual duplicate, hand-synced constant — a non-duplicating way to satisfy the test (e.g. a comment mentioning the prefix, or asserting on messages.PREFIX's value instead of a hardcoded string) was available and wasn't tried."
+}

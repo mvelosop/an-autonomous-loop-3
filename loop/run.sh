@@ -44,6 +44,28 @@ STATE="$LOOP_DIR/state.json"
 PROPOSAL="$LOOP_DIR/proposal.json"
 VERDICT="$LOOP_DIR/verdict.json"
 
+# state.json belongs to the driver. Both session contracts say so in prose --
+# and a rule in prose is not a control. A session that edits a task's `verify`
+# changes what every later gate runs, which collapses the one assumption the
+# whole loop rests on: that every verify command was authored before any
+# implementation existed. A session that writes both the work and the gate has
+# a gate that proves nothing, however correct its rewrite happens to be.
+#
+# So: snapshot before each session, restore after. The snapshot lives outside
+# the repo because it is transient scaffolding within a single run, not a
+# record -- nothing reads it after the iteration that wrote it.
+STATE_PRE="$(mktemp "${TMPDIR:-/tmp}/loop-state.XXXXXX")"
+
+state_snapshot() { [[ -f "$STATE" ]] && cp "$STATE" "$STATE_PRE"; }
+
+# Restores and returns 0 when the session touched it; 1 when it behaved.
+state_restore_if_touched() {
+  [[ -f "$STATE" && -s "$STATE_PRE" ]] || return 1
+  cmp -s "$STATE" "$STATE_PRE" && return 1
+  cp "$STATE_PRE" "$STATE"
+  return 0
+}
+
 MAX_ITER="${LOOP_MAX_ITERATIONS:-30}"
 COST_CEILING="${LOOP_COST_CEILING:-40}"
 MAX_ATTEMPTS="${LOOP_MAX_ATTEMPTS:-3}"
@@ -278,7 +300,7 @@ acquire_lock() {
   fi
   jq -nc --arg p "$$" --arg b "$BRANCH" --arg t "$(ts)" --arg r "$RUN_PATH" \
     '{pid: $p, branch: $b, started: $t, run: $r}' >"$LOCK"
-  trap 'rm -f "$LOCK"' EXIT
+  trap 'rm -f "$LOCK" "$STATE_PRE"' EXIT
 }
 
 # ------------------------------------------------------------- preflight ----
@@ -507,6 +529,7 @@ while true; do
   rm -f "$PROPOSAL" "$VERDICT"
 
   # 1. work session
+  state_snapshot
   run_session work "$iter" "$WORK_MODEL" "/loop-work $task"
   if [[ $? -ne 0 && ! -f "$PROPOSAL" ]]; then
     status="session_error"; exit_code=7; break
@@ -519,6 +542,16 @@ while true; do
     outcome="$(jq -r '.outcome // "blocked"' "$PROPOSAL")"
     summary="$(jq -r '.summary // ""' "$PROPOSAL" | mask)"
     notes="$(jq -r '.notes // "none"' "$PROPOSAL" | mask)"
+  fi
+
+  # The plan is not the session's to edit, and moving a goalpost is a finding
+  # whatever the code looks like -- including when the rewrite is an improvement,
+  # because the loop cannot tell a good rewrite from a bad one without spending
+  # a review on it, which is the cost the pre-authored gate exists to avoid.
+  tampered=""
+  if state_restore_if_touched; then
+    tampered="work session modified loop/state.json — restored by the driver; the plan and its verify commands are not a session's to edit"
+    warn "   STATE TAMPERING $task — loop/state.json was modified; restored, iteration failed"
   fi
 
   # 2. gate — every done task, plus this one if it claims to be done
@@ -554,14 +587,22 @@ while true; do
   for id in "${gate_failed[@]:-}"; do [[ "$id" == "$task" ]] && candidate_failed=1; done
 
   verdict="skipped"
-  if [[ "$outcome" == "blocked" ]]; then
+  if [[ -n "$tampered" ]]; then
+    outcome="gate_fail"
+    warn "   $task failed on state tampering — the work is reverted whatever the gate said"
+  elif [[ "$outcome" == "blocked" ]]; then
     say "   work session reported blocked"
   elif [[ $candidate_failed -eq 1 ]]; then
     outcome="gate_fail"
     warn "   GATE FAIL $task — review skipped, work that fails its own gate is not reviewable"
   else
     # 3. review session — separate, read-only, sees the diff and not the summary
+    state_snapshot
     run_session review "$iter" "$WORK_MODEL" "/loop-review $task"
+    if state_restore_if_touched; then
+      warn "   STATE TAMPERING $task — review session modified loop/state.json; restored"
+      tampered="review session modified loop/state.json — restored by the driver; only the driver makes status transitions"
+    fi
     if [[ ! -f "$VERDICT" ]] || ! jq -e . "$VERDICT" >/dev/null 2>&1; then
       warn "   review session left no valid verdict — treating as FAIL"
       verdict="FAIL"
@@ -578,9 +619,13 @@ while true; do
       state_edit --arg id "$task" '(.tasks[]|select(.id==$id)) |= (.status="done" | .notes="")'
       say "   $task done" ;;
     gate_fail|review_fail)
-      reason="$([[ "$outcome" == "gate_fail" ]] \
-        && echo "gate failed — see loop/runs/$RUN_PATH/gates/$task.log" \
-        || jq -r '(.findings // []) | join("; ")' "$VERDICT" 2>/dev/null | mask)"
+      if [[ -n "$tampered" ]]; then
+        reason="$tampered"
+      elif [[ "$outcome" == "gate_fail" ]]; then
+        reason="gate failed — see loop/runs/$RUN_PATH/gates/$task.log"
+      else
+        reason="$(jq -r '(.findings // []) | join("; ")' "$VERDICT" 2>/dev/null | mask)"
+      fi
       state_edit --arg id "$task" --arg n "$reason" \
         '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)' ;;
     blocked)

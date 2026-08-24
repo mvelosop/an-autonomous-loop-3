@@ -1,0 +1,36 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py:13 defines `_PREFIX = \"runstat: \"`, a duplicate of messages.PREFIX (messages.py:9). The prefix, which is prepended to every error line, exists in two places."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py:13 `_PREFIX = \"runstat: \"` is an error prefix literal written inline in cli.py, in direct violation of this criterion."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py:26 calls `_fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)`; messages.BAD_RUN_DIR = \"run directory not found\". Verified: `uv run pytest -q tests/test_messages.py` passes 2/2, including test_missing_run_dir_exits_2_with_catalogue_text."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": false,
+      "evidence": "Changing the prefix wording requires editing both messages.py (PREFIX) and cli.py (_PREFIX). The code's own comment at cli.py:12-14 admits this: 'Declared here rather than taken from messages.PREFIX ... Keep in sync with messages.PREFIX by hand if the wording changes.'"
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_fail() (cli.py:16-18) only ever writes to sys.stderr; every failing branch in _cmd_signals and main returns via _fail before any stdout print. No print() call in cli.py targets stdout on a failing path."
+    }
+  ],
+  "findings": [
+    "cli.py:9-14 hardcodes its own copy of the error prefix (_PREFIX = \"runstat: \") instead of importing messages.PREFIX, reintroducing the exact drift the catalogue task exists to remove — and the accompanying comment acknowledges the two must be kept in sync by hand.",
+    "messages.py defines PREFIX but nothing in cli.py ever references it, so the catalogue's own prefix constant is dead code."
+  ],
+  "notes": "The gate test (tests/test_messages.py::test_cli_declares_its_error_prefix) only asserts that the literal string \"runstat: \" appears somewhere in cli.py's source text, so it passes regardless of whether the prefix comes from messages.py or is redeclared locally. It does not distinguish `messages.PREFIX` usage from a hardcoded duplicate, so a green gate here does not establish that this criterion is met. The fix is for cli.py to use messages.PREFIX (e.g. `_fail` formatting with `messages.PREFIX` instead of a locally declared `_PREFIX`) and for messages.py to be the sole definition site."
+}

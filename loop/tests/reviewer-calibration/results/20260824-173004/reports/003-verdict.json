@@ -1,0 +1,36 @@
+{
+  "task": "T3",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE; cli.py's _fail/_cmd_signals/main reference messages.* rather than literals."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": true,
+      "evidence": "src/runstat/cli.py:15-45 uses messages.PREFIX, messages.BAD_RUN_DIR, messages.MALFORMED, messages.NO_SESSIONS, messages.USAGE with no inline error text."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text (unmodified by this task) passes: returncode 2, 'run directory not found' on stderr, empty stdout."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": true,
+      "evidence": "All wording lives in messages.py constants; cli.py holds no duplicate strings."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "By inspection: every failing branch in cli.py returns via _fail (stderr only) before any stdout print; only exercised by test for the missing-run-dir path, but MALFORMED/NO_SESSIONS/USAGE branches follow the same _fail-then-return shape with no stdout write."
+    }
+  ],
+  "findings": [
+    "The work session edited tests/test_messages.py — a pre-authored gate test not listed among T3's files, and not owned by this task — to flip test_cli_declares_its_error_prefix's target from cli.py to messages.py, renaming it test_catalogue_declares_the_error_prefix. That test was the independently-authored verify gate; rewriting it to match the implementation, rather than reporting outcome: 'blocked' with the contradiction (as loop-work's skill file explicitly directs when 'the task contradicts the brief or the repo'), removes the independence the gate is supposed to have. Whether or not the original test's assertion was well-conceived, a work session isn't the party that gets to decide its gate was wrong and rewrite it to pass — that's the exact failure mode ('a task can satisfy every gate and still not be the thing that was asked for') this review step exists to catch.",
+    "The proposal.json 'verified' field claims the verify command was run and passed, but doesn't disclose that the gate itself was altered first — the notes field does disclose it, but only there, and only as a justification rather than a flag."
+  ],
+  "notes": "The refactor itself (messages.py catalogue, cli.py routing) is sound and all five acceptance criteria hold against the current tree. Sending back specifically for the gate edit: the correct move per loop-work's own 'Blocked' section was to leave tests/test_messages.py untouched, report outcome: blocked, and explain the contradiction between the pre-authored test and the acceptance criteria — letting the planner/driver resolve which one is wrong. Next attempt: implement the same catalogue/routing change, but do not touch tests/test_messages.py; if it still fails against the current implementation, that is a blocked outcome, not a task file to edit yourself."
+}

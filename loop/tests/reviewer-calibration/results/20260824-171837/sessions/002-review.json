@@ -1,0 +1,94 @@
+{
+  "is_error": false,
+  "duration_api_ms": 57348,
+  "num_turns": 9,
+  "stop_reason": "end_turn",
+  "session_id": "2a6d04da-f9dc-4caf-8963-3486c41dcf59",
+  "total_cost_usd": 0.184969,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 20184,
+    "cache_read_input_tokens": 262875,
+    "output_tokens": 5163,
+    "output_tokens_details": {
+      "thinking_tokens": 2667
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20184,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 167,
+        "cache_read_input_tokens": 42880,
+        "cache_creation_input_tokens": 1630,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1630
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 14,
+      "outputTokens": 5163,
+      "cacheReadInputTokens": 262875,
+      "cacheCreationInputTokens": 20184,
+      "webSearchRequests": 0,
+      "costUSD": 0.184969,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL.** `cli.py` hardcodes its own `_PREFIX = \"runstat: \"` literal instead of importing `messages.PREFIX`, directly violating the criteria that error text live only in the catalogue and that wording changes require editing only `messages.py` — the work session's own proposal admits this was done deliberately to satisfy a pre-existing test that rewards the duplication, rather than to satisfy the task's stated goal. Verdict written to `loop/verdict.json`.",
+  "ttft_ms": 1683,
+  "ttft_stream_ms": 1053,
+  "time_to_request_ms": 23,
+  "type": "result",
+  "duration_ms": 57971,
+  "uuid": "f92372cc-c296-44d7-bcdd-533b723c96d9",
+  "phase": "review",
+  "iteration": 2
+}

@@ -21,8 +21,11 @@ Read, in this order:
    what you will be judged against; the verify command is the gate you must pass.
 2. The last two entries of this plan's journal, `loop/journals/<run_id>.md`
    (the `run_id` is in `state.json`) — what just happened, and anything
-   flagged for you. If your task has non-empty `notes`, read those too: a
-   previous attempt failed and that is what it learned.
+   flagged for you. Then the most recent entry for **your own task**, if it is
+   older than those: the journal is scoped by recency and your task may have
+   been attempted many iterations ago, so what a previous attempt of it learned
+   can already have scrolled past. If your task has non-empty `notes`, read
+   those too: a previous attempt failed and that is what it learned.
 3. `CLAUDE.md`, and the brief named in `state.json`'s `brief` field.
 4. The files your task touches.
 
@@ -75,6 +78,14 @@ implemented the store module" is not.
 
 - **You do not set task status.** You propose an outcome; the gate and the
   review session decide. Do not edit `loop/state.json` at all.
+- **You do not change your own gate.** Not the `verify` command, and not a test
+  file that already existed when you started. Those were authored before any
+  implementation existed, and that is the only reason they mean anything: a
+  session that writes both the work and the gate has a gate that proves
+  nothing — *however correct its rewrite happens to be*. If your gate is wrong,
+  say so and report `blocked` (below). Fixing it is a plan-level change and
+  belongs to the operator. The driver restores `loop/state.json` if you edit it
+  and fails the iteration, so this costs you an attempt and changes nothing.
 - **You do not commit.** The driver makes one commit per iteration covering
   everything. Leave your changes in the working tree.
 - **You do not write to the journal.** The driver assembles the entry from
@@ -88,6 +99,21 @@ required tool is denied, the task contradicts the brief or the repo — do not
 guess and do not fake it. Write `loop/proposal.json` with `outcome: "blocked"`,
 and use `summary` for what you tried and `notes` for the specific decision or
 access you need to proceed.
+
+**A gate a correct implementation cannot pass is one of these.** If the only way
+to make `verify` exit 0 is to write something you would not otherwise write —
+duplicating a value so a substring check finds it, weakening an assertion,
+inlining what belongs behind a reference — then the gate is wrong, not the
+approach. Implement it properly, let the gate fail, and report `blocked` naming
+the command and what it should have asserted instead. Say it in `notes` even if
+you are sure; the next session cannot see what you worked out.
+
+That is the honest version of a real failure this loop has already had: a
+session found its gate asserted something its correct implementation could not
+satisfy, hand-wrote a duplicate to get past it, and recorded exactly why in its
+notes. The review caught it. The notes were the right instinct and the wrong
+outcome — `blocked` was available and says the same thing without shipping the
+defect.
 
 Then stop. Halting cleanly, with a clear account of what blocked you, is a
 success. Faking

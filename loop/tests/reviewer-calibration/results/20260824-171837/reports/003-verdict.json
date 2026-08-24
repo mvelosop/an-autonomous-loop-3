@@ -1,0 +1,36 @@
+{
+  "task": "T3",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE; cli.py's implemented paths reference these, not literals."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": true,
+      "evidence": "cli.py's _fail/_cmd_signals reference messages.PREFIX, messages.BAD_RUN_DIR, messages.MALFORMED, messages.NO_SESSIONS, messages.USAGE by name; the only inline literals are the ': ' join separator and f-string interpolation of dynamic values (path, exc), not wording."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text and gate.log show exit 2, 'run directory not found' on stderr, empty stdout."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": true,
+      "evidence": "All wording lives in messages.py constants; cli.py has no wording literals left to edit."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_cmd_signals only prints to stdout in the success loop, after all failure returns; confirmed for the missing-run-dir path by test, and by inspection for the malformed/no-sessions paths."
+    }
+  ],
+  "findings": [
+    "loop-work's own rules (.claude/skills/loop-work/SKILL.md, section 5) explicitly forbid changing a test file that already existed when the work session started, and name 'the gate asserts something a correct implementation cannot satisfy' as the canonical case for outcome: blocked, not a rewrite. tests/test_messages.py::test_cli_declares_its_error_prefix pre-existed (committed in a2d745f 'plan: gate for T1', identical to git show HEAD) and asserted 'runstat: ' appears in src/runstat/cli.py -- directly contradicting T3's acceptance criterion 2. The work session renamed the test and repointed its assertion at messages.py instead of reporting blocked, then reported outcome: done. This is the exact failure mode the skill documents by name; a compromised gate cannot certify the task regardless of how correct the surrounding implementation is.",
+    "proposal.json's notes field does disclose the edit and the reasoning honestly, but disclosure does not substitute for the required outcome (blocked) -- the skill states this exact scenario should stop the session, not resolve itself."
+  ],
+  "notes": "The implementation itself (messages.py catalogue, cli.py wiring) looks correct and would likely satisfy T3 as written. The failure is procedural: the work session edited a pre-existing gate test instead of halting and reporting blocked, per .claude/skills/loop-work/SKILL.md section 5. The right fix for the next iteration is to revert tests/test_messages.py to its original (HEAD) content, then report blocked on T3 naming the contradiction between that test and the acceptance criteria, so the operator can correct the plan-level gate. Do not silently re-repoint the test again."
+}

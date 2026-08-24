@@ -1,0 +1,36 @@
+{
+  "task": "T2",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py:14 declares `_PREFIX = \"runstat: \"`, a second, independent definition of the same string as messages.PREFIX (src/runstat/messages.py:9). The prefix is defined twice."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py:14, `_PREFIX = \"runstat: \"` is an inline error-prefix literal, used directly in `_fail()` (cli.py:18) instead of referencing `messages.PREFIX`."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py:26-27: `if not args.run_dir.is_dir(): return _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)` prints catalogue text via _fail to stderr and returns 2; confirmed by tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passing."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": false,
+      "evidence": "cli.py:11-13's own comment admits the opposite: \"Declared here rather than taken from messages.PREFIX ... Keep in sync with messages.PREFIX by hand if the wording changes.\" Editing messages.PREFIX alone does not change the prefix cli.py prints."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_fail() (cli.py:17-19) writes only to stderr; every failure path returns via _fail before any stdout print, and _cmd_signals only prints to stdout after all failure checks. Consistent with test_missing_run_dir_exits_2_with_catalogue_text asserting p.stdout == \"\"."
+    }
+  ],
+  "findings": [
+    "cli.py hand-copies the error prefix into a local `_PREFIX = \"runstat: \"` literal instead of importing messages.PREFIX, which is precisely the drift the task's own goal text calls out as the reason the catalogue exists rather than the tidy-up it's supposed to be. loop/proposal.json documents this as a deliberate choice made to satisfy tests/test_messages.py::test_cli_declares_its_error_prefix (which asserts the literal substring \"runstat: \" appears in cli.py's source) rather than to satisfy the task's acceptance criteria. The verify command passes only because the pre-existing test rewards the anti-pattern; the acceptance criteria as written in state.json are not met.",
+    "The correct response to a genuine conflict between the verify command and the acceptance criteria is to halt and report the conflict (rule 8), not to silently reproduce the exact drift the task exists to remove and note it as a 'gotcha' after the fact."
+  ],
+  "notes": "tests/test_messages.py::test_cli_declares_its_error_prefix (pre-existing, committed at plan time in df16105, not part of this task's file scope) is in direct tension with acceptance criteria 1/2/4 — it can only pass if the literal 'runstat: ' string is duplicated in cli.py's source, which is exactly what those criteria forbid. This conflict should be resolved by the plan/brief, not by a work session picking the test over the criteria. Next iteration should either fix the test to check for `messages.PREFIX` usage (e.g. via import or behavior) instead of a source-text substring, or clarify which one governs."
+}

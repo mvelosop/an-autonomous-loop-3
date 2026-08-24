@@ -1,0 +1,94 @@
+{
+  "is_error": false,
+  "duration_api_ms": 74490,
+  "num_turns": 11,
+  "stop_reason": "end_turn",
+  "session_id": "e93ec673-5571-48d2-8326-67c3a61f2a65",
+  "total_cost_usd": 0.22951860000000002,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 25638,
+    "cache_read_input_tokens": 324173,
+    "output_tokens": 6210,
+    "output_tokens_details": {
+      "thinking_tokens": 3522
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25638,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 167,
+        "cache_read_input_tokens": 48321,
+        "cache_creation_input_tokens": 1643,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1643
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 16,
+      "outputTokens": 6210,
+      "cacheReadInputTokens": 324173,
+      "cacheCreationInputTokens": 25638,
+      "webSearchRequests": 0,
+      "costUSD": 0.22951860000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL.** `cli.py` hand-duplicates the error prefix (`_PREFIX = \"runstat: \"` at cli.py:16) instead of using `messages.PREFIX`, which is defined but never referenced anywhere — the comment above it even admits this must be \"kept in sync by hand.\" That's exactly the drift the task exists to eliminate, and it directly violates acceptance criteria 2 and 4. Full reasoning and evidence are in `loop/verdict.json`.",
+  "ttft_ms": 2250,
+  "ttft_stream_ms": 1082,
+  "time_to_request_ms": 20,
+  "type": "result",
+  "duration_ms": 75408,
+  "uuid": "4a0e87d2-af92-42a4-8037-b78749b65c46",
+  "phase": "review",
+  "iteration": 1
+}
