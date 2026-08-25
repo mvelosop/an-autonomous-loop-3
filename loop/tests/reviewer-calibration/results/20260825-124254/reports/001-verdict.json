@@ -1,0 +1,35 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A message catalogue exists at src/runstat/messages.py and defines the CLI's user-facing strings",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE"
+    },
+    {
+      "criterion": "cli.py imports the catalogue rather than carrying a separate hard-coded string table",
+      "met": false,
+      "evidence": "src/runstat/cli.py:16 defines `_PREFIX = \"runstat: \"`, a literal duplicate of messages.PREFIX. It is the value actually used by `_fail()` at cli.py:20 (`f\"{_PREFIX}{text}\"`); `messages.PREFIX` is never imported or referenced anywhere in cli.py. The comment at cli.py:13-15 ('Declared here rather than taken from messages.PREFIX ... Keep in sync with messages.PREFIX by hand') acknowledges the duplication rather than eliminating it. This is exactly the drift the task's own goal text warns against: 'A copy left inline in cli.py reintroduces exactly the drift this task exists to remove.' If messages.PREFIX changes, the CLI's actual printed prefix does not."
+    },
+    {
+      "criterion": "The catalogue's strings are used on the CLI's failure paths",
+      "met": true,
+      "evidence": "cli.py uses messages.BAD_RUN_DIR, messages.MALFORMED, messages.NO_SESSIONS, messages.USAGE on the four failure paths in _cmd_signals/main — every catalogue string except PREFIX, which is bypassed as above"
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py:25-26 returns _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2); tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes (verified via `uv run pytest -q tests/test_messages.py` -> 2 passed)"
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "Every failure path returns via _fail(), which prints only to stderr; test_missing_run_dir_exits_2_with_catalogue_text asserts p.stdout == \"\" and passes"
+    }
+  ],
+  "findings": [
+    "cli.py keeps its own hard-coded `_PREFIX = \"runstat: \"` instead of using messages.PREFIX, which the catalogue defines for exactly this purpose. This is a real, used-at-runtime duplicate (not just a stray literal) and is the specific failure mode the task's goal text names as the reason the task exists. Fix is to reference messages.PREFIX from cli.py."
+  ],
+  "notes": "Unrelated to this task: `uv run pytest -q` (full suite) has one pre-existing failure, tests/test_signals_cmd.py::test_signals_command_prints_eight_lines, caused by signals.py emitting 9 lines instead of 8 (tasks_done/tasks_total as two lines rather than one 'tasks closed: x/y' line per the brief). Confirmed via `git stash` that this fails identically before T1's diff, so it predates T1 and is out of T1's file scope (messages.py, cli.py only) -- not held against this verdict, but worth flagging for whichever later task implements `signals` output fully. Separately, loop/proposal.json for this iteration is close to content-free (\"files\": [], summary \"Implemented the task and verified it.\") -- not itself a criterion failure, but it made the proposal useless as a guide and this review relied entirely on the diff and state.json."
+}

@@ -35,6 +35,39 @@ Each `verify` command must be:
   adjacent happens to work.
 - **Fast.** Seconds, not minutes. It runs again on every later iteration.
 
+### Assert on the parse, not on its text
+
+**The driver rejects a plan whose verify command re-serialises a parsed
+structure and substring-matches the text.** This one is checked, not advised.
+
+```js
+// rejected
+need(JSON.stringify(op.requestBody).indexOf('url') >= 0, '...')
+
+// the compliant form — and there is essentially one
+const s = op.requestBody.content['application/json'].schema;
+const r = s.$ref ? doc.components.schemas[s.$ref.split('/').pop()] : s;
+need(r?.properties?.url, 'the documented request body has no url property');
+```
+
+Such a check is not merely loose, it is **backwards**: it fails the idiomatic
+implementation, because a `$ref` does not contain the property name, and passes
+a hand-written duplicate, because that does. A real run produced exactly that —
+the gate forced a schema to be hand-copied, which was the one thing its task
+existed to prevent.
+
+So resolve a reference before asserting through it, and prefer a structural
+check to a substring: `schema.properties.url` cannot be satisfied by a
+description, a comment, or an unrelated field that happens to contain the word.
+
+Matching text that was never parsed — an HTML page, a log line, `--help` output
+— is fine and is not flagged. The rule is about throwing away a parse you
+already have.
+
+The same applies to **source text**: a gate that greps a file under `src/` for a
+literal is checking how the code is written rather than what it does, and is
+rejected too.
+
 Known trap: `uv run pytest` exits **5**, not 0, when it collects zero tests. A
 scaffolding task whose verify command is a bare test run can therefore never
 pass. Author around it — assert on the thing the task actually produces
@@ -111,6 +144,43 @@ stdout" is both.
 
 Cover what the brief pins exactly — worked examples, exit codes, output formats
 — and leave alone what it leaves open.
+
+### What the gate cannot carry
+
+Some requirements cannot be expressed as an assertion over what the program
+produces, however well you write the assertion. *"The API document is generated
+from the code rather than hand-written"* is one: a hand-duplicated schema and a
+derived one are **byte-identical in the output**. The document cannot reveal
+where it came from. Neither can a test that reads it.
+
+**Do not approximate these in the verify command.** A proxy that passes the
+corrupted implementation is the wrong proxy by construction, and writing one
+costs twice — the gate does not prove the thing, and its existence implies the
+thing was checked. That is worse than an acknowledged gap.
+
+Put it in the acceptance criteria instead, written so the review session can
+rule on it **by reading the diff**, and specific enough to be ruled *against*:
+
+- *"The document is produced by the Swagger module from decorators, not from a
+  checked-in hand-written file"* — a hand-written literal inside a decorator
+  satisfies this. It was, and the review passed it.
+- *"No schema literal is duplicated at a call site; the request body's schema is
+  produced from the DTO's own decorators"* — a reviewer can hold this against
+  the diff and rule.
+
+The gate checks **what the program does**. The review checks **how it was
+built**. A criterion handed to the wrong one is not checked at all.
+
+**Measured, not assumed** (calibration cases 05, 07, 07b): the review catches a
+provenance defect when the failure mode is named *anywhere it reads* — the
+acceptance criteria, the goal, or a docstring on the module that owns the
+invariant. Weakening the criteria did not flip the verdict; nor did weakening
+the goal as well. The one real run that missed this had it written **nowhere**.
+
+So the criteria are the best place — they are what the reviewer rules against —
+but the rule is the broader one: **name what a violation looks like, not just
+what the goal is.** "Generated from the code, not hand-written" is a goal.
+"No schema literal duplicated at a call site" is a violation.
 
 ## Before you finish
 

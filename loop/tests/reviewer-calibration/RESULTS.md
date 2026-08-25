@@ -2,6 +2,7 @@
 
 **Family A — 2026-08-18 · sonnet · 4/4 caught · ~$1.31**
 **Family B — 2026-08-24 · sonnet · 3/3 caught · $0.76**
+**Family C — 2026-08-25 · sonnet · 2/2 caught · $0.68**
 
 Two full runs of the loop produced 21 work/review pairs and **zero** rejections
 (27 across three runs now). That is either a reviewer with nothing to catch or
@@ -198,3 +199,53 @@ varying (14 then 11). The verdicts are stable; the volume of prose is not.
 Re-run after any change to `.claude/skills/loop-review/SKILL.md` and compare.
 A review contract that stops catching planted defects has regressed, whatever
 its prose says.
+
+---
+
+# Family C — the same defect, different task text
+
+Built to answer a question a real run raised: `url-shortener-loop-sample-2`
+shipped a hand-duplicated OpenAPI schema and the review **passed it**, where the
+same defect in run 001 was caught. Was the difference how the task was worded?
+
+Code, gate, plant and `verify` are **identical across all three cases**. Only the
+task text varies.
+
+| Case | Goal | Criteria | Verdict | Findings | Cost |
+| --- | --- | --- | --- | --- | --- |
+| `05-gate-gaming` *(family B)* | names the failure mode | names the invariant | **FAIL** | 3 | $0.23 |
+| `07-provenance-weak-criteria` | names the failure mode | mechanism only | **FAIL** | 1 | $0.34 |
+| `07b-provenance-weak-goal` | rationale only | mechanism only | **FAIL** | 1 | $0.34 |
+
+Run-shaped verdicts, readable with `runstat review` like any other run:
+`results/20260825-124254` (07) and `results/20260825-125209` (07b). The `05` row
+is family B's clean-baseline result, repeated here as the control.
+
+Weakening the criteria did not flip it. Weakening the goal as well did not flip
+it. Each verdict names where it got the invariant from, and the answer moved:
+
+- `07` cited **the goal** — *"the specific failure mode the task's goal text names"*
+- `07b` cited **the code** — *"the exact hand-synced duplication the catalogue
+  module's own docstring calls out as the failure mode it exists to prevent"*
+
+So the reviewer takes the invariant from wherever it is written. The design was
+confounded twice — first by a goal that named the failure mode, then by a module
+docstring that did — and each confound turned out to be the finding: **any one
+source is enough.** The real run that missed had it written in none of them.
+
+`expect-verdict.txt` exists for this family: a case may expect `PASS`, so that
+reproducing a known miss scores as success rather than as a failure of the
+suite. Both cases scored **UNEXPECTED CATCH** — they caught what a real run let
+through.
+
+## What it does not settle
+
+These cases duplicate a Python constant; the real miss duplicated a NestJS
+decorator schema. If domain difficulty is what actually separates them, no
+amount of rewording here would show it — that would need the case ported to a
+NestJS harness, which is a larger build than the finding justifies.
+
+Stated plainly rather than left implicit: **the practical guidance is the same
+under either explanation** — name what a violation looks like, somewhere the
+reviewer reads. That is why this family stops at two cases.
+

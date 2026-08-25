@@ -244,9 +244,24 @@ run_case() {
       | grep -qiE -f "$dir/expect.txt" && named=1
   fi
 
+  # Most cases expect a FAIL. One expects a PASS: it reproduces a miss that
+  # already happened in a real run, and exists to be A/B'd against a sibling
+  # whose only difference is how its acceptance criteria are worded. Scoring
+  # that as a plain miss would report a successful measurement as a failure --
+  # which is the exact reporting defect this whole suite exists to prevent.
+  local expected=FAIL
+  [[ -f "$dir/expect-verdict.txt" ]] && expected="$(tr -d '[:space:]' <"$dir/expect-verdict.txt")"
+
   local outcome_rec closed_before=$((miss + diagnosed))
   [[ "$verdict" == "FAIL" ]] && outcome_rec=review_fail || outcome_rec=done
-  if [[ "$verdict" == "FAIL" ]]; then
+  if [[ "$verdict" == "FAIL" && "$expected" == "PASS" ]]; then
+    say "  UNEXPECTED CATCH — FAIL where the real run passed, $findings finding(s), \$$cost"
+    jq -r '(.findings // [])[] | "      - " + .' "$WORK/loop/verdict.json" 2>/dev/null | head -4
+    pass=$((pass + 1)); RESULTS+=("UNEXPECT $name  (caught what a real run missed)")
+  elif [[ "$verdict" != "FAIL" && "$expected" == "PASS" ]]; then
+    say "  REPRODUCED — $verdict, as the real run did, \$$cost"
+    pass=$((pass + 1)); RESULTS+=("REPRODUC $name  (the known miss reproduces)")
+  elif [[ "$verdict" == "FAIL" ]]; then
     say "  CAUGHT — FAIL, $findings finding(s), \$$cost"
     jq -r '(.findings // [])[] | "      - " + .' "$WORK/loop/verdict.json" 2>/dev/null | head -4
     pass=$((pass + 1)); RESULTS+=("CAUGHT   $name  ($findings finding(s))")

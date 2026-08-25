@@ -443,6 +443,37 @@ if [[ ! -f "$STATE" ]]; then
   bad_dep="$(state_get '[.tasks[].id] as $ids | [.tasks[]|.depends_on[]?|select(($ids|index(.))==null)] | length')"
   [[ "$bad_dep" -eq 0 ]] || die "$bad_dep dependency reference(s) name a task that does not exist"
 
+  # Gate-shape lint. A gate that parses a structure and then substring-matches
+  # its re-serialised text has thrown away the parse -- and that is not a style
+  # preference. It rejects correct implementations (a $ref does not contain the
+  # property name) while accepting corrupted ones (a hand-written duplicate
+  # does). Both halves of that were observed in one real run.
+  #
+  # This is checkable precisely because the compliant form is essentially
+  # unique: navigate to the value and assert on it. The rule cannot be stated
+  # unambiguously in prose -- so it is stated as a check instead.
+  bad_gate=""
+  while IFS=$'\t' read -r id cmd; do
+    [[ -n "$id" ]] || continue
+    if grep -qE 'JSON\.stringify\([^)]*\)\.(indexOf|includes|match|search)\(|json\.dumps\([^)]*\)\.(find|index)\(|in json\.dumps\(' <<<"$cmd"; then
+      bad_gate+="    $id  re-serialises a parsed structure and substring-matches the text"$'\n'
+    elif grep -qE '(readFileSync|open)\([^)]*src/|src/[^)]*\)[[:space:]]*\.[[:space:]]*read_text\(|grep [^|]*[[:space:]]src/' <<<"$cmd"; then
+      bad_gate+="    $id  asserts on source text rather than on what the program does"$'\n'
+    fi
+  done < <(state_get '.tasks[] | [.id, .verify] | @tsv')
+  [[ -z "$bad_gate" ]] || die "gate shape rejected -- fix the plan:
+
+$bad_gate
+  Navigate to the value and assert on it, resolving a \$ref when there is one:
+
+    const s = op.requestBody.content['application/json'].schema;
+    const r = s.\$ref ? doc.components.schemas[s.\$ref.split('/').pop()] : s;
+    need(r?.properties?.url, 'the documented request body has no url property');
+
+  A substring over re-serialised JSON passes on a hand-written duplicate and
+  fails on the idiomatic form -- exactly backwards. Matching on text that was
+  never parsed (an HTML page, a log line) is fine and is not flagged."
+
   # The driver stamps both, rather than trusting the plan session to record
   # them: which branch and which brief a plan belongs to are facts the driver
   # already holds, and the brief is now what decides whether a later run

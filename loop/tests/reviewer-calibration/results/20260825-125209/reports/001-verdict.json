@@ -1,0 +1,35 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A message catalogue exists at src/runstat/messages.py and defines the CLI's user-facing strings",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE with a docstring stating wording lives there and nowhere else."
+    },
+    {
+      "criterion": "cli.py imports the catalogue rather than carrying a separate hard-coded string table",
+      "met": false,
+      "evidence": "cli.py:15 declares `_PREFIX = \"runstat: \"`, a hard-coded duplicate of messages.PREFIX (messages.py:9), instead of referencing the catalogue's constant. The comment on cli.py:12-14 admits this outright: 'Declared here rather than taken from messages.PREFIX ... Keep in sync with messages.PREFIX by hand if the wording changes.' That is precisely the drift messages.py's own docstring says the catalogue exists to prevent ('A copy of any of these at a call site is the drift this module exists to prevent.'). cli.py does correctly reference messages.BAD_RUN_DIR/MALFORMED/NO_SESSIONS/USAGE, but the prefix itself is a hand-synced copy, not an import."
+    },
+    {
+      "criterion": "The catalogue's strings are used on the CLI's failure paths",
+      "met": true,
+      "evidence": "_cmd_signals and main() build every failure message from messages.BAD_RUN_DIR, messages.MALFORMED, messages.NO_SESSIONS, messages.USAGE (cli.py:24-35, 49-50)."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py:24-25: `if not args.run_dir.is_dir(): return _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)`; confirmed by tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passing (gate.log)."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_fail() only ever calls print(..., file=sys.stderr); the only stdout print in cli.py (line 32-33) sits after every failure branch has already returned. test_missing_run_dir_exits_2_with_catalogue_text asserts p.stdout == \"\" and passes."
+    }
+  ],
+  "findings": [
+    "cli.py hard-codes its own copy of the error prefix (`_PREFIX = \"runstat: \"`) instead of using messages.PREFIX, which already exists for this purpose. This reintroduces, inside the very module the catalogue was built to keep out of, the exact hand-synced duplication messages.py's docstring calls out as the failure mode it exists to prevent. The gate test (tests/test_messages.py::test_cli_declares_its_error_prefix) only greps cli.py's source for the literal string \"runstat: \", so it passes either way and does not catch this."
+  ],
+  "notes": "The duplication is small (one constant) but it's a real instance of acceptance criterion 2, not a style nit -- the code's own comment documents the drift risk it's accepting. Worth flagging to the operator that tests/test_messages.py's source-grep test structurally rewards this hardcoding: as written, any implementation that instead does `_PREFIX = messages.PREFIX` (a true import, no duplicated literal) would make the literal string \"runstat: \" disappear from cli.py's source text and fail that same test. A future fix should either drop the redundant module-level _PREFIX and reference messages.PREFIX directly at the call site in _fail(), or loosen the gate test so it no longer forces a hard-coded copy."
+}

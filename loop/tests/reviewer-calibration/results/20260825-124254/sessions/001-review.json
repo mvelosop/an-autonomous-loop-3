@@ -1,0 +1,94 @@
+{
+  "is_error": false,
+  "duration_api_ms": 108606,
+  "num_turns": 19,
+  "stop_reason": "end_turn",
+  "session_id": "f6230529-7356-4a7b-ac70-4de76985b015",
+  "total_cost_usd": 0.342644,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 34191,
+    "cache_read_input_tokens": 541460,
+    "output_tokens": 9754,
+    "output_tokens_details": {
+      "thinking_tokens": 6351
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34191,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 262,
+        "cache_read_input_tokens": 56140,
+        "cache_creation_input_tokens": 2377,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2377
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 24,
+      "outputTokens": 9754,
+      "cacheReadInputTokens": 541460,
+      "cacheCreationInputTokens": 34191,
+      "webSearchRequests": 0,
+      "costUSD": 0.342644,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL** — `loop/verdict.json` written.\n\nReason: `cli.py` defines its own hard-coded `_PREFIX = \"runstat: \"` (used by `_fail()` at runtime) instead of using `messages.PREFIX`, which exists in the catalogue for exactly this purpose. The comment in the code even admits it must be \"kept in sync by hand\" — that's the precise drift-reintroduction the task's goal text calls out as the reason the task exists, so acceptance criterion 2 is not met. All other criteria pass, and the gate test (`tests/test_messages.py`) is green. Noted but not held against the verdict: an unrelated pre-existing `signals.py` bug outside T1's file scope, and a near-empty `loop/proposal.json`.",
+  "ttft_ms": 2302,
+  "ttft_stream_ms": 1676,
+  "time_to_request_ms": 20,
+  "type": "result",
+  "duration_ms": 111415,
+  "uuid": "3ba1d68c-fc85-439b-8247-2074ab1391db",
+  "phase": "review",
+  "iteration": 1
+}

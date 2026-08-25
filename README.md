@@ -31,7 +31,7 @@ executable bit that a `git clone` preserves.)
 
 The loop is **vendored** — copied in, not linked. It merges `.claude/settings.json`
 and `CLAUDE.md` rather than overwriting them, stamps `loop/.installed` with the
-source commit, and finishes by running its own 26-check suite in your repo to
+source commit, and finishes by running its own 27-check suite in your repo to
 prove the install works. Verified on a Go repo with no Python present.
 
 It is only ~1% stack-coupled, because the loop never names a test runner: each

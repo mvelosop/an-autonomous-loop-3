@@ -215,7 +215,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-loop/tests/run-all.sh          # all 26 checks
+loop/tests/run-all.sh          # all 27 checks
 loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 
@@ -248,6 +248,7 @@ input and an expected exit code end an argument that a paragraph cannot
 | `23-git-identity` | a repo with no git identity is refused before any spend |
 | `19-session-error` | a dead session is an infrastructure failure, not a task's |
 | `24-state-tampering` | a session that edits `loop/state.json` has it restored and the iteration failed |
+| `25-gate-shape` | a verify command that substring-matches re-serialised JSON is refused at plan time |
 
 Scenario 12 is the one that keeps the control plane and the analysis plane
 honest: the same fixture arbitrates `run.sh` and `runstat`.
