@@ -32,6 +32,7 @@ echo 'months of narrative'                     >"$TGT/.loop/state/journals/consu
 echo '{"iteration":1}'                         >"$TGT/.loop/state/runs/main/x/iterations.jsonl"
 echo 'transient'                               >"$TGT/.loop/tmp/proposal.json"
 echo '{"permissions":{"allow":["Bash(pnpm:*)"],"deny":[]}}' >"$TGT/.claude/settings.json"
+printf '# Knowledge roots\n\nours, hand-written\n' >"$TGT/.claude/loop-knowledge.md"
 printf '# Their repo\n\ntheir own instructions\n'           >"$TGT/CLAUDE.md"
 echo 'node_modules'                            >"$TGT/.gitignore"
 # a stale mechanism file, to prove the other half of the boundary
@@ -42,6 +43,7 @@ before_journal="$(cat "$TGT/.loop/state/journals/consumer-plan.md")"
 before_iters="$(cat "$TGT/.loop/state/runs/main/x/iterations.jsonl")"
 before_tmp="$(cat "$TGT/.loop/tmp/proposal.json")"
 before_settings="$(cat "$TGT/.claude/settings.json")"
+before_know="$(cat "$TGT/.claude/loop-knowledge.md")"
 
 note "── install into a target that is mid-run ──"
 "$REPO_ROOT/.loop/install.sh" --no-proof "$TGT" >"$TGT/install.log" 2>&1
@@ -63,6 +65,12 @@ note "── install into a target that is mid-run ──"
   || bad "the installer modified the target's settings.json"
 [[ -f "$TGT/.loop/settings.json" ]] \
   && ok ".loop/settings.json installed" || bad "the fence did not ship"
+# The knowledge declaration is the repo's own content at a path the loop fixes.
+# Seeding it is a courtesy; rewriting it would be the settings-merge mistake in
+# another costume.
+[[ "$(cat "$TGT/.claude/loop-knowledge.md")" == "$before_know" ]] \
+  && ok ".claude/loop-knowledge.md untouched — the repo's own knowledge" \
+  || bad "the installer overwrote the target's knowledge declaration"
 grep -q 'Bash(git commit:\*)' "$TGT/.loop/settings.json" \
   && ok "the fence carries its deny list" || bad "the fence has no deny list"
 
@@ -126,6 +134,8 @@ git -C "$TGT2" config user.email t@t && git -C "$TGT2" config user.name t
 
 ( cd "$TGT" && ./.loop/install.sh --no-proof "$TGT2" ) >"$TGT2/install.log" 2>&1
 [[ $? -eq 0 ]] && ok "chained install exited 0" || bad "an installed copy cannot install onward — see $TGT2/install.log"
+[[ -s "$TGT2/.claude/loop-knowledge.md" ]] \
+  && ok "knowledge declaration seeded where absent" || bad "no knowledge declaration seeded"
 [[ -s "$TGT2/.loop/run.sh" && -s "$TGT2/.loop/settings.json" ]] \
   && ok "mechanism reached the second target" || bad "mechanism did not chain"
 [[ -s "$TGT2/.loop/examples/0003-runstat-cli.md" && -s "$TGT2/.loop/examples/0004-runstat-review.md" ]] \

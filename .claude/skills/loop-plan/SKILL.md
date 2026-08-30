@@ -10,7 +10,8 @@ code. Your entire output is `.loop/state/state.json` — the task list every lat
 session works from.
 
 Your argument is the path to a brief. Read it completely before anything else,
-then read `CLAUDE.md`.
+then read `CLAUDE.md`, then — if it exists — `.claude/loop-knowledge.md` and
+the roots it declares (see *Surveying what binds*, below).
 
 ## What makes this hard
 
@@ -113,6 +114,9 @@ Write `.loop/state/state.json` in exactly this shape:
       "title": "One line, imperative",
       "goal": "Why this task exists and what it unblocks. Two or three sentences, written for someone who has not read the brief.",
       "files": ["src/runstat/__init__.py", "pyproject.toml"],
+      "references": [
+        {"path": "docs/runstat.md", "why": "the signal formulas this task must not diverge from"}
+      ],
       "depends_on": [],
       "acceptance": [
         "A specific, checkable statement",
@@ -129,10 +133,56 @@ Write `.loop/state/state.json` in exactly this shape:
 
 `run_id` is the brief's number and slug. Every task starts `pending` with
 `attempts: 0` and empty `notes`. Timestamps are UTC, `Z`-suffixed.
+`references` is `[]` when nothing binds the task.
 
 The `goal` field is not decoration. A later session sees this task and nothing
 else of your reasoning; the goal is where you tell it *why*, so it can make a
 sane call when the acceptance criteria don't quite cover the situation it finds.
+
+## Surveying what binds
+
+The brief carries the decisions. It does not carry the repo — the conventions,
+the invariants, the contracts a task has to respect because something else
+already depends on them. In a greenfield target there is nothing there and this
+step is empty. In a repo with years of accumulated knowledge it is most of what
+a work session needs, and **you are the only session positioned to supply it**:
+you see the whole decomposition, so you can tell which task is bound by what.
+
+If `.claude/loop-knowledge.md` exists, read it and survey every root it
+declares, the way that file says each one can be scanned — an index, or the
+files' own `description:` frontmatter. You are building a one-line-per-document
+catalogue, not reading the documents. Then, for each task, attach what actually
+binds it:
+
+```json
+"references": [
+  {"path": "docs/runstat.md", "why": "the signal formulas this task must not diverge from"}
+]
+```
+
+If the file does not exist, every task gets `"references": []` and you move on.
+Do not go looking for a knowledge root the repo has not declared.
+
+**The `why` is not a label, it is the whole value.** A path on its own gets
+followed wastefully or skipped silently; a reason tells a later session whether
+this one applies to what it is actually doing. Write what the document
+*constrains*, not what it is about.
+
+**Cite what binds, not what relates.** Every reference costs attention in two
+sessions on every iteration that touches the task. Four references that each
+constrain something beat twelve that might be interesting. But where a document
+genuinely binds, cite it — a work session can skip a reference that turns out
+not to apply, and cannot read one it was never given.
+
+**Only cite what exists.** The driver rejects a plan with a reference that does
+not resolve, and it is right to: a cited-but-missing file stops a work session
+that has no way to recover, and it costs an attempt to find out. Check the
+paths you write.
+
+**References do not replace acceptance criteria.** A reference tells a session
+what to read; a criterion is what it is judged against. If a document imposes
+something the review must rule on, say it in the acceptance criteria too — the
+reviewer holds the diff against the criteria, not against a reading list.
 
 ## Acceptance criteria
 
@@ -193,7 +243,8 @@ Check your own output, and fix what fails rather than reporting it:
 4. Every `verify` command runs *right now* and **fails** — run them. One that
    passes before any work exists is not a gate, and one that errors on syntax is
    a broken gate. Fix either.
-5. Nothing anywhere contains an absolute path.
+5. Every `references` path resolves. Check them; a dangling one fails the run.
+6. Nothing anywhere contains an absolute path.
 
 Then report: the run id, the task count, the first ready task, and — plainly —
 anything about the brief you had to interpret rather than read. That last part

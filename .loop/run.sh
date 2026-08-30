@@ -82,7 +82,52 @@ CONVERGENCE_MIN="${LOOP_CONVERGENCE_MIN:-6}"
 PLAN_MODEL="${LOOP_PLAN_MODEL:-opus}"
 WORK_MODEL="${LOOP_WORK_MODEL:-sonnet}"
 
-BRIEF="${1:-}"
+PLAN_ONLY=0
+BRIEF=""
+for a in "$@"; do
+  case "$a" in
+    --plan-only|--only-plan) PLAN_ONLY=1 ;;
+    *) BRIEF="$a" ;;
+  esac
+done
+
+# Validate the argument before anything is opened, locked or reset.
+#
+# The plan-reset path below deletes a committed state.json when the brief you
+# name differs from the one the plan holds — which is right, but it used to
+# happen without ever checking that the brief you named exists. So `run.sh
+# --help`, or a mistyped path, read as "a different brief" and destroyed a
+# finished plan on its way to failing. Found by doing exactly that.
+#
+# A resumable run is the loop's central promise; a typo must not be able to
+# spend it.
+case "$BRIEF" in
+  -h|--help)
+    cat <<'USAGE'
+usage: .loop/run.sh [--plan-only] [brief-path]
+
+  .loop/run.sh docs/briefs/0003-runstat-cli.md   plan and run that brief
+  .loop/run.sh                                   resume the plan in .loop/state/state.json
+  .loop/run.sh --plan-only <brief>               plan, commit it, and stop
+
+--plan-only is the cheap half of a run: it pays for one planning session, then
+stops so you can read the plan and its verify commands before committing to
+the rest. Review .loop/state/plan.md, adjust with .loop/amend.sh, then run
+.loop/run.sh with no argument to execute it.
+
+Naming a brief other than the one the current plan holds resets that plan and
+starts fresh. Docs: .loop/manual.md
+USAGE
+    exit 0 ;;
+  -*)
+    printf '\033[31m[loop] unknown option: %s — see .loop/run.sh --help\033[0m\n' "$BRIEF" >&2
+    exit 2 ;;
+esac
+if [[ -n "$BRIEF" && ! -f "$BRIEF" ]]; then
+  printf '\033[31m[loop] brief not found: %s\033[0m\n' "$BRIEF" >&2
+  printf '\033[31m[loop] nothing was changed; the current plan is untouched\033[0m\n' >&2
+  exit 2
+fi
 BRANCH="$(git branch --show-current 2>/dev/null)"
 [[ -n "$BRANCH" ]] || BRANCH="detached-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 BRANCH_SAFE="${BRANCH//\//-}"
@@ -348,6 +393,31 @@ preflight() {
     say "  [ ] .claude/settings.json is present but invalid"; ok=0
   fi
 
+  # A declared knowledge root the planner cannot scan is the expensive kind of
+  # silence: planning still succeeds, the tasks simply carry no references, and
+  # nothing downstream can tell the difference between "nothing bound this task"
+  # and "the planner could not see what did". Say it before the run spends.
+  if [[ -f .claude/loop-knowledge.md ]]; then
+    local blind="" n_roots=0 r
+    while read -r r; do
+      [[ -n "$r" ]] || continue
+      n_roots=$((n_roots + 1))
+      if   [[ ! -d "$r" ]];                                            then blind+=" $r(no such directory)"
+      elif [[ -f "$r/README.md" ]];                                    then continue
+      elif head -5 "$r"/*.md 2>/dev/null | grep -q '^description:';    then continue
+      else blind+=" $r"
+      fi
+    done < <(grep -oE '`[A-Za-z0-9_./-]+/`' .claude/loop-knowledge.md 2>/dev/null | tr -d '`' | sort -u)
+    if [[ "$n_roots" -eq 0 ]]; then
+      warn "  [ ] .claude/loop-knowledge.md declares no roots — the planner will cite nothing"
+    elif [[ -z "$blind" ]]; then
+      say "  [x] $n_roots knowledge root(s) scannable"
+    else
+      warn "  [ ] declared root(s) with no index and no descriptions:$blind"
+      warn "      the planner will guess from filenames; add a README.md index or description: frontmatter"
+    fi
+  fi
+
   # The driver makes one commit per iteration. A repo with no identity
   # configured fails at the END of iteration 1, after both sessions have been
   # paid for: the most expensive place to find a one-line setup problem.
@@ -457,6 +527,22 @@ if [[ ! -f "$STATE" ]]; then
   bad_dep="$(state_get '[.tasks[].id] as $ids | [.tasks[]|.depends_on[]?|select(($ids|index(.))==null)] | length')"
   [[ "$bad_dep" -eq 0 ]] || die "$bad_dep dependency reference(s) name a task that does not exist"
 
+  # Dangling-reference lint. A task's references are what the work session is
+  # told to read and what the review session holds it against, so a path that
+  # does not resolve is worse than no reference at all: the work session cannot
+  # recover, and it costs an attempt to discover that. Cheap to check here,
+  # expensive to find at iteration 7.
+  bad_ref=""
+  while IFS=$'\t' read -r id ref; do
+    [[ -n "$id" && -n "$ref" ]] || continue
+    [[ -e "$ref" ]] || bad_ref+="    $id  $ref"$'\n'
+  done < <(state_get '.tasks[] as $t | ($t.references // [])[] | [$t.id, .path] | @tsv')
+  [[ -z "$bad_ref" ]] || die "task reference(s) do not resolve -- fix the plan:
+
+$bad_ref
+  A cited file that is not there stops the session it was cited to, which has
+  no way to recover and burns an attempt finding out. Cite what exists."
+
   # Gate-shape lint. A gate that parses a structure and then substring-matches
   # its re-serialised text has thrown away the parse -- and that is not a style
   # preference. It rejects correct implementations (a $ref does not contain the
@@ -510,7 +596,31 @@ $bad_gate
 
   render_plan
   git add -A && git commit -q -m "[loop] plan $(state_get .run_id)" && say "committed the plan"
+
+  # --plan-only stops here, having paid for exactly one session.
+  #
+  # The plan is the highest-leverage artefact in a run and the cheapest thing to
+  # get wrong: every gate the rest of the run is measured against was authored
+  # in that one session. Reading it before spending on iterations is the whole
+  # point, and it used to mean LOOP_MAX_ITERATIONS=0 -- which works, but reads
+  # like a workaround and invites a typo in the one place a typo is expensive.
+  if [[ "$PLAN_ONLY" -eq 1 ]]; then
+    say ""
+    say "═══ plan only ═══"
+    say "plan:   $(state_get .run_id) — $(state_get '.tasks|length') task(s)"
+    say "first:  $(state_get '[.tasks[]|select(.status=="pending" and ((.depends_on//[])|length)==0)][0].id // "none"')"
+    say "read:   .loop/state/plan.md   (verify commands are in .loop/state/state.json)"
+    say "adjust: .loop/amend.sh"
+    say "run it: .loop/run.sh"
+    exit 0
+  fi
 else
+  if [[ "$PLAN_ONLY" -eq 1 ]]; then
+    say "--plan-only, but $(state_get .run_id) is already planned — nothing to do"
+    say "read:   .loop/state/plan.md"
+    say "run it: .loop/run.sh"
+    exit 0
+  fi
   say "resuming $(state_get .run_id) — $(state_get '[.tasks[]|select(.status=="done")]|length')/$(state_get '.tasks|length') done"
   state_edit --arg t "$(ts)" --arg b "$BRANCH" '.status="running" | .updated=$t | .branch=$b'
   open_journal

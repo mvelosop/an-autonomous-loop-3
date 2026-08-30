@@ -55,7 +55,7 @@ physically cannot inherit the implementer's rationalisation. Isolation is a
 property of the operating system, not of prompt discipline.
 
 **The orchestrator is deterministic.** Task selection, gates, attempt counting,
-stop conditions and halting are bash. That is why there are 28 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
+stop conditions and halting are bash. That is why there are 32 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
 attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
 stub the Task tool.** Every mechanical bug found in this loop was found by those
 tests, not by a run.
@@ -147,7 +147,7 @@ too — deny beats allow, repo-wide — which on a repo whose agents commit and
 push is a bad first day.
 
 It stamps `.loop/.installed` with the source commit, and finishes by **running
-the loop's own suite in the target** — 28 checks, free and offline, no model.
+the loop's own suite in the target** — 32 checks, free and offline, no model.
 (You will see one fewer until you have briefs of your own: the brief checker
 sits out when `docs/briefs/` is empty.)
 That is the install test: a copied artefact that can prove it works where it
@@ -184,6 +184,64 @@ jq --version && git --version && claude --version   # required
 the trust dialog. Without it `claude -p` *silently ignores* `.claude/settings.json`,
 so a run executes under the wrong permission surface. Preflight refuses to start
 until this is done — it is the single most common way to waste a run.
+
+### Telling the planner where your knowledge lives
+
+**Optional, and worth it in any repo that has more than the brief to obey.**
+
+The brief carries the decisions. It does not carry the repo — the conventions,
+the invariants, the specs a task must respect because something else already
+depends on them. In a greenfield target there is nothing there. In a codebase
+with years of accumulated knowledge that *is* most of what a work session needs,
+and there is no channel for it: `CLAUDE.md` is global, and the brief is
+re-read every iteration by two sessions, so neither can carry something that
+binds one task.
+
+So the planning session attaches references **per task**, and it finds them by
+reading `.claude/loop-knowledge.md` — your file, at a path the loop fixes:
+
+```markdown
+| Surface | Path | How to find what is in it |
+| --- | --- | --- |
+| Decision records | `docs/decisions/` | Index at `README.md` |
+| Domain model | `docs/domain/` | Every file has a `description:` frontmatter line |
+```
+
+Each task then carries what actually binds it, with a reason:
+
+```json
+"references": [
+  {"path": "docs/domain/state-transaction.puml",
+   "why": "the status lifecycle this task must not widen"}
+]
+```
+
+**The work session reads them, and so does the review session.** That second
+half is the point. A constraint the reviewer cannot see is a constraint it
+cannot enforce — the work would be bound by a document the review has no idea
+it was bound by. Because the reference lives on the task, both see the same
+list, and a convention that was pointed at and ignored becomes a finding rather
+than a thing nobody noticed.
+
+The loop knows nothing about what these documents *are*. It has no idea what an
+ADR is, or a use case, or a tier. Those are conventions and they belong to the
+repo that has them — so the declaration is prose you write, not a schema the
+loop imposes. If tier variants change which guideline binds, say that in your
+file and the planner will read it.
+
+Two things are checked rather than advised:
+
+- **A reference that does not resolve fails the plan**, before the run spends
+  anything. A cited-but-missing file stops a work session that has no way to
+  recover, and costs an attempt to discover.
+- **A declared root with neither an index nor `description:` frontmatter is
+  reported by preflight.** That failure is otherwise silent: planning succeeds,
+  tasks simply carry no references, and nothing downstream can distinguish
+  "nothing bound this task" from "the planner could not see what did".
+
+Declare nothing and the whole feature costs nothing — no file, no warnings,
+empty `references`. That is the right behaviour for a repo whose brief really is
+the whole world.
 
 ## 4. Writing a brief
 
@@ -331,9 +389,18 @@ Continue with no state edit:
 ## 6. Running
 
 ```bash
-.loop/run.sh docs/briefs/000N-....md   # plan, then iterate
-.loop/run.sh                           # resume
+.loop/run.sh docs/briefs/000N-....md              # plan, then iterate
+.loop/run.sh --plan-only docs/briefs/000N-....md  # plan, commit it, stop
+.loop/run.sh                                      # resume
 ```
+
+**`--plan-only` is worth making a habit.** The plan is the highest-leverage
+artefact the loop produces: every gate the rest of the run is measured against
+was authored in that one session, and a weak `verify` silently lowers the bar
+for everything after it. One planning session is cheap; the iterations are not.
+Stop, read `.loop/state/plan.md` and the `verify` commands in
+`.loop/state/state.json`, adjust with `.loop/amend.sh`, then `.loop/run.sh` with
+no argument to execute what you approved.
 
 Budgets are **per-run** and checked **between iterations**, so raising one and
 re-running always works with no state edit. Defaults: 30 iterations, $40,
