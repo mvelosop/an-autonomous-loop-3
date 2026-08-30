@@ -27,7 +27,12 @@ Read, in this order:
    can already have scrolled past. If your task has non-empty `notes`, read
    those too: a previous attempt failed and that is what it learned.
 3. `CLAUDE.md`, and the brief named in `state.json`'s `brief` field.
-4. The files your task touches.
+4. Everything in your task's `references`, each of which carries a `why` saying
+   what it constrains. These are not background reading: the planning session
+   attached them because this task is bound by them, and the review session can
+   see the same list. Skipping one you were given is how work gets rejected for
+   breaking a convention nobody mentioned in the diff.
+5. The files your task touches.
 
 ## 2. Do the task — only the task
 

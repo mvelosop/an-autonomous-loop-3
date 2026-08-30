@@ -97,6 +97,11 @@ Linear sub-issues plus cited design artifacts — and the loop can read neither.
   ordered slice seeds; step 7 is the hand-off.
 - `.claude/project-adapter.md` — the gate declaration. The brief's Constraints
   section points here.
+- `.claude/loop-knowledge.md` — where this repo declares its knowledge roots for
+  the planner. If it still holds the installer's seed, fix that first: the
+  `## Knowledge roots` table in `.claude/project-adapter.md` already has the
+  answer, and `docs/domain/` and `docs/use-cases/` need an index or per-file
+  `description:` frontmatter before the planner can survey them at all.
 
 ## What it does
 
@@ -115,6 +120,8 @@ Linear sub-issues plus cited design artifacts — and the loop can read neither.
    exact codes and formats a gate will assert. Worked example with concrete
    values. Out-of-scope from the sibling slices (step 6 already ordered them).
    Constraints from the stack and `.claude/project-adapter.md`. Task count.
+   Cite the design artifacts the brief came from — not the per-task guidelines,
+   which the planning session attaches itself.
 4. **Check.** Run `.loop/check-brief.sh <path>` and fix what it reports. The skill
    is not done until it exits 0. Mark the brief `**Status:** ready to plan` — the
    checker skips anything else, so an unmarked brief passes vacuously.
@@ -125,11 +132,17 @@ Linear sub-issues plus cited design artifacts — and the loop can read neither.
 - **Interactive, main-thread, operator-in-the-loop** — same posture as
   `/architect`, not a loop agent. Deciding what is frozen versus still open is a
   judgment call that needs to be able to ask.
-- **Reference binding docs, don't copy them.** Tech guidelines in
-  `docs/implementation/` and `.claude/guidelines/` reach the implementer and the
-  reviewer through the brief, so duplicating them into acceptance criteria is
-  waste that goes stale. But cite few and label each with *why* it is there — the
-  brief is re-read every iteration by two sessions.
+- **Do not do the guideline survey here.** Per-task references — tech
+  guidelines, process guidelines, ADRs, domain docs, use-case specs — are the
+  *planning* session's job, not the brief's. It reads `.claude/loop-knowledge.md`
+  and attaches what binds onto each task, where the work session reads it and
+  the review session can hold the diff against it. Putting that in the brief
+  would make it run-global, lose the per-task selection, and bloat a document
+  two sessions re-read every iteration. Make sure `.claude/loop-knowledge.md`
+  declares this repo's roots; that is where the survey lives.
+- **Do cite the design artifacts that frame the whole run** — the ADR, the
+  design note, the handoff the brief was derived from. Those are about the
+  brief; the per-task ones are about the tasks.
 - **Strip mechanics.** ADRs and flow docs pin structure on purpose. The brief
   carries their decisions and drops their file layouts and class names.
   `check-brief.sh` warns above two internal symbols; that warning is a signal.

@@ -15,8 +15,9 @@
 #
 #   loop-owned    .loop/* except state/ and tmp/, .claude/skills/loop-*
 #                 replaced wholesale — these ARE the loop
-#   yours         .loop/state/, .loop/tmp/, CLAUDE.md, everything else
-#                 state/ and tmp/ are never written here; CLAUDE.md is MERGED
+#   yours         .loop/state/, .loop/tmp/, CLAUDE.md, .claude/loop-knowledge.md
+#                 state/ and tmp/ are never written here; CLAUDE.md is MERGED;
+#                 loop-knowledge.md is seeded once and then left alone
 #
 # What this installer does NOT do any more: touch your .claude/settings.json.
 # The loop's permission fence ships as .loop/settings.json and run.sh hands it
@@ -148,6 +149,57 @@ fi
 # One line, not four. Every transient the loop produces lives under .loop/tmp/,
 # so the boundary that keeps the installer out of consumer state is the same
 # boundary git ignores.
+# The knowledge declaration is the consumer's content at a path the loop fixes.
+# Seeded once so the path is discoverable — a seam nobody knows about is a seam
+# nobody fills — and never touched again: it is the repo's own knowledge, and an
+# upgrade that rewrote it would be the settings-merge mistake in another costume.
+KNOW="$TARGET/.claude/loop-knowledge.md"
+if [[ -f "$KNOW" ]]; then
+  say "  .claude/loop-knowledge.md left untouched (yours)"
+else
+  cat >"$KNOW" <<'SEED'
+# Knowledge roots
+
+**Read by the planning session.** This file answers a question the loop cannot
+answer for you: *where does the knowledge live that a task might be bound by,
+and how do I find out what is in it without reading everything?*
+
+The loop fixes this path and nothing else about this file. It does not know
+what an ADR is, or a use case, or a tier — those are conventions, and
+conventions belong to the repo that has them. Delete this file and the loop
+still runs; the planner simply cites nothing.
+
+## The roots
+
+Replace these with yours. Declare a path as a backticked directory ending in
+`/`, and say how its contents can be surveyed.
+
+| Surface | Path | How to find what is in it |
+| --- | --- | --- |
+| Example — architecture decisions | `docs/decisions/` | Index at `README.md` |
+| Example — domain model | `docs/domain/` | Every file carries a `description:` frontmatter line |
+
+## What "discoverable" means
+
+Either mechanism is enough, and both is better:
+
+- **An index** at the root — one line per document saying what it *binds*, not
+  what it covers. Cheapest: the planner reads one file per root, not N.
+- **Per-file frontmatter** with a `description:` line. Better where files are
+  added often and an index would go stale.
+
+A root with neither leaves the planner guessing from filenames. Preflight warns
+about that before a run spends anything.
+
+## How to cite
+
+Prefer the document that is *binding* over the one that is merely related.
+Every reference costs attention in two sessions on every iteration that touches
+the task, so each carries a reason — what it constrains, not what it is about.
+SEED
+  say "  .claude/loop-knowledge.md seeded (yours to fill in — the planner reads it)"
+fi
+
 for entry in ".loop/tmp/"; do
   grep -qxF "$entry" "$TARGET/.gitignore" 2>/dev/null || echo "$entry" >>"$TARGET/.gitignore"
 done
@@ -179,20 +231,25 @@ fi
 
 cat <<NEXT
 
-Installed. The whole footprint is .loop/ plus .claude/skills/loop-*, one
-merged section in CLAUDE.md, and one line in .gitignore. Your
-.claude/settings.json was not touched.
+Installed. The whole footprint is .loop/ plus .claude/skills/loop-*, a seeded
+.claude/loop-knowledge.md, one merged section in CLAUDE.md, and one line in
+.gitignore. Your .claude/settings.json was not touched.
 
-Two things are stack-specific and yours to set:
+Three things are yours to set:
 
-  1. .claude/settings.json — add the commands your gates need, e.g.
+  1. .claude/loop-knowledge.md — declare where your guidelines, decision
+     records, domain docs and specs live, and how each root can be surveyed.
+     The planner reads it and cites what binds onto each task, so the work and
+     review sessions both see it. Leave it as-is and the loop cites nothing.
+
+  2. .claude/settings.json — add the commands your gates need, e.g.
        "Bash(pnpm:*)"   "Bash(npm:*)"   "Bash(go:*)"   "Bash(cargo:*)"
      The loop itself never names a test runner: each task carries its own
      verify command, so the gate list is your plan's, not the loop's. The
      loop's own fence is separate and already in place (.loop/settings.json),
      so nothing you add here can be silently overwritten by an upgrade.
 
-  2. CLAUDE.md — the loop section was added between the loop:begin/end
+  3. CLAUDE.md — the loop section was added between the loop:begin/end
      markers. Add a toolchain note of your own above or below it.
 
 Read .loop/manual.md before writing your first brief; .loop/examples/ has two
