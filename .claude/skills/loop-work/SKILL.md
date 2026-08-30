@@ -1,6 +1,6 @@
 ---
 name: loop-work
-description: Do exactly one task of the autonomous loop's plan and report on it. Invoked once per iteration by loop/run.sh with the task id as its argument.
+description: Do exactly one task of the autonomous loop's plan and report on it. Invoked once per iteration by .loop/run.sh with the task id as its argument.
 ---
 
 # Work one task
@@ -16,10 +16,10 @@ you; do not pick a different one.
 
 Read, in this order:
 
-1. `loop/state.json` — find your task. Read its `goal`, `acceptance` and
+1. `.loop/state/state.json` — find your task. Read its `goal`, `acceptance` and
    `verify`. The goal tells you why the task exists; the acceptance criteria are
    what you will be judged against; the verify command is the gate you must pass.
-2. The last two entries of this plan's journal, `loop/journals/<run_id>.md`
+2. The last two entries of this plan's journal, `.loop/state/journals/<run_id>.md`
    (the `run_id` is in `state.json`) — what just happened, and anything
    flagged for you. Then the most recent entry for **your own task**, if it is
    older than those: the journal is scoped by recency and your task may have
@@ -37,7 +37,7 @@ will handle it. Do not add features the brief lists as out of scope, however
 obvious they seem — that list is deliberate.
 
 If you find work that is genuinely required and not in the plan, do the minimum
-your task needs and say so in your report. Do not edit `loop/state.json` to add
+your task needs and say so in your report. Do not edit `.loop/state/state.json` to add
 a task; that file is not yours.
 
 ## 3. Check your own work
@@ -52,7 +52,7 @@ than work that fails honestly.
 
 ## 4. Report
 
-Write `loop/proposal.json`:
+Write `.loop/tmp/proposal.json`:
 
 ```json
 {
@@ -77,14 +77,14 @@ implemented the store module" is not.
 ## 5. What you do not do
 
 - **You do not set task status.** You propose an outcome; the gate and the
-  review session decide. Do not edit `loop/state.json` at all.
+  review session decide. Do not edit `.loop/state/state.json` at all.
 - **You do not change your own gate.** Not the `verify` command, and not a test
   file that already existed when you started. Those were authored before any
   implementation existed, and that is the only reason they mean anything: a
   session that writes both the work and the gate has a gate that proves
   nothing — *however correct its rewrite happens to be*. If your gate is wrong,
   say so and report `blocked` (below). Fixing it is a plan-level change and
-  belongs to the operator. The driver restores `loop/state.json` if you edit it
+  belongs to the operator. The driver restores `.loop/state/state.json` if you edit it
   and fails the iteration, so this costs you an attempt and changes nothing.
 - **You do not commit.** The driver makes one commit per iteration covering
   everything. Leave your changes in the working tree.
@@ -96,7 +96,7 @@ implemented the store module" is not.
 
 If you cannot complete the task — the verify command cannot be made to pass, a
 required tool is denied, the task contradicts the brief or the repo — do not
-guess and do not fake it. Write `loop/proposal.json` with `outcome: "blocked"`,
+guess and do not fake it. Write `.loop/tmp/proposal.json` with `outcome: "blocked"`,
 and use `summary` for what you tried and `notes` for the specific decision or
 access you need to proceed.
 

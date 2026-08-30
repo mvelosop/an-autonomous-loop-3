@@ -3,46 +3,13 @@
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
-      "Read",
-      "Glob",
-      "Grep",
-      "Edit",
-      "Write",
-      "TodoWrite",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git show:*)",
-      "Bash(ls:*)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(wc:*)",
-      "Bash(find:*)",
-      "Bash(mkdir:*)",
-      "Bash(jq:*)",
       "Bash(uv:*)",
       "Bash(uvx:*)",
       "Bash(python3:*)",
       "Bash(pytest:*)"
-    ],
-    "deny": [
-      "Bash(git push:*)",
-      "Bash(git commit:*)",
-      "Bash(git reset:*)",
-      "Bash(git clean:*)",
-      "Bash(rm -rf:*)",
-      "Bash(sudo:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
-      "Bash(pip install:*)",
-      "Bash(claude:*)",
-      "Bash(loop/run.sh:*)",
-      "Read(~/.claude/**)",
-      "Edit(~/.claude/**)",
-      "Write(~/.claude/**)",
-      "WebFetch",
-      "WebSearch"
     ]
+  },
+  "enabledPlugins": {
+    "claude-hud@claude-hud": true
   }
 }

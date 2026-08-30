@@ -58,7 +58,7 @@ plus a total row. Any session with `is_error` true, or a non-empty
 `permission_denials`, is called out by file name.
 
 ```
-$ uv run runstat summary loop/runs/20260814-101500
+$ uv run runstat summary .loop/state/runs/20260814-101500
 phase    sessions       cost   turns    wall
 plan            1 $    1.98      12    141s
 work            3 $    1.50      18    204s
@@ -73,7 +73,7 @@ Dollar figures are an estimate, not a bill.
 The eight run-level convergence signals, as `key: value` lines:
 
 ```
-$ uv run runstat signals loop/runs/20260814-101500
+$ uv run runstat signals .loop/state/runs/20260814-101500
 iterations: 3
 tasks closed: 2/8
 iterations per closed: 1.50
@@ -91,7 +91,7 @@ run A). The delta is signed for numeric signals and blank for `tasks closed`,
 which is a pair rather than a number.
 
 ```
-$ uv run runstat compare loop/runs/20260814-101500 loop/runs/20260815-093000
+$ uv run runstat compare .loop/state/runs/20260814-101500 .loop/state/runs/20260815-093000
 signal                      run a      run b      delta
 iterations                      3          2         -1
 tasks closed                  2/8        1/8           
@@ -115,7 +115,7 @@ per-iteration table, a totals block, every finding verbatim grouped by
 iteration, and the five coherence checks (see `docs/runstat.md`).
 
 ```
-$ uv run runstat review loop/runs/20260817-120000
+$ uv run runstat review .loop/state/runs/20260817-120000
 iteration task   verdict criteria not met findings evidence
         1 T1     PASS           3       0        0      3/3
         2 T2     FAIL           3       1        2      3/3

@@ -92,7 +92,7 @@ docs/briefs/NNNN-*.md            the input
         │
         │  PLAN phase — once, opus
         ▼
-loop/state.json                  the plan, as structured state
+.loop/state/state.json                  the plan, as structured state
         │
         │  ITERATE phase — repeat, sonnet
         ▼
@@ -106,7 +106,7 @@ loop/state.json                  the plan, as structured state
   └───────────────────────────────────────────────────────┘
 ```
 
-**Plan phase.** Reads a brief, writes `loop/state.json`. The driver validates the
+**Plan phase.** Reads a brief, writes `.loop/state/state.json`. The driver validates the
 result before any iteration runs and refuses to start if validation fails:
 valid JSON, every task has a non-empty `verify` command, every task has at least
 one acceptance criterion, dependencies resolve to real task ids and are acyclic.

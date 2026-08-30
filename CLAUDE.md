@@ -8,16 +8,24 @@ First target: `docs/briefs/0003-runstat-cli.md`.
 
 ## How the loop works
 
-`loop/run.sh` drives three kinds of **fresh, separate `claude -p` session**. None
-of them share memory. All continuity lives in files:
+`.loop/run.sh` drives three kinds of **fresh, separate `claude -p` session**. None
+of them share memory. All continuity lives in files.
+
+The loop is **one directory**, `.loop/`, and one line runs through it: the
+mechanism above (`run.sh`, `settings.json`, `skills` under `.claude/`, `tests/`,
+docs) is replaced wholesale when the loop is upgraded, and `state/` and `tmp/`
+below it are the repo's own and are never written by the installer. Sessions
+run under `.loop/settings.json`, the loop's own permission fence, which
+`run.sh` passes with `--settings` — so it binds loop sessions and leaves the
+repo's `.claude/settings.json` to the repo.
 
 | Path | Role |
 | --- | --- |
-| `loop/state.json` | **Single source of truth.** Tasks, acceptance criteria, verify commands, status, attempts. Belongs to the branch that planned it — see `loop/README.md`. |
-| `loop/journals/<plan-id>.md` | Append-only, **one per plan**. One entry per iteration. A view, never the source of truth. |
-| `loop/proposal.json` | Transient. The work session's report on the task it just did. |
-| `loop/verdict.json` | Transient. The review session's independent verdict. |
-| `loop/runs/<branch>/<run-id>/` | Telemetry: one JSON per session, plus `iterations.jsonl`. Grouped by branch so parallel loops cannot collide. |
+| `.loop/state/state.json` | **Single source of truth.** Tasks, acceptance criteria, verify commands, status, attempts. Belongs to the branch that planned it — see `.loop/README.md`. |
+| `.loop/state/journals/<plan-id>.md` | Append-only, **one per plan**. One entry per iteration. A view, never the source of truth. |
+| `.loop/tmp/proposal.json` | Transient. The work session's report on the task it just did. |
+| `.loop/tmp/verdict.json` | Transient. The review session's independent verdict. |
+| `.loop/state/runs/<branch>/<run-id>/` | Telemetry: one JSON per session, plus `iterations.jsonl`. Grouped by branch so parallel loops cannot collide. |
 
 One iteration: driver picks the next ready task → **work session** does it →
 driver runs the **gate** (every done task's verify command) → **review session**
