@@ -107,4 +107,27 @@ grep -q '^node_modules$' "$TGT/.gitignore" \
 [[ "$(cat "$TGT/.loop/state/journals/consumer-plan.md")" == "$before_journal" ]] \
   && ok "re-install still leaves state alone" || bad "re-install wrote consumer state"
 
+# 6. An installed copy must be able to install onward.
+#
+# Not a curiosity: the installer's own proof step runs this suite IN the
+# target, so this scenario chains there whether or not anyone intended it. The
+# first version of it sourced the example briefs from docs/briefs/, which
+# exists only in the loop's own repo — so every real install failed its own
+# proof, and running the suite here could not see it because here that path
+# does exist. Chain explicitly, from the one place the difference is visible.
+note "── an installed copy installs onward ──"
+TGT2="$(mktemp -d "${TMPDIR:-/tmp}/loopinst2.XXXXXX")"
+TGT2="$(cd "$TGT2" && pwd -P)"
+trap 'rm -rf "$TGT" "$TGT2"' EXIT
+git -C "$TGT2" init -q
+git -C "$TGT2" config user.email t@t && git -C "$TGT2" config user.name t
+
+( cd "$TGT" && ./.loop/install.sh --no-proof "$TGT2" ) >"$TGT2/install.log" 2>&1
+[[ $? -eq 0 ]] && ok "chained install exited 0" || bad "an installed copy cannot install onward — see $TGT2/install.log"
+[[ -s "$TGT2/.loop/run.sh" && -s "$TGT2/.loop/settings.json" ]] \
+  && ok "mechanism reached the second target" || bad "mechanism did not chain"
+[[ -s "$TGT2/.loop/examples/0003-runstat-cli.md" && -s "$TGT2/.loop/examples/0004-runstat-review.md" ]] \
+  && ok "example briefs chained — they live in examples/ once installed" \
+  || bad "example briefs did not survive a chained install"
+
 finish

@@ -148,6 +148,8 @@ push is a bad first day.
 
 It stamps `.loop/.installed` with the source commit, and finishes by **running
 the loop's own suite in the target** — 28 checks, free and offline, no model.
+(You will see one fewer until you have briefs of your own: the brief checker
+sits out when `docs/briefs/` is empty.)
 That is the install test: a copied artefact that can prove it works where it
 landed. (`--no-proof` skips it for a re-run that only refreshes the mechanism.)
 
