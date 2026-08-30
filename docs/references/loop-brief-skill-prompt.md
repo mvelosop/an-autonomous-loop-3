@@ -19,16 +19,55 @@ stack-independent — the same seam `.loop/settings.json` draws for permissions.
 
 Brief B007 records the decision. This is its worked example.
 
-## Before running it, decide two things
+## This is a replacement, not an addition
 
-**Which work goes down which pipe.** A consumer with its own loop ends up with
-two: one writing `PLAN.md`, one writing `.loop/state/state.json`. Two planners,
-two state files, and both conventionally prefixing commits `[loop]`. If the
-design act has to pick a destination every time with no stated rule, it will
-pick inconsistently. Add the rule to the prompt if you already know it.
+The consumer's existing loop is being **retired**, not run alongside. So there
+is no routing question — no deciding which work goes down which pipe. There is
+one pipe.
 
-**Brief numbering.** Whether the skill continues the consumer's existing
-sequence or starts its own.
+`/architect` survives, because a design act is upstream of any loop and this
+loop has none. Its hand-off retargets: from `/create-plan` to a brief.
+Everything downstream of that — `/create-plan`, the tick driver, the four
+agents, `PLAN.md` and the `plans/` archive — is what the new loop replaces.
+
+The motivation matters here, because it constrains what a good migration looks
+like. What sent the consumer looking for a new loop was **soft gates**: a review
+that could pass work no command had proven. This loop's answer is that every
+`verify` command is authored at plan time, before any implementation exists,
+and the driver re-runs every done task's gate on every iteration. That is the
+one property the migration exists to obtain, so it is the property to protect
+when deciding what else to carry over.
+
+**Replacement is a narrowing.** The new loop is a smaller machine: one brief,
+one run, local commits, then it halts. It has no tracker, no pull requests, no
+roadmap sequencing and no tiers. Those functions do not disappear — they lose
+their home inside the loop and need one outside it, with the operator or with
+the design act. Decide that before retiring anything, not after.
+
+**Worth auditing while you do:** some of the old loop's machinery may exist
+*because* the gate was soft — the verdict guards, the missed-bug logs, the
+separate acceptance and pre-merge passes, the plan-section reconcilers. Against
+a hard gate, some of that has nothing left to do. Not all of it, and the point
+is to check rather than to assume, but a replacement is the one moment the
+question is cheap to ask.
+
+## Order of operations
+
+Do not build this skill first. The skill's whole job is to produce a good brief,
+and nobody knows yet what a good brief for *this* repo looks like.
+
+1. Write **one brief by hand**, for a small real slice. `.loop/manual.md` and
+   `.loop/examples/` are enough to do it.
+2. Run it. This is the first real test of the loop on this stack — and the first
+   thing that will bite is the gate list: verify commands here are `pnpm …`,
+   which the loop's own fence does not allow, so they go in *your*
+   `.claude/settings.json`, which the installer deliberately leaves to you.
+3. **Then** build the skill, with a worked local example in hand rather than a
+   template.
+4. Retire the old loop once the new one has actually landed work.
+
+One thing still to settle: **brief numbering** — whether the skill continues the
+consumer's existing `docs/briefs/` sequence or starts its own.
 
 ## The prompt
 
