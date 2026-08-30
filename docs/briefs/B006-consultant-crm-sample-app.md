@@ -14,7 +14,7 @@
 > at least one alternative sample domain is still under discussion. Everything
 > below is the CRM option written out far enough to be compared against
 > alternatives and costed. Flipping `Status:` to `ready to plan` is the only
-> edit needed to put the v1 requirements in front of `loop/check-brief.sh` and
+> edit needed to put the v1 requirements in front of `.loop/check-brief.sh` and
 > then the planner.
 
 ---
@@ -290,7 +290,7 @@ that the planner calls, rather than assertions it re-derives per task.
 The motivation is measured rather than theoretical: two planners, months and
 stacks apart, independently wrote the same broken assertion against the same
 OpenAPI document
-([`RESULTS.md`](../../loop/tests/reviewer-calibration/RESULTS.md), families B
+([`RESULTS.md`](../../.loop/tests/reviewer-calibration/RESULTS.md), families B
 and C). Shared tooling is the fix for that class.
 
 Tech-dependence does not disappear — it **relocates**, from re-derivation in
@@ -304,7 +304,7 @@ Ordered by what would hurt most. The first is a hole this design *opens* rather
 than closes.
 
 1. **Nothing protects the gate tooling.** The driver restores
-   `loop/state.json` if a session edits it, so a work session cannot rewrite its
+   `.loop/state/state.json` if a session edits it, so a work session cannot rewrite its
    own `verify`. A helper file is ordinary code: a session that cannot rewrite
    the gate can rewrite what the gate calls. That is calibration case 06 in a
    different costume, and it has to be answered — the guard extended to a
@@ -321,7 +321,7 @@ than closes.
 3. **No optional strictness.** Every argument that can be omitted is a way to
    weaken a gate invisibly, and a planner that needs a green gate will find it.
    No lenient flag, no default that skips a check. Genuine modes become separate
-   commands with distinct names, so the verify text in `loop/state.json` records
+   commands with distinct names, so the verify text in `.loop/state/state.json` records
    which was used and the review sees it in the diff.
 
 4. **Name what the tooling cannot check.** A directory of gate helpers makes a

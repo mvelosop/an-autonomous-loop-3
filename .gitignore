@@ -1,15 +1,14 @@
 .DS_Store
 
-# Transient per-iteration handoffs. The durable copies live in
-# loop/runs/<run-id>/reports/, masked and committed as evidence.
-loop/proposal.json
-loop/verdict.json
+# Transient per-iteration handoffs and the run lock. Everything the loop
+# produces that must NOT be committed lives under .loop/tmp/, so the line that
+# keeps the installer out of consumer state is the same line git ignores. The
+# durable copies live in .loop/state/runs/<branch>/<run-id>/reports/, masked
+# and committed as evidence.
+.loop/tmp/
 
 # Python / uv build artefacts from the demo target
 __pycache__/
 .pytest_cache/
 .venv/
 *.egg-info/
-
-# Runtime lock: one loop per working tree. Machine-specific (holds a pid).
-loop/.running

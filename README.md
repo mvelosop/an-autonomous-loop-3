@@ -23,16 +23,21 @@ measured result from a prior run or a rule from the vendored design notes in
 
 ```bash
 git clone https://github.com/mvelosop/an-autonomous-loop-3
-bash an-autonomous-loop-3/loop/install.sh /path/to/your-repo
+bash an-autonomous-loop-3/.loop/install.sh /path/to/your-repo
 ```
 
 (Invoked via `bash` so it works even from a downloaded ZIP, which loses the
 executable bit that a `git clone` preserves.)
 
-The loop is **vendored** — copied in, not linked. It merges `.claude/settings.json`
-and `CLAUDE.md` rather than overwriting them, stamps `loop/.installed` with the
-source commit, and finishes by running its own 27-check suite in your repo to
-prove the install works. Verified on a Go repo with no Python present.
+The loop is **vendored** — copied in, not linked. Its whole footprint is
+`.loop/` plus `.claude/skills/loop-*`, one merged section in `CLAUDE.md` and one
+line in `.gitignore`; your `.claude/settings.json` is not touched, because the
+loop's permission fence ships as `.loop/settings.json` and binds loop sessions
+only. Inside `.loop/`, `state/` and `tmp/` are yours and the installer cannot
+write them — a scenario installs over a target carrying sentinel state and
+fails if a byte moves. It stamps `.loop/.installed` with the source commit and
+finishes by running its own 28-check suite in your repo to prove the install
+works. Verified on a Go repo with no Python present.
 
 It is only ~1% stack-coupled, because the loop never names a test runner: each
 task carries its own verify command, so the gate list belongs to your plan.
@@ -50,7 +55,7 @@ task carries its own verify command, so the gate list belongs to your plan.
 docs/briefs/NNNN-*.md
         │  plan phase — once, opus
         ▼
-loop/state.json          tasks, acceptance criteria, verify commands
+.loop/state/state.json          tasks, acceptance criteria, verify commands
         │  iterate phase — repeat, sonnet
         ▼
   driver picks the next ready task
@@ -66,7 +71,7 @@ the entire continuity. The driver owns every mechanical decision — which task 
 next, whether a task is really done, attempts, when to stop; sessions do the work
 and give opinions, and never set status or commit.
 
-Details: [`loop/README.md`](loop/README.md).
+Details: [`.loop/README.md`](.loop/README.md).
 
 ## What it built
 
@@ -104,7 +109,7 @@ driver that ran it, which is brief 0002's acceptance item 6.
 **Twenty-one work/review pairs produced zero rejections**, which is unreadable
 on its own: a reviewer with nothing to catch and a reviewer that cannot catch
 look identical from outside. So the defect was planted instead of waited for —
-[reviewer calibration](loop/tests/reviewer-calibration/RESULTS.md) hands a real
+[reviewer calibration](.loop/tests/reviewer-calibration/RESULTS.md) hands a real
 review session work that passes its gate but violates its acceptance criteria.
 **4 of 4 caught**, including the two shapes a gate structurally cannot see: work
 that is correct but out of scope, and criteria no test asserts.
@@ -126,10 +131,10 @@ to what genuinely needs judgement.
 
 | Path | What it is |
 | --- | --- |
-| `loop/run.sh` | the driver — the only thing you run |
-| `loop/README.md` | how the loop works, its stop conditions and its tests |
-| `loop/tests/` | 19 fixture scenarios, free and offline |
-| `loop/tests/reviewer-calibration/` | planted-defect calibration (calls a real model) |
+| `.loop/run.sh` | the driver — the only thing you run |
+| `.loop/README.md` | how the loop works, its stop conditions and its tests |
+| `.loop/tests/` | 19 fixture scenarios, free and offline |
+| `.loop/tests/reviewer-calibration/` | planted-defect calibration (calls a real model) |
 | `.claude/skills/` | the three session contracts: plan, work, review |
 | `docs/briefs/` | the inputs a run is planned from |
 | `docs/references/` | vendored design notes the briefs cite |
@@ -151,14 +156,14 @@ others. A squash on `main` destroys the only record of that.
 
 ## Running it
 
-**[→ The user manual](docs/manual.md)** — end to end: writing a brief, checking
+**[→ The user manual](.loop/manual.md)** — end to end: writing a brief, checking
 the plan before you spend, watching a run, reading what happened, running
 several at once, and changing the loop itself.
 
 ```bash
-loop/run.sh docs/briefs/0003-runstat-cli.md   # plan, then iterate
-loop/run.sh                                   # resume from existing state
-loop/tests/run-all.sh                         # the loop's own tests (free)
+.loop/run.sh docs/briefs/0003-runstat-cli.md   # plan, then iterate
+.loop/run.sh                                   # resume from existing state
+.loop/tests/run-all.sh                         # the loop's own tests (free)
 ```
 
 Preflight refuses to start on a problem it can name — most importantly an

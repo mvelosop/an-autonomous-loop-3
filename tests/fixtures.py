@@ -1,6 +1,6 @@
 """Test helper that materializes the brief's worked-example run directory.
 
-Nothing in this repo reads a real loop/runs/ directory in tests: this is the
+Nothing in this repo reads a real .loop/state/runs/ directory in tests: this is the
 one place the brief's fixture numbers are written to disk, and every later
 test builds on it via tmp_path.
 """

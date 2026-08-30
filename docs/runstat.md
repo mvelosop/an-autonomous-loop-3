@@ -2,11 +2,11 @@
 
 `runstat` reads a completed loop run's telemetry off disk. This document is the
 field-by-field contract for that input, and the derivation of each of the eight
-run-level signals. It exists so `runstat` and `loop/run.sh` — which computes the
+run-level signals. It exists so `runstat` and `.loop/run.sh` — which computes the
 same eight signals inline, in shell, while a run is in flight — cannot drift
 apart without the drift being visible in one place. Brief 0002's acceptance
 item 6 requires the two to agree exactly on a completed run; if a formula
-changes here, it must change in `loop/run.sh` too, and vice versa.
+changes here, it must change in `.loop/run.sh` too, and vice versa.
 
 `runstat` itself never runs during a run. It is strictly post-hoc analysis over
 an archived `<run-id>/` directory.
@@ -166,7 +166,7 @@ twice. Count records with a non-`done` outcome instead.
 
 ## Cross-check against the driver
 
-`loop/run.sh` computes these same eight signals inline, in shell (see the
+`.loop/run.sh` computes these same eight signals inline, in shell (see the
 `sig_*` functions and `print_signals` in the `signals` section of that script),
 so an operator watching a run in progress sees numbers that must match what
 `runstat signals` reports once the run is archived. The two implementations

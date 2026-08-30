@@ -204,8 +204,8 @@ reporting zero.
 - Reuse the existing loader and error types. One tool, one contract.
 - Every existing test must still pass, unchanged, and the four existing commands
   must behave exactly as they do now.
-- Changes to `loop/run.sh` and `.claude/skills/loop-review/SKILL.md` are in
-  scope for this brief. `loop/tests/run-all.sh` must stay green, and any new
+- Changes to `.loop/run.sh` and `.claude/skills/loop-review/SKILL.md` are in
+  scope for this brief. `.loop/tests/run-all.sh` must stay green, and any new
   driver behaviour needs a scenario.
 - `docs/runstat.md` and `docs/runstat-cli.md` both cover the telemetry contract
   and the commands; both must cover the new fields and commands when done, with

@@ -1,12 +1,12 @@
 ---
 name: loop-plan
-description: Decompose a brief into loop/state.json — the task list the autonomous loop executes. Invoked once per run by loop/run.sh. Takes the brief path as its argument.
+description: Decompose a brief into .loop/state/state.json — the task list the autonomous loop executes. Invoked once per run by .loop/run.sh. Takes the brief path as its argument.
 ---
 
 # Plan a run
 
 You are the **planning phase** of an autonomous loop. You run once. You write no
-code. Your entire output is `loop/state.json` — the task list every later
+code. Your entire output is `.loop/state/state.json` — the task list every later
 session works from.
 
 Your argument is the path to a brief. Read it completely before anything else,
@@ -97,7 +97,7 @@ builds a thing over a task that "sets up" for a thing.
 Order them so dependencies flow forward, and record those dependencies. The
 driver will only hand out a task whose dependencies are all done.
 
-Write `loop/state.json` in exactly this shape:
+Write `.loop/state/state.json` in exactly this shape:
 
 ```json
 {
@@ -186,7 +186,7 @@ what the goal is.** "Generated from the code, not hand-written" is a goal.
 
 Check your own output, and fix what fails rather than reporting it:
 
-1. `loop/state.json` is valid JSON.
+1. `.loop/state/state.json` is valid JSON.
 2. Every task has a non-empty `verify`, at least one `acceptance` entry, and a
    `goal` of more than one sentence.
 3. Every `depends_on` entry names a real task id, and no cycle exists.
