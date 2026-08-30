@@ -78,8 +78,15 @@ and nobody knows yet what a good brief for *this* repo looks like.
    template.
 6. Retire the old loop once the new one has actually landed work.
 
-One thing still to settle: **brief numbering** — whether the skill continues the
-consumer's existing `docs/briefs/` sequence or starts its own.
+**Brief numbering is settled:** continue the consumer's existing `docs/briefs/`
+sequence, prefixed with `B`. Its last brief is `0001-loop-plugin-repo.md`, so
+the next is `B0002-<slug>.md`.
+
+The prefix marks the scheme change without restarting the count, so two
+documents can never both claim "2" — the same reason this repo's own briefs
+switched at `B006`. Note the digit widths differ between the two repos (`B0002`
+there, `B006` here) because each continues its own sequence; that is intended,
+not a slip.
 
 ## The prompt
 
@@ -134,7 +141,10 @@ Linear sub-issues plus cited design artifacts — and the loop can read neither.
    Constraints from the stack and `.claude/project-adapter.md`. Task count.
    Cite the design artifacts the brief came from — not the per-task guidelines,
    which the planning session attaches itself.
-4. **Check.** Run `.loop/check-brief.sh <path>` and fix what it reports. The skill
+4. **Name and check it.** Briefs live in `docs/briefs/`, continuing the existing
+   sequence with a `B` prefix — the last is `0001-loop-plugin-repo.md`, so the
+   next is `B0002-<slug>.md`. Then run `.loop/check-brief.sh <path>` and fix
+   what it reports. The skill
    is not done until it exits 0. Mark the brief `**Status:** ready to plan` — the
    checker skips anything else, so an unmarked brief passes vacuously.
 5. **Present to the operator**, who owns the call and commits.
