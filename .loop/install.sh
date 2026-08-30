@@ -71,12 +71,24 @@ chmod +x "$TARGET"/.loop/*.sh
 # One worked brief of each kind beats any amount of prose about brief-writing,
 # and the manual's "Writing a brief" section ends by pointing at exactly these
 # two. They used to live only in this repo, so a consumer following that
-# pointer hit nothing. Named explicitly and checked, so a rename fails loudly
-# rather than shipping an empty examples/ directory.
+# pointer hit nothing.
+#
+# Where they live depends on WHICH copy is installing. In the loop's own repo
+# they are briefs that drove real runs and sit with the other briefs, so they
+# are staged into examples/ here. In an installed copy they are already
+# examples/ and arrived with the wholesale copy above — an installed loop can
+# install onward, which is what the suite does when it runs in the target.
+# Checked either way, so a rename fails loudly rather than shipping an empty
+# directory.
 mkdir -p "$TARGET/.loop/examples"
 for b in 0003-runstat-cli 0004-runstat-review; do
-  [[ -f "$SRC/docs/briefs/$b.md" ]] || die "example brief docs/briefs/$b.md is missing — the manual cites it"
-  cp "$SRC/docs/briefs/$b.md" "$TARGET/.loop/examples/$b.md"
+  if [[ -f "$SRC/.loop/examples/$b.md" ]]; then
+    :   # already installed by the wholesale copy of .loop/
+  elif [[ -f "$SRC/docs/briefs/$b.md" ]]; then
+    cp "$SRC/docs/briefs/$b.md" "$TARGET/.loop/examples/$b.md"
+  else
+    die "example brief $b.md is in neither .loop/examples/ nor docs/briefs/ — the manual cites it"
+  fi
 done
 
 # The calibration CASES are mechanism — a consumer can run them against their

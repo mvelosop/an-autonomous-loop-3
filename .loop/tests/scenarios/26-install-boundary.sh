@@ -68,11 +68,12 @@ grep -q 'Bash(git commit:\*)' "$TGT/.loop/settings.json" \
 
 # 3. the other half: mechanism IS replaced, and everything of it arrives
 grep -q STALE "$TGT/.loop/run.sh" && bad "run.sh was not replaced" || ok "run.sh replaced"
+missing=0
 for f in run.sh amend.sh check-brief.sh render-plan.sh install.sh \
          manual.md README.md brief-template.md settings.json; do
-  [[ -s "$TGT/.loop/$f" ]] || bad "mechanism file missing: .loop/$f"
+  [[ -s "$TGT/.loop/$f" ]] || { bad "mechanism file missing: .loop/$f"; missing=1; }
 done
-ok "every mechanism file shipped"
+[[ $missing -eq 0 ]] && ok "every mechanism file shipped"
 [[ -x "$TGT/.loop/run.sh" ]] && ok "scripts are executable" || bad "run.sh is not executable"
 [[ -d "$TGT/.loop/tests/scenarios" ]] && ok "tests shipped" || bad "tests did not ship"
 [[ -d "$TGT/.loop/tests/reviewer-calibration/cases" ]] \
@@ -82,10 +83,11 @@ ok "every mechanism file shipped"
   || bad "the loop's own calibration results were installed into the target"
 [[ -s "$TGT/.loop/examples/0003-runstat-cli.md" && -s "$TGT/.loop/examples/0004-runstat-review.md" ]] \
   && ok "worked example briefs shipped" || bad "the manual cites examples that did not ship"
+missing=0
 for s in loop-plan loop-work loop-review; do
-  [[ -s "$TGT/.claude/skills/$s/SKILL.md" ]] || bad "skill did not ship: $s"
+  [[ -s "$TGT/.claude/skills/$s/SKILL.md" ]] || { bad "skill did not ship: $s"; missing=1; }
 done
-ok "all three skills shipped"
+[[ $missing -eq 0 ]] && ok "all three skills shipped"
 
 # 4. the shared files: merged, not clobbered
 grep -q 'their own instructions' "$TGT/CLAUDE.md" \
@@ -106,5 +108,28 @@ grep -q '^node_modules$' "$TGT/.gitignore" \
   && ok "re-install adds no duplicate CLAUDE.md section" || bad "re-install duplicated the CLAUDE.md section"
 [[ "$(cat "$TGT/.loop/state/journals/consumer-plan.md")" == "$before_journal" ]] \
   && ok "re-install still leaves state alone" || bad "re-install wrote consumer state"
+
+# 6. An installed copy must be able to install onward.
+#
+# Not a curiosity: the installer's own proof step runs this suite IN the
+# target, so this scenario chains there whether or not anyone intended it. The
+# first version of it sourced the example briefs from docs/briefs/, which
+# exists only in the loop's own repo — so every real install failed its own
+# proof, and running the suite here could not see it because here that path
+# does exist. Chain explicitly, from the one place the difference is visible.
+note "── an installed copy installs onward ──"
+TGT2="$(mktemp -d "${TMPDIR:-/tmp}/loopinst2.XXXXXX")"
+TGT2="$(cd "$TGT2" && pwd -P)"
+trap 'rm -rf "$TGT" "$TGT2"' EXIT
+git -C "$TGT2" init -q
+git -C "$TGT2" config user.email t@t && git -C "$TGT2" config user.name t
+
+( cd "$TGT" && ./.loop/install.sh --no-proof "$TGT2" ) >"$TGT2/install.log" 2>&1
+[[ $? -eq 0 ]] && ok "chained install exited 0" || bad "an installed copy cannot install onward — see $TGT2/install.log"
+[[ -s "$TGT2/.loop/run.sh" && -s "$TGT2/.loop/settings.json" ]] \
+  && ok "mechanism reached the second target" || bad "mechanism did not chain"
+[[ -s "$TGT2/.loop/examples/0003-runstat-cli.md" && -s "$TGT2/.loop/examples/0004-runstat-review.md" ]] \
+  && ok "example briefs chained — they live in examples/ once installed" \
+  || bad "example briefs did not survive a chained install"
 
 finish
