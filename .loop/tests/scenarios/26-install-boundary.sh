@@ -68,11 +68,12 @@ grep -q 'Bash(git commit:\*)' "$TGT/.loop/settings.json" \
 
 # 3. the other half: mechanism IS replaced, and everything of it arrives
 grep -q STALE "$TGT/.loop/run.sh" && bad "run.sh was not replaced" || ok "run.sh replaced"
+missing=0
 for f in run.sh amend.sh check-brief.sh render-plan.sh install.sh \
          manual.md README.md brief-template.md settings.json; do
-  [[ -s "$TGT/.loop/$f" ]] || bad "mechanism file missing: .loop/$f"
+  [[ -s "$TGT/.loop/$f" ]] || { bad "mechanism file missing: .loop/$f"; missing=1; }
 done
-ok "every mechanism file shipped"
+[[ $missing -eq 0 ]] && ok "every mechanism file shipped"
 [[ -x "$TGT/.loop/run.sh" ]] && ok "scripts are executable" || bad "run.sh is not executable"
 [[ -d "$TGT/.loop/tests/scenarios" ]] && ok "tests shipped" || bad "tests did not ship"
 [[ -d "$TGT/.loop/tests/reviewer-calibration/cases" ]] \
@@ -82,10 +83,11 @@ ok "every mechanism file shipped"
   || bad "the loop's own calibration results were installed into the target"
 [[ -s "$TGT/.loop/examples/0003-runstat-cli.md" && -s "$TGT/.loop/examples/0004-runstat-review.md" ]] \
   && ok "worked example briefs shipped" || bad "the manual cites examples that did not ship"
+missing=0
 for s in loop-plan loop-work loop-review; do
-  [[ -s "$TGT/.claude/skills/$s/SKILL.md" ]] || bad "skill did not ship: $s"
+  [[ -s "$TGT/.claude/skills/$s/SKILL.md" ]] || { bad "skill did not ship: $s"; missing=1; }
 done
-ok "all three skills shipped"
+[[ $missing -eq 0 ]] && ok "all three skills shipped"
 
 # 4. the shared files: merged, not clobbered
 grep -q 'their own instructions' "$TGT/CLAUDE.md" \
