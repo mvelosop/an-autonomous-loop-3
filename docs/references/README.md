@@ -1,8 +1,13 @@
 # References
 
-Verbatim copies of design notes from the `exploring-claude` repo, vendored here
-so this repo's briefs cite something a reader can open — including a reader who
-does not have the source repo.
+Documents whose paths resolve in the **consumer** repo (`exploring-claude`),
+not in this one. Two kinds: verbatim copies of design notes vendored here so
+this repo's briefs cite something a reader can open — including a reader who
+does not have the source repo — and material addressed *to* that repo, such as
+the prompt that builds its `/loop-brief` skill.
+
+That shared property is why `.loop/tests/check-docs.sh` exempts this directory
+from path resolution: the paths are not dead, they are simply not ours.
 
 **Do not edit these files.** They are snapshots. If one needs correcting, fix it
 upstream and re-copy; a local edit would silently fork the record the briefs

@@ -42,6 +42,16 @@ works. Verified on a Go repo with no Python present.
 It is only ~1% stack-coupled, because the loop never names a test runner: each
 task carries its own verify command, so the gate list belongs to your plan.
 
+**If your repo already has a design practice** — decision records, use cases,
+design hand-offs, a tracker — the loop reads none of it. It runs from a single
+brief file, and every session downstream of that brief is memoryless and
+offline. Bridging the two is a skill *your* repo owns, because the moment the
+loop names your tracker it stops being stack-independent. The loop ships the
+contract and the checker; you ship the adapter.
+[`docs/references/loop-brief-skill-prompt.md`](docs/references/loop-brief-skill-prompt.md)
+is a worked prompt for building one, and `.loop/manual.md` carries the rules it
+rests on.
+
 > **Why not a plugin?** Because the loop is two things with different homes —
 > skills that must sit at `.claude/skills/`, and a driver you run from a
 > terminal. A Claude Code plugin can carry the first but not the second. The
@@ -133,11 +143,11 @@ to what genuinely needs judgement.
 | --- | --- |
 | `.loop/run.sh` | the driver — the only thing you run |
 | `.loop/README.md` | how the loop works, its stop conditions and its tests |
-| `.loop/tests/` | 19 fixture scenarios, free and offline |
+| `.loop/tests/` | 26 fixture scenarios, free and offline |
 | `.loop/tests/reviewer-calibration/` | planted-defect calibration (calls a real model) |
 | `.claude/skills/` | the three session contracts: plan, work, review |
 | `docs/briefs/` | the inputs a run is planned from |
-| `docs/references/` | vendored design notes the briefs cite |
+| `docs/references/` | documents whose paths resolve in the consumer repo, not here |
 | `src/`, `tests/` | `runstat`, built by run 1 |
 
 ## Branches
