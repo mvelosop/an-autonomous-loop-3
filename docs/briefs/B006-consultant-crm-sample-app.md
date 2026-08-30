@@ -278,6 +278,93 @@ Three, and violating any one voids the results:
 
 ---
 
+## Project-declared gates
+
+The loop stays tech-independent by never learning the stack: the project
+declares its gates and the loop consumes them
+([`executable-loop-harness.md`](../references/executable-loop-harness.md), and
+the decoupling pivot). So the sample app is also where to work out what
+project-supplied gate *tooling* should look like — helpers under `tools/gates/`
+that the planner calls, rather than assertions it re-derives per task.
+
+The motivation is measured rather than theoretical: two planners, months and
+stacks apart, independently wrote the same broken assertion against the same
+OpenAPI document
+([`RESULTS.md`](../../loop/tests/reviewer-calibration/RESULTS.md), families B
+and C). Shared tooling is the fix for that class.
+
+Tech-dependence does not disappear — it **relocates**, from re-derivation in
+every planning session to one place that is visible, versioned and testable. The
+planner still chooses which helper and which arguments, so stack knowledge
+leaves the driver but not the planner's judgment.
+
+### Precautions
+
+Ordered by what would hurt most. The first is a hole this design *opens* rather
+than closes.
+
+1. **Nothing protects the gate tooling.** The driver restores
+   `loop/state.json` if a session edits it, so a work session cannot rewrite its
+   own `verify`. A helper file is ordinary code: a session that cannot rewrite
+   the gate can rewrite what the gate calls. That is calibration case 06 in a
+   different costume, and it has to be answered — the guard extended to a
+   declared set of paths, or the tooling held outside the working tree —
+   **before the tooling exists**, not after.
+
+2. **A shared helper fails everywhere at once, and looks like consistency.**
+   Ad-hoc assertions fail visibly, one at a time. So each helper needs its own
+   tests, including a **negative** one: prove it *rejects* a known-bad
+   implementation, not merely that it accepts a good one. A helper only ever
+   tested against correct code may assert nothing at all. This is the inverse
+   precondition the calibration harness already applies, one level down.
+
+3. **No optional strictness.** Every argument that can be omitted is a way to
+   weaken a gate invisibly, and a planner that needs a green gate will find it.
+   No lenient flag, no default that skips a check. Genuine modes become separate
+   commands with distinct names, so the verify text in `loop/state.json` records
+   which was used and the review sees it in the diff.
+
+4. **Name what the tooling cannot check.** A directory of gate helpers makes a
+   project *feel* covered. Provenance — whether a value derived from its source
+   of truth — is invisible in output however good the helper is. The guidelines
+   must say so, so the planner routes those to acceptance criteria instead of
+   approximating them. False coverage is worse than acknowledged absence.
+
+5. **Exercise it in CI, not only in the loop.** A helper run only when the loop
+   runs rots silently, and the rot surfaces mid-run at model prices. In the
+   project's own suite, a library upgrade that changes an output shape breaks a
+   test instead.
+
+6. **The scaffolding line, written down before it is needed.** Gate tooling may
+   live in the repo, must **never be imported by `src/`**, and must **never
+   change what the product does**. A helper under `tools/gates/` passes that
+   test. The 25 lines of document post-processing that a real run added to its
+   application bootstrap, purely to satisfy a broken gate, fails it.
+
+7. **Let it accrete; do not front-load it.** A greenfield project has no gate
+   tooling exactly when the planner is least informed. Build helpers *from
+   observed defects*, the way the calibration cases came from a real incident
+   rather than from imagination. Early tasks use ad-hoc gates; the ones that go
+   wrong name the helper worth writing.
+
+8. **Cite only what exists.** The planner cites files present on disk, and
+   cited-but-missing **blocks** the task rather than being silently ignored.
+   Prose guidelines drift from tooling faster than anything else here, and a
+   citation that resolves to nothing is how a task ships ungated.
+
+### What this adds to the experiment
+
+A fourth thing worth measuring, and possibly the most useful: **does
+project-supplied gate *tooling* improve gate quality more than project-supplied
+*prose* does?** The arms already vary how much documentation the planner gets,
+and tooling is documentation that executes. If the documented arms beat the
+scanning arm mainly through better *gates* rather than better implementations,
+that is where the effect lives.
+
+Cheap to fold in — the same arms, run once with the gate helpers present and
+once without — but it doubles the run count, so it is a decision to take
+deliberately rather than by drift.
+
 ## Out of scope
 
 For v1. A plan that adds any of these has widened its own scope, which is itself
@@ -332,4 +419,10 @@ into one task loses the property that makes this app worth building.
   sourcing or adapting before the BDUF act can cite it.
 - **Is the CLI enough surface?** A thin HTTP layer would let more of the canon
   bind, at the cost of a larger v1 and a longer BDUF act.
-- **Is this the right domain at all?** An alternative is under discussion.
+- **Is this the right domain at all?** Settled: yes. The alternative considered
+  was the loop's own state service, rejected because you cannot be a neutral
+  experimenter on your own infrastructure — a subtly broken arm gets fixed
+  rather than recorded.
+- **Is gate tooling a fourth arm, or a constant?** Holding it constant keeps the
+  run count at nine; varying it doubles them and answers whether executable
+  documentation beats prose documentation. Unresolved.
