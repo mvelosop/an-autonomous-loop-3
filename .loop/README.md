@@ -215,7 +215,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-.loop/tests/run-all.sh          # all 31 checks
+.loop/tests/run-all.sh          # all 32 checks
 .loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 
@@ -256,6 +256,7 @@ input and an expected exit code end an argument that a paragraph cannot
 | `27-dangling-reference` | a task citing a document that does not exist is refused at plan time |
 | `28-knowledge-roots` | an unscannable declared root is called out before spend; declaring nothing costs nothing |
 | `29-brief-typo` | a mistyped brief, `--help` or an unknown option cannot reset a committed plan |
+| `30-plan-only` | `--plan-only` pays for one session, commits the plan, and leaves it resumable |
 
 Scenario 12 is the one that keeps the control plane and the analysis plane
 honest: the same fixture arbitrates `run.sh` and `runstat`.

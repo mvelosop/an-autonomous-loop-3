@@ -55,7 +55,7 @@ physically cannot inherit the implementer's rationalisation. Isolation is a
 property of the operating system, not of prompt discipline.
 
 **The orchestrator is deterministic.** Task selection, gates, attempt counting,
-stop conditions and halting are bash. That is why there are 31 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
+stop conditions and halting are bash. That is why there are 32 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
 attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
 stub the Task tool.** Every mechanical bug found in this loop was found by those
 tests, not by a run.
@@ -147,7 +147,7 @@ too — deny beats allow, repo-wide — which on a repo whose agents commit and
 push is a bad first day.
 
 It stamps `.loop/.installed` with the source commit, and finishes by **running
-the loop's own suite in the target** — 31 checks, free and offline, no model.
+the loop's own suite in the target** — 32 checks, free and offline, no model.
 (You will see one fewer until you have briefs of your own: the brief checker
 sits out when `docs/briefs/` is empty.)
 That is the install test: a copied artefact that can prove it works where it
@@ -389,9 +389,18 @@ Continue with no state edit:
 ## 6. Running
 
 ```bash
-.loop/run.sh docs/briefs/000N-....md   # plan, then iterate
-.loop/run.sh                           # resume
+.loop/run.sh docs/briefs/000N-....md              # plan, then iterate
+.loop/run.sh --plan-only docs/briefs/000N-....md  # plan, commit it, stop
+.loop/run.sh                                      # resume
 ```
+
+**`--plan-only` is worth making a habit.** The plan is the highest-leverage
+artefact the loop produces: every gate the rest of the run is measured against
+was authored in that one session, and a weak `verify` silently lowers the bar
+for everything after it. One planning session is cheap; the iterations are not.
+Stop, read `.loop/state/plan.md` and the `verify` commands in
+`.loop/state/state.json`, adjust with `.loop/amend.sh`, then `.loop/run.sh` with
+no argument to execute what you approved.
 
 Budgets are **per-run** and checked **between iterations**, so raising one and
 re-running always works with no state edit. Defaults: 30 iterations, $40,

@@ -36,7 +36,7 @@ loop's permission fence ships as `.loop/settings.json` and binds loop sessions
 only. Inside `.loop/`, `state/` and `tmp/` are yours and the installer cannot
 write them — a scenario installs over a target carrying sentinel state and
 fails if a byte moves. It stamps `.loop/.installed` with the source commit and
-finishes by running its own 31-check suite in your repo to prove the install
+finishes by running its own 32-check suite in your repo to prove the install
 works. Verified on a Go repo with no Python present.
 
 It is only ~1% stack-coupled, because the loop never names a test runner: each
@@ -143,7 +143,7 @@ to what genuinely needs judgement.
 | --- | --- |
 | `.loop/run.sh` | the driver — the only thing you run |
 | `.loop/README.md` | how the loop works, its stop conditions and its tests |
-| `.loop/tests/` | 29 fixture scenarios, free and offline |
+| `.loop/tests/` | 30 fixture scenarios, free and offline |
 | `.loop/tests/reviewer-calibration/` | planted-defect calibration (calls a real model) |
 | `.claude/skills/` | the three session contracts: plan, work, review |
 | `docs/briefs/` | the inputs a run is planned from |

@@ -82,7 +82,14 @@ CONVERGENCE_MIN="${LOOP_CONVERGENCE_MIN:-6}"
 PLAN_MODEL="${LOOP_PLAN_MODEL:-opus}"
 WORK_MODEL="${LOOP_WORK_MODEL:-sonnet}"
 
-BRIEF="${1:-}"
+PLAN_ONLY=0
+BRIEF=""
+for a in "$@"; do
+  case "$a" in
+    --plan-only|--only-plan) PLAN_ONLY=1 ;;
+    *) BRIEF="$a" ;;
+  esac
+done
 
 # Validate the argument before anything is opened, locked or reset.
 #
@@ -97,10 +104,16 @@ BRIEF="${1:-}"
 case "$BRIEF" in
   -h|--help)
     cat <<'USAGE'
-usage: .loop/run.sh [brief-path]
+usage: .loop/run.sh [--plan-only] [brief-path]
 
   .loop/run.sh docs/briefs/0003-runstat-cli.md   plan and run that brief
   .loop/run.sh                                   resume the plan in .loop/state/state.json
+  .loop/run.sh --plan-only <brief>               plan, commit it, and stop
+
+--plan-only is the cheap half of a run: it pays for one planning session, then
+stops so you can read the plan and its verify commands before committing to
+the rest. Review .loop/state/plan.md, adjust with .loop/amend.sh, then run
+.loop/run.sh with no argument to execute it.
 
 Naming a brief other than the one the current plan holds resets that plan and
 starts fresh. Docs: .loop/manual.md
@@ -583,7 +596,31 @@ $bad_gate
 
   render_plan
   git add -A && git commit -q -m "[loop] plan $(state_get .run_id)" && say "committed the plan"
+
+  # --plan-only stops here, having paid for exactly one session.
+  #
+  # The plan is the highest-leverage artefact in a run and the cheapest thing to
+  # get wrong: every gate the rest of the run is measured against was authored
+  # in that one session. Reading it before spending on iterations is the whole
+  # point, and it used to mean LOOP_MAX_ITERATIONS=0 -- which works, but reads
+  # like a workaround and invites a typo in the one place a typo is expensive.
+  if [[ "$PLAN_ONLY" -eq 1 ]]; then
+    say ""
+    say "═══ plan only ═══"
+    say "plan:   $(state_get .run_id) — $(state_get '.tasks|length') task(s)"
+    say "first:  $(state_get '[.tasks[]|select(.status=="pending" and ((.depends_on//[])|length)==0)][0].id // "none"')"
+    say "read:   .loop/state/plan.md   (verify commands are in .loop/state/state.json)"
+    say "adjust: .loop/amend.sh"
+    say "run it: .loop/run.sh"
+    exit 0
+  fi
 else
+  if [[ "$PLAN_ONLY" -eq 1 ]]; then
+    say "--plan-only, but $(state_get .run_id) is already planned — nothing to do"
+    say "read:   .loop/state/plan.md"
+    say "run it: .loop/run.sh"
+    exit 0
+  fi
   say "resuming $(state_get .run_id) — $(state_get '[.tasks[]|select(.status=="done")]|length')/$(state_get '.tasks|length') done"
   state_edit --arg t "$(ts)" --arg b "$BRANCH" '.status="running" | .updated=$t | .branch=$b'
   open_journal

@@ -56,15 +56,27 @@ question is cheap to ask.
 Do not build this skill first. The skill's whole job is to produce a good brief,
 and nobody knows yet what a good brief for *this* repo looks like.
 
-1. Write **one brief by hand**, for a small real slice. `.loop/manual.md` and
+1. **Fill in `.claude/loop-knowledge.md`.** The installer seeds a placeholder;
+   until it names real roots the planner cites nothing, and every task reaches
+   the work session with no idea what binds it. The `## Knowledge roots` table
+   in `.claude/project-adapter.md` already has most of the answer. Note that
+   `docs/domain/` and `docs/use-cases/` have neither an index nor per-file
+   `description:` frontmatter, so they cannot be surveyed at all yet — preflight
+   will say so before a run spends anything.
+2. Write **one brief by hand**, for a small real slice. `.loop/manual.md` and
    `.loop/examples/` are enough to do it.
-2. Run it. This is the first real test of the loop on this stack — and the first
-   thing that will bite is the gate list: verify commands here are `pnpm …`,
-   which the loop's own fence does not allow, so they go in *your*
-   `.claude/settings.json`, which the installer deliberately leaves to you.
-3. **Then** build the skill, with a worked local example in hand rather than a
+3. **Plan it and stop**: `.loop/run.sh --plan-only <brief>`. One session, then
+   read `.loop/state/plan.md` and the `verify` commands in
+   `.loop/state/state.json`. This is where the first real friction shows up, and
+   seeing it costs one planning session rather than a run: the gates here will be
+   `pnpm …`, which the loop's own fence does not allow, so they go in *your*
+   `.claude/settings.json` — the file the installer deliberately leaves alone.
+   Adjust with `.loop/amend.sh`.
+4. Run it — `.loop/run.sh`, no argument. The first real test of the loop on this
+   stack.
+5. **Then** build the skill, with a worked local example in hand rather than a
    template.
-4. Retire the old loop once the new one has actually landed work.
+6. Retire the old loop once the new one has actually landed work.
 
 One thing still to settle: **brief numbering** — whether the skill continues the
 consumer's existing `docs/briefs/` sequence or starts its own.
@@ -167,5 +179,10 @@ upgrade, and the moment the loop names Linear it stops being stack-independent.
 Three things are `exploring-claude`-specific and would change: the tracker
 (Linear), the design-surface paths under `docs/`, and `/architect` as the
 upstream act. Everything else — the dereferencing rule, the three rows, the exit
-condition on `check-brief.sh` — follows from how the loop runs its sessions and
-holds anywhere.
+condition on `check-brief.sh`, and the division of labour between the brief and
+the planner — follows from how the loop runs its sessions and holds anywhere.
+
+Note what is *not* in this prompt, and deliberately so: the per-task survey of
+guidelines, decision records, domain docs and specs. That is the planning
+session's job, driven by `.claude/loop-knowledge.md`, and it is the same in
+every consumer. Only the declaration changes.
