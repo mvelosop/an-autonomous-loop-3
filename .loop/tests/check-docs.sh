@@ -86,5 +86,22 @@ for c in $claimed; do
   fi
 done
 
+# 4. review markers must not survive into a commit.
+#
+# Two "> COMMENT:" notes sat in the manual across three merges: one flagging a
+# section that documented a workaround the flag it asks for had already
+# replaced, one disputing a rule that turned out to be wrong. Both were read
+# past by every editor including the one that committed them, because a
+# blockquote looks like prose. Cheap to check, and the cost of missing one is a
+# question nobody answers.
+markers="$(grep -rniE '^[[:space:]]*>[[:space:]]*(COMMENT|TODO|FIXME|REVIEW)[[:space:]]*:' \
+  --include='*.md' . 2>/dev/null \
+  | grep -v './docs/references/\|./.loop/state/runs/\|./.loop/state/journals/\|reviewer-calibration/results/' || true)"
+if [[ -n "$markers" ]]; then
+  echo "  unaddressed review marker(s) — answer them or delete them, do not commit them"
+  echo "$markers" | sed 's/^/      /'
+  fail=1
+fi
+
 [[ $fail -eq 0 ]] && echo "docs ok — every path resolves, no retired layout described" || echo "docs FAILED"
 exit $fail
