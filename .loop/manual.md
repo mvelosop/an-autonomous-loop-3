@@ -55,7 +55,7 @@ physically cannot inherit the implementer's rationalisation. Isolation is a
 property of the operating system, not of prompt discipline.
 
 **The orchestrator is deterministic.** Task selection, gates, attempt counting,
-stop conditions and halting are bash. That is why there are 32 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
+stop conditions and halting are bash. That is why there are 33 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
 attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
 stub the Task tool.** Every mechanical bug found in this loop was found by those
 tests, not by a run.
@@ -147,7 +147,7 @@ too — deny beats allow, repo-wide — which on a repo whose agents commit and
 push is a bad first day.
 
 It stamps `.loop/.installed` with the source commit, and finishes by **running
-the loop's own suite in the target** — 32 checks, free and offline, no model.
+the loop's own suite in the target** — 33 checks, free and offline, no model.
 (You will see one fewer until you have briefs of your own: the brief checker
 sits out when `docs/briefs/` is empty.)
 That is the install test: a copied artefact that can prove it works where it
@@ -179,6 +179,33 @@ jq --version && git --version && claude --version   # required
 ```
 
 `uv` is only needed if *your* gates use it. The loop never names a test runner.
+
+**Check the setup before you spend anything:**
+
+```bash
+.loop/run.sh --check          # --preflight is the same flag
+```
+
+It runs the same preflight a real run runs — the same code, not a
+reimplementation, because a sanity check that can disagree with the thing it
+checks is worse than none. Tools, workspace trust, the permission fence, git
+identity, and whether the knowledge roots you declared can actually be
+surveyed: each has an index or describes itself, and each index names every
+document beside it.
+
+It needs no brief, takes no lock, and leaves no run directory behind, so it is
+the right thing to run after editing `.claude/loop-knowledge.md` or adding a
+document. It exits **1 on advisory findings** — a real run would still start on
+those, but the two commands are asked different questions, and answering "is
+anything wrong?" with a silent 0 makes the flag useless in the hook or CI job it
+exists to be put in.
+
+Two more checks, also free and also offline:
+
+```bash
+.loop/check-brief.sh docs/briefs/000N-....md   # is this brief plannable
+.loop/tests/run-all.sh                         # the loop's own suite
+```
 
 **Trust the workspace.** Run `claude` interactively in the repo once and accept
 the trust dialog. Without it `claude -p` *silently ignores* `.claude/settings.json`,
@@ -351,16 +378,23 @@ stack-independent.
 
 Four rules, and the first is the one that actually bites.
 
-**Know which of three rows you are in.** The question is never inline-vs-
-reference in general; it is what a given thing is *for*.
+**Know which row you are in.** The question is never inline-vs-reference in
+general; it is what a given thing is *for*.
 
 | What | Rule | Why |
 | --- | --- | --- |
-| Behaviour contract, worked example, out-of-scope | **In the brief.** Never "see `docs/…`" | The brief is what arbitrates when two implementations disagree. An arbiter that delegates is not one — and once the expected value lives in two documents, nothing sits above them to break a tie. |
-| Tech guidelines, ADRs, use-case entries, design handoffs | **Reference, repo-relative.** Do not copy | They are durable and outlive the brief; a copy goes stale silently and nobody notices. |
+| The behaviour contract | **In the brief, or delegated whole to one named document.** Never split | Where a spec already says what to build — a use-case entry, an ADR — naming it as the sole authority is *better* than copying it, because a copy goes stale silently. What must not happen is half the contract here and half there: then the two drift and nothing sits above them to break a tie. Delegating is fine; splitting is not. |
+| Worked example, out-of-scope, constraints | **In the brief.** Always | These are about *this run*, not about the subject. A use-case spec has flows, not the exact literal values a gate asserts on; it says what the use case is, not which adjacent thing this run must not build. `check-brief.sh` fails a brief missing any of them, which is the same rule stated as a check. |
+| Tech guidelines, ADRs, use-case entries, design handoffs cited *as context* | **Reference, repo-relative.** Do not copy | Durable, and they outlive the brief; a copy goes stale and nobody notices. |
 | Tracker issues, chat threads, the design conversation itself | **Inline.** There is no choice | Not openable: fresh session, `--strict-mcp-config`, `WebFetch`/`WebSearch` denied. |
 
-The middle row is better than it sounds, because **all three session types read
+So a brief that says *"the behaviour is exactly what `docs/use-cases/uc-<n>.md`
+specifies, and nothing beyond it"* is a good brief — one authority, no drift,
+and the planner reads that document when it authors the gates. A brief that
+restates two of the flows and leaves the third to the spec is a bad one, and it
+will not look bad until the spec changes.
+
+Referencing is better than it sounds, because **all three session types read
 the brief** — planner, work and review all follow `state.json`'s `brief` field.
 A referenced guideline reaches the implementer and the reviewer, not just the
 planner, so you do not need to duplicate it into acceptance criteria to make it
@@ -393,12 +427,17 @@ usually the cheapest section of the whole brief to write, and it is the one
 ## 5. Planning, and checking the plan before you spend
 
 ```bash
-LOOP_MAX_ITERATIONS=0 .loop/run.sh docs/briefs/000N-....md
+.loop/run.sh --plan-only docs/briefs/000N-....md
 ```
 
-Runs the plan phase alone and stops at the budget (exit 4, resumable). ~$2–4.
-**Do this on anything unfamiliar.** The plan authors every `verify` command, and
-a weak one silently lowers the bar for the whole run.
+Runs the plan phase alone, commits it, and stops (exit 0). ~$2–4. **Do this on
+anything unfamiliar.** The plan authors every `verify` command, and a weak one
+silently lowers the bar for the whole run — so one session spent reading it back
+is the cheapest insurance the loop offers.
+
+(`LOOP_MAX_ITERATIONS=0` does the same thing and still works, but it stops at
+the budget rather than at the plan, so it exits 4 rather than 0 and reads like
+the workaround it was. Prefer the flag.)
 
 Then read `.loop/state/plan.md` and the top of the plan's journal. The planner's report
 ends with **what it interpreted rather than read** — that list is your one cheap

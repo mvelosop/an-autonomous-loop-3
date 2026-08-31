@@ -39,6 +39,12 @@ fixture_new() {
   FX_REPO="$(cd "$FX/repo" && pwd -P)"
 
   cp -R "$REPO_ROOT/.claude" "$FX/repo/"
+  # The skills are mechanism and must travel. The knowledge declaration is THIS
+  # repo's content and must not: carried into a fixture it names roots the
+  # fixture does not have, so every scenario ran against a declaration it never
+  # asked for and preflight warned about roots nobody declared. Each scenario
+  # writes its own, or none.
+  rm -f "$FX/repo/.claude/loop-knowledge.md"
   cp "$REPO_ROOT/CLAUDE.md" "$REPO_ROOT/.gitignore" "$FX/repo/"
   mkdir -p "$FX/repo/.loop" "$FX/repo/docs/briefs"
   # settings.json travels with the driver: run.sh hands it to every session with
