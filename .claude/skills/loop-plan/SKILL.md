@@ -149,10 +149,22 @@ a work session needs, and **you are the only session positioned to supply it**:
 you see the whole decomposition, so you can tell which task is bound by what.
 
 If `.claude/loop-knowledge.md` exists, read it and survey every root it
-declares, the way that file says each one can be scanned — an index, or the
-files' own `description:` frontmatter. You are building a one-line-per-document
-catalogue, not reading the documents. Then, for each task, attach what actually
-binds it:
+declares. You are building a one-line-per-document catalogue, not reading the
+documents, so **take the cheapest source that answers the question**:
+
+1. **The root's index** — `index.md`, `README.md` or `README-<subject>.md`. One
+   file read, and it is written to be read this way. Its name says nothing about
+   how to parse it; all three are markdown and the only difference is finding
+   them.
+2. **`description:` frontmatter**, where there is no index. One line per file
+   rather than one per root, and it cannot drift from the file it describes.
+
+An index is cheaper but can go stale — a document added and never listed is
+invisible to you, and nothing about the repo looks wrong. Preflight reports
+those before the run starts, so if you were told about one, it is in the root
+and not in the index. Read it anyway.
+
+Then, for each task, attach what actually binds it:
 
 ```json
 "references": [
@@ -178,6 +190,19 @@ not to apply, and cannot read one it was never given.
 not resolve, and it is right to: a cited-but-missing file stops a work session
 that has no way to recover, and it costs an attempt to find out. Check the
 paths you write.
+
+**A folder is a legitimate reference** when the thing that binds is the whole
+bundle rather than one file in it — a design handoff with its tokens and
+screens, a spec with its diagrams. Cite the directory, with a trailing slash.
+
+But cite it only if it can be entered: a session handed a directory with no
+`index.md`, `README.md` or `README-<subject>.md` opens files until it thinks it
+has understood, which is the expensive kind of guessing. Where a folder has an
+entry point and only part of it binds, cite that file instead — the reference is
+attention, and a whole bundle costs more of it than the one page that
+constrains the task. The driver warns about a folder it cannot enter rather
+than failing the plan, because the plan is sound; the docs are not, and that is
+not yours to fix.
 
 **References do not replace acceptance criteria.** A reference tells a session
 what to read; a criterion is what it is judged against. If a document imposes

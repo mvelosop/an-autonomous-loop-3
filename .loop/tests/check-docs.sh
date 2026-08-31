@@ -39,6 +39,12 @@ for d in docs:
     for m in pat.finditer(d.read_text()):
         r = m.group(1)
         if r.startswith(('~', 'http')) or 'NNN' in r or '<' in r: continue
+        # index.md is one of the three entry-point names the loop RECOGNISES
+        # (run.sh entry_point) — a convention it accepts, not a file this repo
+        # keeps; this repo uses README.md. Naming it in prose is not a link.
+        # Deliberately one literal name and not a pattern: an exemption that
+        # can grow is one that stops meaning anything.
+        if r == 'index.md': continue
         if (d.parent / r).exists() or (root / r).exists() or r.split('/')[-1] in names: continue
         bad.append((d.relative_to(root), r))
 for d, r in bad: print(f"  dead path  {d}: {r}")

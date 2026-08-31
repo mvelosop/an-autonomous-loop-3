@@ -207,6 +207,39 @@ reading `.claude/loop-knowledge.md` — your file, at a path the loop fixes:
 | Domain model | `docs/domain/` | Every file has a `description:` frontmatter line |
 ```
 
+**Where a description comes from, cheapest first.** The planner takes the first
+source that answers "what is in this root":
+
+1. **The root's index** — `index.md`, `README.md` or `README-<subject>.md`. One
+   file read per root, written to be read that way.
+2. **`description:` frontmatter** where there is no index — one line per file
+   instead of one per root, at any depth, so a root holding one folder per slice
+   is not blind because its top level is empty.
+
+The three index names are equivalent to the loop and it prescribes none: the
+name affects *finding* the file, never parsing it — all three are markdown.
+**`README-<subject>.md` is the recommendation.** A dozen files called
+`README.md` are indistinguishable in a flat search, which is what an Obsidian
+quick-switcher and backlink pane give you; a subject-named one is unique
+everywhere. GitHub stops auto-rendering it at the top of the folder view, which
+costs almost nothing — the file is right there in the listing, named for what
+it is, one click away.
+
+That the same `description:` line serves the planner and Obsidian's properties
+is not a coincidence. Both are the same request: let a machine tell what this
+document is without reading it.
+
+**Why not a JSON or YAML index?** A structured index is easier to
+validate and worse at everything else. It is a second source of truth that
+drifts from the documents it describes; no human reads it, so nobody notices
+when it rots; and it is invisible to the graph, backlinks and search that make
+a markdown index worth keeping. The real hazard with an index is not its format
+but its **coverage** — a document added and never listed is invisible to the
+planner forever, and nothing about the repo looks wrong. Coverage is checkable
+in any format, so the loop checks that and leaves the format alone. (This
+manual's own repo failed that check the first time it ran: a document had sat
+unlisted in an indexed root for three merges.)
+
 Each task then carries what actually binds it, with a reason:
 
 ```json
@@ -229,8 +262,26 @@ repo that has them — so the declaration is prose you write, not a schema the
 loop imposes. If tier variants change which guideline binds, say that in your
 file and the planner will read it.
 
+**The loop checks a property; your repo enforces a convention.** The property is
+"can a session find out what is in here" — an index or descriptions, either
+will do. A stricter house rule (*every `.md` carries frontmatter, every folder
+carries an entry file, every index names every document in its folder*) is
+worth having and belongs in your own lint, where it can fail a commit. It does
+not belong here, because the loop also installs into repos that will never adopt
+it, and a check that half its users must switch off is a check nobody trusts.
+
 Two things are checked rather than advised:
 
+- **A folder is a valid reference** when what binds is the whole bundle — a
+  design handoff, a spec with its diagrams. It needs an entry point for the same
+  reason a root does, and the driver warns when one has none: the plan is sound,
+  the docs are not, and that is not the planner's to fix. Content you cannot
+  annotate — an export that would fork if edited — is handled by writing the
+  index *beside* the bundle rather than inside its files.
+- **A document its own index does not name is reported by preflight.** An index
+  is the cheapest thing to read and the easiest to let rot, and this is the
+  failure that leaves no trace: the file is committed, the index looks fine, and
+  the planner simply never learns the document exists.
 - **A reference that does not resolve fails the plan**, before the run spends
   anything. A cited-but-missing file stops a work session that has no way to
   recover, and costs an attempt to discover.

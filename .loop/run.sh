@@ -398,15 +398,30 @@ preflight() {
   # nothing downstream can tell the difference between "nothing bound this task"
   # and "the planner could not see what did". Say it before the run spends.
   if [[ -f .claude/loop-knowledge.md ]]; then
-    local blind="" n_roots=0 r
+    local blind="" unlisted="" n_roots=0 r entry f b
     while read -r r; do
       [[ -n "$r" ]] || continue
       n_roots=$((n_roots + 1))
-      if   [[ ! -d "$r" ]];                                            then blind+=" $r(no such directory)"
-      elif [[ -f "$r/README.md" ]];                                    then continue
-      elif head -5 "$r"/*.md 2>/dev/null | grep -q '^description:';    then continue
-      else blind+=" $r"
+      if [[ ! -d "$r" ]]; then blind+=" $r(no such directory)"; continue; fi
+      # An index is the cheapest thing to read and the easiest to let rot: a
+      # document added and never listed is invisible to the planner forever,
+      # and nothing about the repo looks wrong. That is the real hazard with an
+      # index -- not its format -- so coverage is checked and format is not.
+      if entry="$(entry_point "$r")"; then
+        while IFS= read -r f; do
+          [[ -f "$f" ]] || continue
+          b="$(basename "$f")"
+          [[ "$b" == "$(basename "$entry")" ]] && continue   # the index itself
+          grep -qF -- "$b" "$entry" || unlisted+=" ${f#./}"
+        done < <(find "$r" -maxdepth 1 -name '*.md')
+        continue
       fi
+      # No index, so fall back to the files describing themselves -- at any
+      # depth, because a root's documents are often one folder down (a handoff
+      # bundle per slice, an ADR per topic) and a top-level glob would call that
+      # root blind while sitting on a hundred description lines.
+      find "$r" -name '*.md' -exec head -5 {} + 2>/dev/null | grep -q '^description:' && continue
+      blind+=" $r"
     done < <(grep -oE '`[A-Za-z0-9_./-]+/`' .claude/loop-knowledge.md 2>/dev/null | tr -d '`' | sort -u)
     if [[ "$n_roots" -eq 0 ]]; then
       warn "  [ ] .claude/loop-knowledge.md declares no roots — the planner will cite nothing"
@@ -414,8 +429,12 @@ preflight() {
       say "  [x] $n_roots knowledge root(s) scannable"
     else
       warn "  [ ] declared root(s) with no index and no descriptions:$blind"
-      warn "      the planner will guess from filenames; add a README.md index or description: frontmatter"
+      warn "      the planner will guess from filenames; add an index or description: frontmatter"
     fi
+    [[ -z "$unlisted" ]] || {
+      warn "  [ ] document(s) their index does not name:$unlisted"
+      warn "      the planner cites from the index, so an unlisted document does not exist to it"
+    }
   fi
 
   # The driver makes one commit per iteration. A repo with no identity
@@ -454,6 +473,30 @@ preflight() {
 
   [[ $ok -eq 1 ]] || die "preflight failed — nothing has run"
   say "preflight ok"
+}
+
+# A directory is usable as knowledge if it says what is in it. Three names,
+# because the choice between them is the repo's and each buys something
+# different: README.md is what GitHub renders when you browse a folder,
+# README-<subject>.md stays unique in a flat search (an Obsidian quick-switcher,
+# a backlink pane), index.md is the web convention. The loop recognises all
+# three and prescribes none.
+#
+# Deliberately a property, not a convention: can a session find out what is in
+# here without opening every file? A repo wanting the stricter rule -- every .md
+# carries frontmatter, every folder carries an entry file -- enforces that in
+# its own lint, where it can be strict, because the loop also installs into
+# repos that will never adopt it.
+entry_point() {
+  # Roots are declared with a trailing slash, so normalise it away: "$d/README.md"
+  # on "docs/" yields "docs//README.md", which no path comparison against find's
+  # output will ever match. Cost the first time: an index reported as missing
+  # from itself.
+  local d="${1%/}" f
+  for f in "$d/index.md" "$d/README.md"; do [[ -f "$f" ]] && { printf '%s' "$f"; return 0; }; done
+  f="$(find "$d" -maxdepth 1 -name 'README-*.md' -print -quit 2>/dev/null)"
+  [[ -n "$f" ]] && { printf '%s' "$f"; return 0; }
+  return 1
 }
 
 # ------------------------------------------------------------------- run ----
@@ -532,11 +575,23 @@ if [[ ! -f "$STATE" ]]; then
   # does not resolve is worse than no reference at all: the work session cannot
   # recover, and it costs an attempt to discover that. Cheap to check here,
   # expensive to find at iteration 7.
-  bad_ref=""
+  bad_ref=""; blind_ref=""
   while IFS=$'\t' read -r id ref; do
     [[ -n "$id" && -n "$ref" ]] || continue
-    [[ -e "$ref" ]] || bad_ref+="    $id  $ref"$'\n'
+    if [[ ! -e "$ref" ]]; then
+      bad_ref+="    $id  $ref"$'\n'
+    elif [[ -d "$ref" ]] && ! entry_point "$ref" >/dev/null; then
+      # A folder reference is right for something that only makes sense whole --
+      # a design handoff bundle, a spec and its diagrams. But handed a directory
+      # with no way in, a session opens files until it thinks it understands,
+      # which is the expensive kind of guessing. Not fatal: the plan is sound and
+      # the docs are not, and failing here would punish the planner for something
+      # it cannot fix.
+      blind_ref+="    $id  $ref"$'\n'
+    fi
   done < <(state_get '.tasks[] as $t | ($t.references // [])[] | [$t.id, .path] | @tsv')
+  [[ -z "$blind_ref" ]] || warn "folder reference(s) with no index.md, README.md or README-*.md:
+$blind_ref  a session handed one of these opens files until it guesses right"
   [[ -z "$bad_ref" ]] || die "task reference(s) do not resolve -- fix the plan:
 
 $bad_ref
