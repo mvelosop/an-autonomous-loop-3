@@ -89,5 +89,71 @@ fixture_run docs/briefs/0003-runstat-cli.md
 assert_exit 0
 grep -q "knowledge root" "$FX/out.log" && bad "preflight talked about knowledge with nothing declared" \
   || ok "silent when nothing is declared"
+note "── a root whose descriptions are one folder down is not blind ──"
+fixture_cleanup; fixture_new
+mkdir -p "$FX/repo/docs/handoffs/spa87"
+printf -- '---\ndescription: the split-editor handoff\n---\n' >"$FX/repo/docs/handoffs/spa87/brief.md"
+cat >"$FX/repo/.claude/loop-knowledge.md" <<'KNOW'
+# Knowledge roots
+| Surface | Path | How to find what is in it |
+|---|---|---|
+| Design handoffs | `docs/handoffs/` | every file carries a description |
+KNOW
+fixture_stub <<'STUB'
+case "$PHASE" in
+  plan) cat > .loop/state/state.json <<'PLANJSON'
+{"run_id":"nested","brief":"docs/briefs/0003-runstat-cli.md","status":"running","iteration":0,
+ "created":"2026-08-15T00:00:00Z","updated":"2026-08-15T00:00:00Z","tasks":[
+ {"id":"T1","title":"t","goal":"g","files":[],"depends_on":[],
+  "references":[{"path":"docs/handoffs/spa87/","why":"the bundle this renders"}],
+  "acceptance":["a"],"verify":"true","status":"pending","attempts":0,"notes":""}]}
+PLANJSON
+    ;;
+  work)   jq -nc --arg t "$TASK" '{task:$t,outcome:"done",summary:"s",files:[],verified:"ok",notes:"none"}' > .loop/tmp/proposal.json ;;
+  review) jq -nc --arg t "$TASK" '{task:$t,verdict:"PASS",criteria:[],findings:[],notes:"none"}' > .loop/tmp/verdict.json ;;
+esac
+STUB
+fixture_run docs/briefs/0003-runstat-cli.md
+# The descriptions live a folder down, which is normal — one bundle per slice.
+# A top-level glob would call this root blind while sitting on the answer.
+assert_log "knowledge root(s) scannable"
+# ...but the folder that got CITED has no way in, and that is worth saying.
+assert_log "folder reference(s) with no index.md"
+assert_log "docs/handoffs/spa87/"
+# A warning, not a refusal: the plan is sound, the docs are not, and the
+# planner cannot fix them.
+assert_exit 0
+
+note "── a folder with any of the three entry points is quiet ──"
+for entry in index.md README.md README-handoff.md; do
+  fixture_cleanup; fixture_new
+  mkdir -p "$FX/repo/docs/handoffs/spa87"
+  printf '# what is in here\n' >"$FX/repo/docs/handoffs/spa87/$entry"
+  cat >"$FX/repo/.claude/loop-knowledge.md" <<'KNOW'
+# Knowledge roots
+| Surface | Path | How to find what is in it |
+|---|---|---|
+| Design handoffs | `docs/handoffs/` | index per bundle |
+KNOW
+  fixture_stub <<'STUB'
+case "$PHASE" in
+  plan) cat > .loop/state/state.json <<'PLANJSON'
+{"run_id":"entry","brief":"docs/briefs/0003-runstat-cli.md","status":"running","iteration":0,
+ "created":"2026-08-15T00:00:00Z","updated":"2026-08-15T00:00:00Z","tasks":[
+ {"id":"T1","title":"t","goal":"g","files":[],"depends_on":[],
+  "references":[{"path":"docs/handoffs/spa87/","why":"the bundle this renders"}],
+  "acceptance":["a"],"verify":"true","status":"pending","attempts":0,"notes":""}]}
+PLANJSON
+    ;;
+  work)   jq -nc --arg t "$TASK" '{task:$t,outcome:"done",summary:"s",files:[],verified:"ok",notes:"none"}' > .loop/tmp/proposal.json ;;
+  review) jq -nc --arg t "$TASK" '{task:$t,verdict:"PASS",criteria:[],findings:[],notes:"none"}' > .loop/tmp/verdict.json ;;
+esac
+STUB
+  fixture_run docs/briefs/0003-runstat-cli.md
+  grep -q "no index.md, README.md or README-\*.md" "$FX/out.log" \
+    && bad "$entry was not accepted as an entry point" \
+    || ok "$entry accepted as an entry point"
+done
+
 assert_no_tool_errors
 finish

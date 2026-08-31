@@ -179,6 +179,19 @@ not resolve, and it is right to: a cited-but-missing file stops a work session
 that has no way to recover, and it costs an attempt to find out. Check the
 paths you write.
 
+**A folder is a legitimate reference** when the thing that binds is the whole
+bundle rather than one file in it — a design handoff with its tokens and
+screens, a spec with its diagrams. Cite the directory, with a trailing slash.
+
+But cite it only if it can be entered: a session handed a directory with no
+`index.md`, `README.md` or `README-<subject>.md` opens files until it thinks it
+has understood, which is the expensive kind of guessing. Where a folder has an
+entry point and only part of it binds, cite that file instead — the reference is
+attention, and a whole bundle costs more of it than the one page that
+constrains the task. The driver warns about a folder it cannot enter rather
+than failing the plan, because the plan is sound; the docs are not, and that is
+not yours to fix.
+
 **References do not replace acceptance criteria.** A reference tells a session
 what to read; a criterion is what it is judged against. If a document imposes
 something the review must rule on, say it in the acceptance criteria too — the

@@ -207,6 +207,13 @@ reading `.claude/loop-knowledge.md` — your file, at a path the loop fixes:
 | Domain model | `docs/domain/` | Every file has a `description:` frontmatter line |
 ```
 
+An index can be `index.md`, `README.md` or `README-<subject>.md` — the loop
+accepts all three and prescribes none, because the choice is yours and each
+buys something different: `README.md` is what GitHub renders when you browse a
+folder, a subject-named one stays unique in a flat search such as an Obsidian
+quick-switcher. Descriptions count at any depth, so a root holding one folder
+per slice is not blind because its top level is empty.
+
 Each task then carries what actually binds it, with a reason:
 
 ```json
@@ -231,6 +238,12 @@ file and the planner will read it.
 
 Two things are checked rather than advised:
 
+- **A folder is a valid reference** when what binds is the whole bundle — a
+  design handoff, a spec with its diagrams. It needs an entry point for the same
+  reason a root does, and the driver warns when one has none: the plan is sound,
+  the docs are not, and that is not the planner's to fix. Content you cannot
+  annotate — an export that would fork if edited — is handled by writing the
+  index *beside* the bundle rather than inside its files.
 - **A reference that does not resolve fails the plan**, before the run spends
   anything. A cited-but-missing file stops a work session that has no way to
   recover, and costs an attempt to discover.
