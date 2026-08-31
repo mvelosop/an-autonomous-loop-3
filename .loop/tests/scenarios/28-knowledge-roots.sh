@@ -155,5 +155,82 @@ STUB
     || ok "$entry accepted as an entry point"
 done
 
+note "── a document its index does not name is reported ──"
+fixture_cleanup; fixture_new
+mkdir -p "$FX/repo/docs/decisions"
+cat >"$FX/repo/docs/decisions/README-decisions.md" <<'IDX'
+# Decisions
+| File | What it decides |
+| --- | --- |
+| `0001-storage.md` | where uploads live |
+IDX
+printf '# storage\n'  >"$FX/repo/docs/decisions/0001-storage.md"
+printf '# currency\n' >"$FX/repo/docs/decisions/0002-currency.md"
+cat >"$FX/repo/.claude/loop-knowledge.md" <<'KNOW'
+# Knowledge roots
+| Surface | Path | How to find what is in it |
+|---|---|---|
+| Decisions | `docs/decisions/` | index |
+KNOW
+fixture_stub <<'STUB'
+case "$PHASE" in
+  plan) cat > .loop/state/state.json <<'PLANJSON'
+{"run_id":"cover","brief":"docs/briefs/0003-runstat-cli.md","status":"running","iteration":0,
+ "created":"2026-08-15T00:00:00Z","updated":"2026-08-15T00:00:00Z","tasks":[
+ {"id":"T1","title":"t","goal":"g","files":[],"depends_on":[],"references":[],
+  "acceptance":["a"],"verify":"true","status":"pending","attempts":0,"notes":""}]}
+PLANJSON
+    ;;
+  work)   jq -nc --arg t "$TASK" '{task:$t,outcome:"done",summary:"s",files:[],verified:"ok",notes:"none"}' > .loop/tmp/proposal.json ;;
+  review) jq -nc --arg t "$TASK" '{task:$t,verdict:"PASS",criteria:[],findings:[],notes:"none"}' > .loop/tmp/verdict.json ;;
+esac
+STUB
+fixture_run docs/briefs/0003-runstat-cli.md
+# The unlisted one: committed, invisible to the planner, and nothing about the
+# repo looks wrong. This is the failure an index has that frontmatter does not.
+assert_log "index does not name"
+assert_log "0002-currency.md"
+# The listed one must NOT be reported, or the warning is noise within one run.
+grep -q "0001-storage.md" "$FX/out.log" && bad "a listed document was reported as missing" \
+  || ok "the listed document was not reported"
+assert_exit 0
+
+note "── an index is never reported as missing from itself ──"
+# Once per name, because the bug this pins is in how the path is BUILT, and the
+# three names take different routes: index.md and README.md are concatenated
+# onto the root ("docs/decisions/" + "/README.md" = a doubled slash that no
+# comparison against find's normalised output can match), while README-*.md
+# comes back from find already normalised. Testing only the last one passes
+# while the first two are broken, which is exactly what happened here.
+for idx in index.md README.md README-decisions.md; do
+  fixture_cleanup; fixture_new
+  mkdir -p "$FX/repo/docs/decisions"
+  printf '# decisions\n\n- `0001-storage.md` where uploads live\n' >"$FX/repo/docs/decisions/$idx"
+  printf '# storage\n' >"$FX/repo/docs/decisions/0001-storage.md"
+  cat >"$FX/repo/.claude/loop-knowledge.md" <<'KNOW'
+# Knowledge roots
+| Surface | Path | How to find what is in it |
+|---|---|---|
+| Decisions | `docs/decisions/` | index |
+KNOW
+  fixture_stub <<'STUB'
+case "$PHASE" in
+  plan) cat > .loop/state/state.json <<'PLANJSON'
+{"run_id":"selfidx","brief":"docs/briefs/0003-runstat-cli.md","status":"running","iteration":0,
+ "created":"2026-08-15T00:00:00Z","updated":"2026-08-15T00:00:00Z","tasks":[
+ {"id":"T1","title":"t","goal":"g","files":[],"depends_on":[],"references":[],
+  "acceptance":["a"],"verify":"true","status":"pending","attempts":0,"notes":""}]}
+PLANJSON
+    ;;
+  work)   jq -nc --arg t "$TASK" '{task:$t,outcome:"done",summary:"s",files:[],verified:"ok",notes:"none"}' > .loop/tmp/proposal.json ;;
+  review) jq -nc --arg t "$TASK" '{task:$t,verdict:"PASS",criteria:[],findings:[],notes:"none"}' > .loop/tmp/verdict.json ;;
+esac
+STUB
+  fixture_run docs/briefs/0003-runstat-cli.md
+  grep -q "index does not name" "$FX/out.log" \
+    && bad "$idx was reported as missing from itself" \
+    || ok "$idx is not reported as missing from itself"
+done
+
 assert_no_tool_errors
 finish

@@ -398,12 +398,24 @@ preflight() {
   # nothing downstream can tell the difference between "nothing bound this task"
   # and "the planner could not see what did". Say it before the run spends.
   if [[ -f .claude/loop-knowledge.md ]]; then
-    local blind="" n_roots=0 r
+    local blind="" unlisted="" n_roots=0 r entry f b
     while read -r r; do
       [[ -n "$r" ]] || continue
       n_roots=$((n_roots + 1))
       if [[ ! -d "$r" ]]; then blind+=" $r(no such directory)"; continue; fi
-      entry_point "$r" >/dev/null && continue
+      # An index is the cheapest thing to read and the easiest to let rot: a
+      # document added and never listed is invisible to the planner forever,
+      # and nothing about the repo looks wrong. That is the real hazard with an
+      # index -- not its format -- so coverage is checked and format is not.
+      if entry="$(entry_point "$r")"; then
+        while IFS= read -r f; do
+          [[ -f "$f" ]] || continue
+          b="$(basename "$f")"
+          [[ "$b" == "$(basename "$entry")" ]] && continue   # the index itself
+          grep -qF -- "$b" "$entry" || unlisted+=" ${f#./}"
+        done < <(find "$r" -maxdepth 1 -name '*.md')
+        continue
+      fi
       # No index, so fall back to the files describing themselves -- at any
       # depth, because a root's documents are often one folder down (a handoff
       # bundle per slice, an ADR per topic) and a top-level glob would call that
@@ -417,8 +429,12 @@ preflight() {
       say "  [x] $n_roots knowledge root(s) scannable"
     else
       warn "  [ ] declared root(s) with no index and no descriptions:$blind"
-      warn "      the planner will guess from filenames; add a README.md index or description: frontmatter"
+      warn "      the planner will guess from filenames; add an index or description: frontmatter"
     fi
+    [[ -z "$unlisted" ]] || {
+      warn "  [ ] document(s) their index does not name:$unlisted"
+      warn "      the planner cites from the index, so an unlisted document does not exist to it"
+    }
   fi
 
   # The driver makes one commit per iteration. A repo with no identity
@@ -472,7 +488,11 @@ preflight() {
 # its own lint, where it can be strict, because the loop also installs into
 # repos that will never adopt it.
 entry_point() {
-  local d="$1" f
+  # Roots are declared with a trailing slash, so normalise it away: "$d/README.md"
+  # on "docs/" yields "docs//README.md", which no path comparison against find's
+  # output will ever match. Cost the first time: an index reported as missing
+  # from itself.
+  local d="${1%/}" f
   for f in "$d/index.md" "$d/README.md"; do [[ -f "$f" ]] && { printf '%s' "$f"; return 0; }; done
   f="$(find "$d" -maxdepth 1 -name 'README-*.md' -print -quit 2>/dev/null)"
   [[ -n "$f" ]] && { printf '%s' "$f"; return 0; }

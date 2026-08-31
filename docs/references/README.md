@@ -9,7 +9,12 @@ the prompt that builds its `/loop-brief` skill.
 That shared property is why `.loop/tests/check-docs.sh` exempts this directory
 from path resolution: the paths are not dead, they are simply not ours.
 
-**Do not edit these files.** They are snapshots. If one needs correcting, fix it
+`loop-brief-skill-prompt.md` is the exception to what follows: it is authored
+here and kept current, not a snapshot. It sits in this directory because it
+shares the property that defines it — its paths resolve in the consumer repo,
+not in this one.
+
+**Do not edit the snapshots.** They are exactly that. If one needs correcting, fix it
 upstream and re-copy; a local edit would silently fork the record the briefs
 cite.
 
@@ -17,13 +22,14 @@ cite.
 | --- | --- | --- | --- |
 | `executable-loop-harness.md` | `exploring-claude` · `docs/design-notes/` | `c09765ca` (2026-08-04) | Proposed |
 | `loop-decoupling-pivot.md` | `exploring-claude` · `docs/design-notes/` | `57020103` (2026-08-09) | Proposed |
+| `loop-brief-skill-prompt.md` | authored here, addressed to `exploring-claude` | — | current |
 
-Both are marked **Proposed**, not Accepted — they are argued positions with
+The two snapshots are marked **Proposed**, not Accepted — they are argued positions with
 measured evidence behind them, not settled policy. `docs/briefs/0002-*` treats
 them that way: it adopts specific rules, and where it departs from one it says
 so and why (see its *The one tension in this list*).
 
-Neither file contains an absolute path, so both are safe to commit as-is.
+No file here contains an absolute path, so all are safe to commit as-is.
 
 ## Why these two
 

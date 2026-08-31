@@ -149,10 +149,22 @@ a work session needs, and **you are the only session positioned to supply it**:
 you see the whole decomposition, so you can tell which task is bound by what.
 
 If `.claude/loop-knowledge.md` exists, read it and survey every root it
-declares, the way that file says each one can be scanned — an index, or the
-files' own `description:` frontmatter. You are building a one-line-per-document
-catalogue, not reading the documents. Then, for each task, attach what actually
-binds it:
+declares. You are building a one-line-per-document catalogue, not reading the
+documents, so **take the cheapest source that answers the question**:
+
+1. **The root's index** — `index.md`, `README.md` or `README-<subject>.md`. One
+   file read, and it is written to be read this way. Its name says nothing about
+   how to parse it; all three are markdown and the only difference is finding
+   them.
+2. **`description:` frontmatter**, where there is no index. One line per file
+   rather than one per root, and it cannot drift from the file it describes.
+
+An index is cheaper but can go stale — a document added and never listed is
+invisible to you, and nothing about the repo looks wrong. Preflight reports
+those before the run starts, so if you were told about one, it is in the root
+and not in the index. Read it anyway.
+
+Then, for each task, attach what actually binds it:
 
 ```json
 "references": [
