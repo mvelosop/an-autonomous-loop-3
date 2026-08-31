@@ -83,10 +83,12 @@ PLAN_MODEL="${LOOP_PLAN_MODEL:-opus}"
 WORK_MODEL="${LOOP_WORK_MODEL:-sonnet}"
 
 PLAN_ONLY=0
+CHECK_ONLY=0
 BRIEF=""
 for a in "$@"; do
   case "$a" in
     --plan-only|--only-plan) PLAN_ONLY=1 ;;
+    --check|--preflight)     CHECK_ONLY=1 ;;
     *) BRIEF="$a" ;;
   esac
 done
@@ -104,11 +106,22 @@ done
 case "$BRIEF" in
   -h|--help)
     cat <<'USAGE'
-usage: .loop/run.sh [--plan-only] [brief-path]
+usage: .loop/run.sh [--check | --plan-only] [brief-path]
 
   .loop/run.sh docs/briefs/0003-runstat-cli.md   plan and run that brief
   .loop/run.sh                                   resume the plan in .loop/state/state.json
   .loop/run.sh --plan-only <brief>               plan, commit it, and stop
+  .loop/run.sh --check                           run the checks and stop; spends nothing
+
+--check answers "is this repo ready?" — tools, workspace trust, the permission
+fence, git identity, and whether the knowledge roots you declared can actually
+be surveyed: each one has an index or describes itself, and each index names
+every document beside it. It costs nothing, touches nothing and needs no brief,
+so it is the right thing to run after editing .claude/loop-knowledge.md or
+adding a document.
+
+Related, and also free:
+  .loop/check-brief.sh <brief>    is this brief plannable
 
 --plan-only is the cheap half of a run: it pays for one planning session, then
 stops so you can read the plan and its verify commands before committing to
@@ -162,7 +175,8 @@ mask() { sed -e "s#${HOME}#~#g" -e "s#${USER_NAME}#USER#g"; }
 # mistake waiting to happen, so the backstop sits here rather than at each
 # call site.
 say()  { printf '\033[36m[loop]\033[0m %s\n' "$(printf '%s' "$*" | mask)" | tee -a "$RUN_DIR/loop.log" >&2; }
-warn() { printf '\033[33m[loop]\033[0m %s\n' "$(printf '%s' "$*" | mask)" | tee -a "$RUN_DIR/loop.log" >&2; }
+WARN_COUNT=0
+warn() { WARN_COUNT=$((WARN_COUNT + 1)); printf '\033[33m[loop]\033[0m %s\n' "$(printf '%s' "$*" | mask)" | tee -a "$RUN_DIR/loop.log" >&2; }
 die()  { printf '\033[31m[loop] %s\033[0m\n' "$(printf '%s' "$*" | mask)" >&2; exit 1; }
 ts()   { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
@@ -460,9 +474,14 @@ preflight() {
     && say "  [x] masking active (\$HOME and username)" \
     || { say "  [ ] masking cannot resolve \$HOME"; ok=0; }
 
-  mkdir -p "$SESSIONS" 2>/dev/null \
-    && say "  [x] telemetry dir .loop/state/runs/$RUN_PATH" \
-    || { say "  [ ] cannot create telemetry dir"; ok=0; }
+  if [[ "$CHECK_ONLY" -eq 1 ]]; then
+    mkdir -p "$SESSIONS" 2>/dev/null && say "  [x] telemetry dir writable" \
+      || { say "  [ ] cannot create telemetry dir"; ok=0; }
+  else
+    mkdir -p "$SESSIONS" 2>/dev/null \
+      && say "  [x] telemetry dir .loop/state/runs/$RUN_PATH" \
+      || { say "  [ ] cannot create telemetry dir"; ok=0; }
+  fi
 
   if [[ -f "$STATE" ]]; then
     if jq -e . "$STATE" >/dev/null 2>&1; then say "  [x] state.json valid — $(state_get '[.tasks[]|select(.status=="pending")]|length') pending"
@@ -500,6 +519,33 @@ entry_point() {
 }
 
 # ------------------------------------------------------------------- run ----
+
+# --check runs the same preflight the real thing runs -- the same code, not a
+# reimplementation of it, because a sanity check that can disagree with the
+# thing it is checking is worse than none.
+#
+# It takes no lock (a check must not block a running loop, nor fail because one
+# is running) and writes its log outside the repo, since a check that leaves a
+# run directory behind every time you fix a heading is a check people stop
+# running.
+if [[ "$CHECK_ONLY" -eq 1 ]]; then
+  RUN_DIR="$(mktemp -d "${TMPDIR:-/tmp}/loop-check.XXXXXX")"
+  SESSIONS="$RUN_DIR/sessions"
+  trap 'rm -rf "$RUN_DIR" "$STATE_PRE"' EXIT
+  preflight
+  say ""
+  if [[ "$WARN_COUNT" -eq 0 ]]; then
+    say "ready. nothing was run and nothing was changed."
+    exit 0
+  fi
+  # Non-zero on advisories even though a real run would proceed through them,
+  # because the two commands are asked different questions. A run asks "can I
+  # start?"; --check asks "is anything wrong?", and answering that with a silent
+  # 0 makes it useless in the hook or CI job it exists to be put in.
+  warn "$WARN_COUNT advisory finding(s) above — a run would still start, but read them first"
+  say "nothing was run and nothing was changed."
+  exit 1
+fi
 
 mkdir -p "$SESSIONS"
 acquire_lock

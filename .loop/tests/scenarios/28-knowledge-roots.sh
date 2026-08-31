@@ -87,8 +87,14 @@ fixture_run docs/briefs/0003-runstat-cli.md
 # No declaration, no references field at all: still a clean run. The whole
 # feature has to be free for a repo with nothing to declare.
 assert_exit 0
-grep -q "knowledge root" "$FX/out.log" && bad "preflight talked about knowledge with nothing declared" \
-  || ok "silent when nothing is declared"
+# Grep for text the driver actually emits. "knowledge root" appears only in the
+# success line, so asserting its absence passed while the fixture was inheriting
+# this repo's declaration and warning about roots it did not have.
+for phrase in "knowledge root" "declared root(s)" "index does not name" "loop-knowledge"; do
+  grep -q -- "$phrase" "$FX/out.log" \
+    && bad "preflight said '$phrase' with nothing declared" \
+    || ok "silent about: $phrase"
+done
 note "── a root whose descriptions are one folder down is not blind ──"
 fixture_cleanup; fixture_new
 mkdir -p "$FX/repo/docs/handoffs/spa87"
