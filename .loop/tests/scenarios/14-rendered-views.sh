@@ -28,6 +28,10 @@ grep -q '^## T1 —' "$J" && ok "journal has per-iteration entries" || bad "jour
 # The rendered view is never a source of truth: regenerating from unchanged
 # state must reproduce it byte for byte.
 cp "$P" "$FX/plan.before"
-( cd "$FX/repo" && ./.loop/render-plan.sh >/dev/null 2>&1 )
+# ...and it must actually RUN. Swallowing the exit code here is how a broken
+# no-arg default survived: render-plan failed, wrote nothing, and the diff
+# below passed precisely BECAUSE nothing had happened.
+( cd "$FX/repo" && ./.loop/render-plan.sh >/dev/null ) \
+  && ok "render-plan runs with no arguments" || bad "render-plan.sh failed with no arguments"
 diff -q "$FX/plan.before" "$P" >/dev/null && ok "render is deterministic" || bad "re-render changed the file"
 finish

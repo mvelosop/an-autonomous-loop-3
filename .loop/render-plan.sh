@@ -16,7 +16,7 @@
 
 set -uo pipefail
 
-STATE="${1:-$(dirname "${BASH_SOURCE[0]}")/state.json}"
+STATE="${1:-$(dirname "${BASH_SOURCE[0]}")/state/state.json}"
 OUT="${2:-$(dirname "$STATE")/plan.md}"
 
 [[ -f "$STATE" ]] || { echo "render-plan: no state at $STATE" >&2; exit 2; }
