@@ -285,9 +285,19 @@ shipped HTTP routes, a `409` guard and a `422` refusal reached the main branch
 with no coverage at all. Nothing in the plan was defective. The gates simply
 were not the deliverable, and nothing had said what was.
 
-Name the violation, not the goal: **a task whose `files` list contains no test
-file.** The driver rejects a plan for it. A task that extends coverage that
-already exists satisfies this by listing the file it extends.
+Name the violation, not the goal: **a task whose `files` list names nothing that
+outlives the run.** Usually that is a test file. It can equally be a committed
+request collection, a fixture, or an assertion the project's own harness
+re-runs — what matters is that something durable exercises the behaviour
+afterwards, not which shape it takes. A task that extends coverage that already
+exists satisfies this by listing the file it extends.
+
+**Nothing enforces this.** The driver rejects a plan for a missing `verify` or a
+missing `acceptance`, and it will accept one whose every task ships nothing
+durable at all. Checking it mechanically means matching filename conventions,
+which is stack knowledge the driver deliberately does not carry — and a check
+written against `.test.`/`.spec.` would have wrongly rejected a Bruno-collection
+task the first time it ran. So this rule holds only because you apply it.
 
 ## Before you finish
 
@@ -296,8 +306,9 @@ Check your own output, and fix what fails rather than reporting it:
 1. `.loop/state/state.json` is valid JSON.
 2. Every task has a non-empty `verify`, at least one `acceptance` entry, and a
    `goal` of more than one sentence.
-3. Every task lists at least one test file in `files`, and its `verify` runs
-   them. A task that ships behaviour with no committed test fails the run.
+3. Every task that ships behaviour lists something durable in `files` — a test
+   file, a committed request collection — and its `verify` runs it. Nothing
+   downstream checks this; it is yours.
 4. Every `depends_on` entry names a real task id, and no cycle exists.
 5. Every `verify` command runs *right now* and **fails** — run them. One that
    passes before any work exists is not a gate, and one that errors on syntax is
