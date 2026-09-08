@@ -113,7 +113,7 @@ Write `.loop/state/state.json` in exactly this shape:
       "id": "T1",
       "title": "One line, imperative",
       "goal": "Why this task exists and what it unblocks. Two or three sentences, written for someone who has not read the brief.",
-      "files": ["src/runstat/__init__.py", "pyproject.toml"],
+      "files": ["src/runstat/__init__.py", "tests/test_runstat.py", "pyproject.toml"],
       "references": [
         {"path": "docs/runstat.md", "why": "the signal formulas this task must not diverge from"}
       ],
@@ -122,7 +122,7 @@ Write `.loop/state/state.json` in exactly this shape:
         "A specific, checkable statement",
         "Another one — enough that a reviewer could rule on them without reading your mind"
       ],
-      "verify": "uv run python -c \"import runstat\"",
+      "verify": "uv run pytest -q tests/test_runstat.py && uv run python -c \"import runstat\"",
       "status": "pending",
       "attempts": 0,
       "notes": ""
@@ -257,6 +257,38 @@ but the rule is the broader one: **name what a violation looks like, not just
 what the goal is.** "Generated from the code, not hand-written" is a goal.
 "No schema literal duplicated at a call site" is a violation.
 
+### What the gate does not outlive
+
+The verify command runs during the run and then stops existing. It is
+scaffolding: it proves the task works *now*, for the driver, and it goes away
+with the state file when the plan is archived.
+
+So a task that ships behaviour must also ship the **committed tests** for that
+behaviour, in whatever surface the project already uses, and list them in
+`files`. The gate then runs them, alongside whatever independent checking it
+does of its own.
+
+**The tests are not a substitute for the gate and the gate is not a substitute
+for the tests.** The gate is written here, from the brief, before any code
+exists — it is implementation-blind by construction. The tests are written by
+the session that built the thing, with full knowledge of how. Two oracles,
+different authors, and the redundancy is the point: only one of them can be
+wrong in a way the other shares. Collapse them into one artifact and you keep
+the weaker one, which is the self-report.
+
+**Measured** (B0006 in the `exploring-claude` repo, a nine-task run against a
+NestJS API): the plan's verify commands came to ~97 KB of assertion logic. All
+of it passed, none of it was wrong, and several checks were sharper than a
+hand-written test would have been. Exactly one task also ran a committed test
+file. When the run ended that file was the only thing left standing — nine
+shipped HTTP routes, a `409` guard and a `422` refusal reached the main branch
+with no coverage at all. Nothing in the plan was defective. The gates simply
+were not the deliverable, and nothing had said what was.
+
+Name the violation, not the goal: **a task whose `files` list contains no test
+file.** The driver rejects a plan for it. A task that extends coverage that
+already exists satisfies this by listing the file it extends.
+
 ## Before you finish
 
 Check your own output, and fix what fails rather than reporting it:
@@ -264,12 +296,14 @@ Check your own output, and fix what fails rather than reporting it:
 1. `.loop/state/state.json` is valid JSON.
 2. Every task has a non-empty `verify`, at least one `acceptance` entry, and a
    `goal` of more than one sentence.
-3. Every `depends_on` entry names a real task id, and no cycle exists.
-4. Every `verify` command runs *right now* and **fails** — run them. One that
+3. Every task lists at least one test file in `files`, and its `verify` runs
+   them. A task that ships behaviour with no committed test fails the run.
+4. Every `depends_on` entry names a real task id, and no cycle exists.
+5. Every `verify` command runs *right now* and **fails** — run them. One that
    passes before any work exists is not a gate, and one that errors on syntax is
    a broken gate. Fix either.
-5. Every `references` path resolves. Check them; a dangling one fails the run.
-6. Nothing anywhere contains an absolute path.
+6. Every `references` path resolves. Check them; a dangling one fails the run.
+7. Nothing anywhere contains an absolute path.
 
 Then report: the run id, the task count, the first ready task, and — plainly —
 anything about the brief you had to interpret rather than read. That last part

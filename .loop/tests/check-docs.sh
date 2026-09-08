@@ -34,6 +34,17 @@ docs = [p for p in root.rglob('*.md')
         and '.loop/state/runs' not in str(p) and '.loop/state/journals' not in str(p)
         and 'reviewer-calibration/results' not in str(p)]
 pat = re.compile(r'`([A-Za-z0-9_./-]+\.(?:md|sh|json|py|jsonl|toml))`')
+
+# .loop/tmp/ is the loop's transients directory — gitignored by design and
+# created during a run. "Does it exist right now" is the wrong question to ask
+# of a path there: in a clean checkout it never does. Ask its PRODUCER instead.
+# run.sh declares each transient, so a reference is live while run.sh still
+# names it and stale the moment it stops — which is the property worth checking
+# and is stricter than the filesystem was. (Before this, `.loop/tmp/verdict.json`
+# failed in four docs while `.loop/tmp/proposal.json` passed in six, purely
+# because an unrelated file in the tree happened to share the second name.)
+runtime = set(re.findall(r'="\$TMP_DIR/([A-Za-z0-9_.-]+)"',
+                         (root / '.loop/run.sh').read_text()))
 bad = []
 for d in docs:
     for m in pat.finditer(d.read_text()):
@@ -45,6 +56,9 @@ for d in docs:
         # Deliberately one literal name and not a pattern: an exemption that
         # can grow is one that stops meaning anything.
         if r == 'index.md': continue
+        # a transient, named by run.sh: checked above against its producer
+        if r.startswith('.loop/tmp/') and r.split('/')[-1] in runtime: continue
+        if '/' not in r and r in runtime: continue
         if (d.parent / r).exists() or (root / r).exists() or r.split('/')[-1] in names: continue
         bad.append((d.relative_to(root), r))
 for d, r in bad: print(f"  dead path  {d}: {r}")
