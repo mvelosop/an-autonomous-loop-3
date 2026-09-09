@@ -47,13 +47,31 @@ a task; that file is not yours.
 
 ## 3. Check your own work
 
-Run your task's `verify` command yourself and make it pass. Then run the whole
-test suite, so you find out now if you broke an earlier task rather than having
-the gate find out for you.
+Run your task's `verify` command yourself, **in the foreground**, and make it
+pass.
 
-The gate runs **every** completed task's verify command after you finish, not
-just yours. Work that passes its own gate while breaking an earlier one is worse
-than work that fails honestly.
+**Your session is one shot.** It is a single `claude -p` batch run: there is no
+second turn, no wakeup, no checking back. Anything you start in the background
+you must wait for in the same turn. A session that ends before writing its
+proposal is a blocked task with a burned attempt — and the work is not what gets
+judged, because there is nothing to judge. Correct work on disk does not save
+you: the proposal is the only thing the driver reads.
+
+You do not need to run the whole test suite, and on a large repo you should not.
+The driver already runs **every** completed task's verify command after you
+finish, not just yours, so a break in an earlier task is caught without you
+paying for it. Work that passes its own gate while breaking an earlier one is
+worse than work that fails honestly — but that is what the driver's gate pass
+establishes, not a suite run you launch yourself.
+
+**Measured** (B0007 in the `exploring-claude` repo): this section used to say
+"then run the whole test suite". On a 2,089-test suite that took 30–40 minutes
+under load, so one session launched it in the background and ended its turn with
+"I'll check results once it completes". There was no once-it-completes. Three
+sessions did it, T3 burned every attempt and stalled the run — with **zero** gate
+failures and **zero** review rejections, because nothing was ever evaluated. The
+suite it was running had also produced six reds, every one an artifact of the
+contention it had itself created.
 
 ## 4. Report
 
@@ -79,6 +97,14 @@ temp file plus `os.replace` for atomicity; the test monkeypatches `os.replace`
 to prove the original survives a failed rename" is useful. "I carefully
 implemented the store module" is not.
 
+**Notes carry behaviour, not just facts** — write them knowing the next session
+may copy what you did, not merely read it. In B0007 one session recorded, as a
+neutral observation, that the full suite took "~31 min under heavy local load".
+The next session quoted it back as "15–40 minutes under load, per prior task
+notes" and adopted the habit that then stalled the run. What you put here
+propagates. Record what the next task needs to know; do not record a practice
+you would not want repeated.
+
 ## 5. What you do not do
 
 - **You do not set task status.** You propose an outcome; the gate and the
@@ -98,6 +124,12 @@ implemented the store module" is not.
 - **You do not push.** Ever.
 
 ## 6. Blocked
+
+**Your work is not lost when you block.** The driver commits code and state
+together every iteration, so files you wrote are safe in the branch even though
+the task did not close. Say what you got done and where — a later session
+resuming the task will find it there, and reporting `blocked` honestly costs one
+attempt rather than the work.
 
 If you cannot complete the task — the verify command cannot be made to pass, a
 required tool is denied, the task contradicts the brief or the repo — do not
