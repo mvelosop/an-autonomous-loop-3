@@ -292,12 +292,34 @@ re-runs — what matters is that something durable exercises the behaviour
 afterwards, not which shape it takes. A task that extends coverage that already
 exists satisfies this by listing the file it extends.
 
-**Nothing enforces this.** The driver rejects a plan for a missing `verify` or a
-missing `acceptance`, and it will accept one whose every task ships nothing
+**The driver does not enforce this.** It rejects a plan for a missing `verify` or
+a missing `acceptance`, and it will accept one whose every task ships nothing
 durable at all. Checking it mechanically means matching filename conventions,
 which is stack knowledge the driver deliberately does not carry — and a check
 written against `.test.`/`.spec.` would have wrongly rejected a Bruno-collection
-task the first time it ran. So this rule holds only because you apply it.
+task the first time it ran.
+
+Two things do look at it, and both look *after* you: the review session is asked
+whether anything durable came out of each task, and `files` is rendered into
+`.loop/state/plan.md` so an operator reading the plan under `--plan-only` can
+see what a task intends to leave behind. Neither can put back a task you never
+wrote this way. Getting it right is yours.
+
+### The gates, together, are the regression net
+
+The driver re-runs **every** done task's `verify` after every iteration, and that
+is now the only thing standing between a later task and a regression in an
+earlier one: the work session is told not to run the whole suite itself, because
+doing that once per iteration is what stalled B0007.
+
+So the *union* of your verify commands has to cover the project, not only each
+task in turn. A plan whose every gate is one narrow test file lets a task break
+something no gate names, pass its own gate, pass review, and close. Give at least
+one task a gate broad enough to notice, or end each gate with one where that is
+cheap — `... && uv run pytest -q` is the shape this repo's own plans use. Where
+the suite is too slow to run every iteration, make the broad gate the cheapest
+thing that would still catch it: a type check, a build, a lint over the package
+the run touches.
 
 ## Before you finish
 
@@ -307,14 +329,16 @@ Check your own output, and fix what fails rather than reporting it:
 2. Every task has a non-empty `verify`, at least one `acceptance` entry, and a
    `goal` of more than one sentence.
 3. Every task that ships behaviour lists something durable in `files` — a test
-   file, a committed request collection — and its `verify` runs it. Nothing
-   downstream checks this; it is yours.
-4. Every `depends_on` entry names a real task id, and no cycle exists.
-5. Every `verify` command runs *right now* and **fails** — run them. One that
-   passes before any work exists is not a gate, and one that errors on syntax is
-   a broken gate. Fix either.
-6. Every `references` path resolves. Check them; a dangling one fails the run.
-7. Nothing anywhere contains an absolute path.
+   file, a committed request collection — and its `verify` runs it.
+4. At least one `verify` is broad enough to notice a regression no other gate
+   names. The gate list is the whole regression net.
+5. Every `depends_on` entry names a real task id, and no cycle exists.
+6. Every `verify` command runs *right now* and **fails** — run them. One that
+   passes before any work exists is not a gate. Failing because the file it
+   names has not been written yet is the *expected* shape, not a broken gate;
+   failing on a shell or syntax error in the command itself is broken. Fix that.
+7. Every `references` path resolves. Check them; a dangling one fails the run.
+8. Nothing anywhere contains an absolute path.
 
 Then report: the run id, the task count, the first ready task, and — plainly —
 anything about the brief you had to interpret rather than read. That last part

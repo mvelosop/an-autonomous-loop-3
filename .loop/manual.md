@@ -55,7 +55,7 @@ physically cannot inherit the implementer's rationalisation. Isolation is a
 property of the operating system, not of prompt discipline.
 
 **The orchestrator is deterministic.** Task selection, gates, attempt counting,
-stop conditions and halting are bash. That is why there are 33 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
+stop conditions and halting are bash. That is why there are 34 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
 attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
 stub the Task tool.** Every mechanical bug found in this loop was found by those
 tests, not by a run.
@@ -147,7 +147,7 @@ too — deny beats allow, repo-wide — which on a repo whose agents commit and
 push is a bad first day.
 
 It stamps `.loop/.installed` with the source commit, and finishes by **running
-the loop's own suite in the target** — 33 checks, free and offline, no model.
+the loop's own suite in the target** — 34 checks, free and offline, no model.
 (You will see one fewer until you have briefs of your own: the brief checker
 sits out when `docs/briefs/` is empty.)
 That is the install test: a copied artefact that can prove it works where it
@@ -442,6 +442,14 @@ the workaround it was. Prefer the flag.)
 Then read `.loop/state/plan.md` and the top of the plan's journal. The planner's report
 ends with **what it interpreted rather than read** — that list is your one cheap
 chance to catch a misreading before every iteration inherits it.
+
+Two more things in `plan.md` are worth a deliberate look, because nothing
+mechanical rules on either. Each task's **Files** line: a task that ships
+behaviour and names nothing outliving the run closes green and leaves the branch
+with no coverage, because the `verify` command that proved it is scaffolding and
+goes away with the plan. And whether any gate is broad enough to catch a
+regression the others do not name — the driver re-runs every done task's
+`verify` and nothing else, so that list is the whole regression net.
 
 ### Amending the plan
 

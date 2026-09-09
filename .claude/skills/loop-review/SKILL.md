@@ -54,6 +54,13 @@ on from the evidence is *not met* — say what evidence would have settled it.
 
 Then ask the questions the criteria do not:
 
+- **Did anything durable come out of it?** The `verify` command dies with the
+  run. The plan should have named something in `files` that outlives it — a test
+  file, a committed request collection, a fixture — so check that it is really
+  there and really exercises the behaviour. A task that shipped behaviour and
+  left nothing behind reaches the branch with a green gate and no coverage,
+  which is exactly what a gate cannot tell you. If the plan never asked for one,
+  that is a gap in the plan and belongs in `notes`, not a failure of the work.
 - **Does a test actually test?** Read the assertions. A test that constructs the
   expected value the same way the implementation does, or asserts only that
   nothing raised, is not coverage.

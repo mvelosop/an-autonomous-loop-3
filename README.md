@@ -36,7 +36,7 @@ loop's permission fence ships as `.loop/settings.json` and binds loop sessions
 only. Inside `.loop/`, `state/` and `tmp/` are yours and the installer cannot
 write them — a scenario installs over a target carrying sentinel state and
 fails if a byte moves. It stamps `.loop/.installed` with the source commit and
-finishes by running its own 33-check suite in your repo to prove the install
+finishes by running its own 34-check suite in your repo to prove the install
 works. Verified on a Go repo with no Python present.
 
 It is only ~1% stack-coupled, because the loop never names a test runner: each
@@ -128,13 +128,13 @@ that is correct but out of scope, and criteria no test asserts.
 
 | | lines |
 | --- | --- |
-| prose contracts (three skills + `CLAUDE.md`) | 391 |
-| the driver and its helpers | 1,115 |
-| tests (24 offline checks + the calibration harness) | 1,386 |
+| prose contracts (three skills + `CLAUDE.md`) | 659 |
+| the driver and its helpers (`.loop/*.sh`) | 1,606 |
+| tests (`.loop/tests/`, 34 offline checks + the calibration harness) | 3,227 |
 
 The first row is the point. The mature prose loop this was rebuilt from carries
 3,280 lines of contract for the same job, because its orchestration is prose an
-agent interprets. Here it is 672 lines of `run.sh`, and the instructions shrink
+agent interprets. Here it is 992 lines of `run.sh`, and the instructions shrink
 to what genuinely needs judgement.
 
 ## Layout
@@ -143,7 +143,7 @@ to what genuinely needs judgement.
 | --- | --- |
 | `.loop/run.sh` | the driver — the only thing you run |
 | `.loop/README.md` | how the loop works, its stop conditions and its tests |
-| `.loop/tests/` | 31 fixture scenarios, free and offline |
+| `.loop/tests/` | 32 fixture scenarios, free and offline |
 | `.loop/tests/reviewer-calibration/` | planted-defect calibration (calls a real model) |
 | `.claude/skills/` | the three session contracts: plan, work, review |
 | `docs/briefs/` | the inputs a run is planned from |

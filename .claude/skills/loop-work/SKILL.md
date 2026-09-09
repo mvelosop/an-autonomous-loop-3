@@ -19,8 +19,8 @@ Read, in this order:
 1. `.loop/state/state.json` — find your task. Read its `goal`, `acceptance` and
    `verify`. The goal tells you why the task exists; the acceptance criteria are
    what you will be judged against; the verify command is the gate you must pass.
-2. The last two entries of this plan's journal, `.loop/state/journals/<run_id>.md`
-   (the `run_id` is in `state.json`) — what just happened, and anything
+2. The last two entries of this plan's journal, `.loop/state/journals/<plan-id>.md`
+   (the plan id is `state.json`'s `run_id`) — what just happened, and anything
    flagged for you. Then the most recent entry for **your own task**, if it is
    older than those: the journal is scoped by recency and your task may have
    been attempted many iterations ago, so what a previous attempt of it learned

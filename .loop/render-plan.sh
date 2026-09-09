@@ -24,6 +24,13 @@ jq -e . "$STATE" >/dev/null 2>&1 || { echo "render-plan: $STATE is not valid JSO
 
 TMP="$(mktemp "${TMPDIR:-/tmp}/plan.XXXXXX")"
 
+# `files` is rendered even though the driver never reads it back, because the
+# operator does. --plan-only exists so a human can read the plan before the run
+# spends anything on it, and one of the few things worth catching there -- a task
+# that ships behaviour but names nothing that outlives the run -- was only
+# visible in state.json. A rule the driver does not enforce has to be at least
+# legible in the artifact people are told to read.
+
 jq -r '
   def mark: if . == "done" then "x" else " " end;
   def note(t):
@@ -52,6 +59,9 @@ jq -r '
     "",
     "`\(.status)`\(note(.)) · depends on: \(if (.depends_on | length) == 0 then "none" else (.depends_on | join(", ")) end)",
     "",
+    (if ((.files // []) | length) > 0
+     then ("**Files:** " + ([.files[] | "`" + . + "`"] | join(", ")), "")
+     else ("**Files:** _none named_", "") end),
     (.goal // "_no goal recorded_"),
     "",
     "**Acceptance**",
