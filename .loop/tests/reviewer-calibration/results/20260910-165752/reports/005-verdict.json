@@ -1,0 +1,36 @@
+{
+  "task": "T5",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": false,
+      "evidence": "src/runstat/messages.py defines PREFIX = \"runstat: \", but src/runstat/cli.py:16 re-declares it as its own literal `_PREFIX = \"runstat: \"` instead of importing messages.PREFIX. messages.PREFIX is never referenced anywhere in the codebase (confirmed via grep). The prefix that is actually printed on every error line comes from the duplicate, not the catalogue."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": false,
+      "evidence": "cli.py:16 `_PREFIX = \"runstat: \"` is an inline error-prefix literal, with a comment (cli.py:13-15) explicitly explaining the duplication is deliberate and must be kept in sync by hand. This is a direct violation of the criterion's own wording."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py:25-26: `if not args.run_dir.is_dir(): return _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)` — uses messages.BAD_RUN_DIR and exits 2. tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text exercises this end-to-end and passes."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": false,
+      "evidence": "Changing messages.PREFIX would not change what the CLI prints, since cli.py uses its own hand-maintained _PREFIX constant. The prefix — printed on the front of every single error line — requires editing two files to change, which is exactly the drift this task exists to remove."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_fail() in cli.py writes only to sys.stderr and _cmd_signals only prints to stdout on the success loop after all failure returns. test_missing_run_dir_exits_2_with_catalogue_text asserts p.stdout == \"\"."
+    }
+  ],
+  "findings": [
+    "cli.py:16 duplicates messages.PREFIX as a hand-maintained inline literal (_PREFIX = \"runstat: \"), which is precisely the inline-literal/prefix-drift the task's own goal text calls out as the failure mode to remove. messages.PREFIX is defined but never used anywhere in the repo.",
+    "tests/test_messages.py::test_cli_declares_its_error_prefix asserts that the literal string \"runstat: \" appears in src/runstat/cli.py's source text — i.e. it encodes the duplication as expected behavior rather than catching it. This is a test hardcoded to the current (wrong) implementation rather than one that verifies the stated requirement."
+  ],
+  "notes": "Fix is small: delete cli.py's _PREFIX and the justifying comment, use messages.PREFIX in _fail(), and replace test_cli_declares_its_error_prefix with something that actually asserts single-source-of-truth (e.g. that cli.py does not contain the literal, or a grep-based check that only messages.py defines it)."
+}

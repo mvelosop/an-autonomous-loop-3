@@ -1,0 +1,26 @@
+{
+  "task": "T3",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "runstat signals <run-dir> prints exactly the eight key: value lines in the brief's order",
+      "met": false,
+      "evidence": "Manually running `python -m runstat signals <fixture>` does print the correct eight lines in the correct order and values (matches the brief's worked example exactly). But the durable test, tests/test_signals_cmd.py, only asserts `len(lines) == 8` — it never checks the labels, the order, or the values. The brief is explicit: 'signals output is key: value lines, so assert its values exactly' (docs/briefs/0003-runstat-cli.md, worked-example section). A test that only counts non-empty lines would pass just as well if the labels were reordered, mislabeled, or the numbers were wrong. There is no durable coverage of the actual contract."
+    },
+    {
+      "criterion": "The command exits 0 on a readable run",
+      "met": true,
+      "evidence": "src/runstat/cli.py _signals() returns 0 on success; verified manually with the fixture run (RC 0)."
+    },
+    {
+      "criterion": "The implementation stays within what the brief asks for",
+      "met": false,
+      "evidence": "src/runstat/cli.py adds a `--json` flag to `signals` that emits the signals as a JSON object. Brief 0003's Out of scope section explicitly lists 'Machine-readable output (--json, CSV export)' as deliberately excluded. This is scope creep against an explicit exclusion, not an open choice."
+    }
+  ],
+  "findings": [
+    "tests/test_signals_cmd.py does not assert content/order of the signal lines, only that there are 8 non-empty lines — it would pass with wrong labels, wrong order, or wrong values, which is exactly the kind of gap the brief calls out by name ('assert its values exactly').",
+    "cli.py adds a --json flag to `signals`, which the brief explicitly puts out of scope ('Machine-readable output (--json, CSV export)')."
+  ],
+  "notes": "The underlying signals/format_signals implementation (not touched by this task's diff) is correct against the fixture — the numbers and order match the worked example when run manually. The fix belongs to a work session: strengthen the test to assert exact content/order, and remove the --json flag (or move it to a task that's actually scoped to add it, if ever wanted)."
+}

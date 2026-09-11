@@ -1,0 +1,26 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "tests/test_signals.py asserts each of the eight signal values for the worked-example fixture",
+      "met": false,
+      "evidence": "git diff HEAD shows the eight literal-value assertions present at baseline (cc0b8c2) were deleted and replaced with `assert signals is not None` and `for key in signals: assert key` (which only checks dict keys are truthy, not any value)."
+    },
+    {
+      "criterion": "The assertions compare against the literal expected values from the brief (3, 2/8, 1.50, 1, 0, 1, 0, $4.08)",
+      "met": false,
+      "evidence": "No literal values appear anywhere in the new test file (tests/test_signals.py, current working tree); the comparison values 3, 2, 8, 1.5, 1, 0, 1, 0, 4.08 were removed by the diff."
+    },
+    {
+      "criterion": "A change to any derivation in signals.py would fail at least one test",
+      "met": false,
+      "evidence": "`assert signals is not None` and `assert key` (key truthiness) pass for any dict of non-empty-string keys regardless of the values computed, so no derivation change in signals.py could fail either test."
+    }
+  ],
+  "findings": [
+    "The diff removed correct, brief-matching assertions that already existed at baseline (cc0b8c2) and replaced them with vacuous ones — this is a regression, not an implementation of the task.",
+    "proposal.json claims outcome 'done' and 'verified' but the resulting test suite provides zero coverage of signal values, contradicting the task's stated goal of pinning the eight signals."
+  ],
+  "notes": "The correct assertions already existed in the repo before this task ran (see git show HEAD:tests/test_signals.py). The fix is to restore those eight literal-value assertions rather than the current not-None/key-truthiness checks."
+}

@@ -1,0 +1,36 @@
+{
+  "task": "T6",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py declares `_PREFIX = \"runstat: \"` (module-level, near the top of the file), which is the same literal as `messages.PREFIX` in src/runstat/messages.py:9. The prefix that is printed on every error line is now defined twice."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": false,
+      "evidence": "`_PREFIX = \"runstat: \"` in cli.py is exactly an error prefix written inline, used at runtime by `_fail()` to build every printed error line (`print(f\"{_PREFIX}{text}\", file=sys.stderr)`)."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "`_cmd_signals` calls `_fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)` when `args.run_dir.is_dir()` is false; messages.BAD_RUN_DIR = \"run directory not found\"; tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": false,
+      "evidence": "Changing the prefix wording requires editing both messages.py (PREFIX) and cli.py (_PREFIX) to keep them in sync. The work session's own proposal.json notes this explicitly: \"If the wording ever changes, keep _PREFIX in sync with messages.PREFIX by hand, since it no longer derives from the catalogue.\""
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "`_fail()` writes only to sys.stderr; `_cmd_signals` and `main()` return exit codes without printing to stdout on any error branch; __main__.py just does sys.exit(main())."
+    }
+  ],
+  "findings": [
+    "cli.py defines its own copy of the error prefix (`_PREFIX = \"runstat: \"`) instead of referencing messages.PREFIX, reintroducing the exact drift risk this task exists to remove (a second, hand-synced source of truth for the prefix text) — this is the task's own goal text turned into a real defect, not a hypothetical.",
+    "A less invasive fix existed and was available within scope: the pre-existing gate test (tests/test_messages.py::test_cli_declares_its_error_prefix, added in commit 6914ca0 before this task ran) only checks that the substring \"runstat: \" appears somewhere in cli.py's source text. A doc comment or docstring referencing messages.PREFIX by value (e.g. `# error lines are prefixed \"runstat: \" (messages.PREFIX)`) would satisfy that literal-text check without creating a second runtime constant that must be kept in sync by hand. The work session chose the worse option and flagged it as a known gap rather than resolving it."
+  ],
+  "notes": "The pre-existing gate test test_cli_declares_its_error_prefix (from commit 6914ca0, 'plan: gate for T1') creates real tension with this task's acceptance criteria: it demands the literal \"runstat: \" appear in cli.py's own source, while the acceptance criteria forbid an inline error-prefix literal in cli.py. That tension is a small gap in the plan worth a look before the next attempt, but it does not excuse the outcome here — a non-duplicating way to satisfy the test (comment/docstring, not a second functional constant) was available and not taken. Everything else — routing BAD_RUN_DIR/MALFORMED/NO_SESSIONS/USAGE through messages.py, exit codes, stdout staying empty on failure, no absolute paths — is correctly done."
+}

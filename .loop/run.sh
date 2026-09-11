@@ -264,6 +264,46 @@ archive_transcript() {
 
 # ------------------------------------------------------------------ gates ---
 
+# A goalpost can be moved without touching state.json at all, by rewriting the
+# file a verify command RUNS. The command still reads
+# `pytest -q tests/test_messages.py`; what it asserts is now the session's own.
+# The state snapshot defends the pointer and leaves the target open.
+#
+# Four conditions, every one mechanical, and together they separate a moved
+# goalpost from ordinary work:
+#
+#   modified, not created    a task that SHIPS the file its gate runs is the
+#                            durable-artifact rule working as intended, so
+#                            creation is always allowed
+#   existed at HEAD          which makes the author an earlier session or the
+#                            planner, never this one
+#   named by THIS task's     the session rewrote the gate it is judged by. A
+#     verify                 file some OTHER task's gate names is deliberately
+#                            not this check's business: 03-gate-regression has
+#                            T2 delete a file T1's gate checks, which is a
+#                            regression the gate re-run is built to catch, and
+#                            restoring the file here would hide it
+#   not in this task's       the plan assigned it, so writing it is the work
+#
+# Measured: reviewer-calibration case 06 plants exactly this -- correct code,
+# every criterion met, and a rewritten gate that is a strictly BETTER test than
+# the planner's. Three review sessions saw it and none objected; one cited the
+# rewritten test as evidence the criteria were met. The reviewer is built to
+# rule on substance and this is a question about process, so it belongs here.
+gate_files_moved() {
+  local f
+  while IFS= read -r f; do
+    [[ -n "$f" ]] || continue
+    git cat-file -e "HEAD:$f" 2>/dev/null || continue
+    jq -e --arg f "$f" --arg t "$task" '
+        (.tasks[] | select(.id == $t)) as $cur
+        | (($cur.verify // "") | contains($f))
+          and ((($cur.files // []) | index($f)) == null)
+      ' "$STATE" >/dev/null 2>&1 && printf '%s\n' "$f"
+  done < <(git diff --name-only HEAD 2>/dev/null)
+}
+
+
 # Re-run the verify command of every task named. This is the whole point of the
 # external gate: "done" has to survive a command the session neither runs nor can
 # edit. Echoes the ids that failed.
@@ -808,6 +848,17 @@ while true; do
   if state_restore_if_touched; then
     tampered="work session modified .loop/state/state.json — restored by the driver; the plan and its verify commands are not a session's to edit"
     warn "   STATE TAMPERING $task — .loop/state/state.json was modified; restored, iteration failed"
+  fi
+
+  # Restored from HEAD rather than reported and left alone: the driver commits
+  # every iteration, so a weakened gate that survives this one guards its task
+  # for the rest of the run -- and keeps passing, which no gate re-run can see.
+  moved=()
+  while IFS= read -r f; do [[ -n "$f" ]] && moved+=("$f"); done < <(gate_files_moved)
+  if [[ ${#moved[@]} -gt 0 ]]; then
+    git checkout HEAD -- "${moved[@]}" 2>/dev/null
+    tampered="${tampered:+$tampered; }work session modified ${moved[*]} — a file a verify command runs, which this task neither created nor was assigned; restored by the driver"
+    warn "   GATE REWRITE $task — ${moved[*]} restored from HEAD; a gate is not a session's to rewrite"
   fi
 
   # 2. gate — every done task, plus this one if it claims to be done

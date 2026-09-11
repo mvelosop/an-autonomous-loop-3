@@ -1,0 +1,38 @@
+{
+  "task": "T4",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A missing or malformed run directory exits 2",
+      "met": true,
+      "evidence": "src/runstat/cli.py main() catches RunError and returns 2; verified `runstat signals /tmp/nonexistent...` exits 2. tests/test_errors.py covers the missing-dir case. Malformed-input case (e.g. bad JSON in a session file) is not exercised by any test, but the same except-path would return 2."
+    },
+    {
+      "criterion": "A readable but empty run exits 1",
+      "met": false,
+      "evidence": "No code path in cli.py or loader.py ever returns 1 -- load_run() treats a missing sessions/ dir or empty sessions dir as zero sessions, not an error, so _signals() falls through and main() returns 0. Verified directly: `runstat signals <empty-but-existing-dir>` exits 0 and prints the all-zero signal report instead of failing with 1."
+    },
+    {
+      "criterion": "On every failing path stdout is completely empty",
+      "met": false,
+      "evidence": "cli.py main(): the except RunError block does `print(f\"runstat: {exc}\")` (stdout) immediately before `print(f\"runstat: {exc}\", file=sys.stderr)`, with a comment stating this is deliberate (\"Print where the user will see it, whichever stream they are watching\"). Verified directly: `runstat signals /tmp/nonexistent...` writes the error text to both stdout and stderr. This is the opposite of the required behaviour and directly contradicts the brief (0003-runstat-cli.md line ~125: 'stdout stays empty on failure')."
+    },
+    {
+      "criterion": "On every failing path the explanation goes to stderr",
+      "met": true,
+      "evidence": "Same except block also writes to sys.stderr, so stderr does get the message -- but see the stdout finding above, which is the actual defect."
+    },
+    {
+      "criterion": "No traceback reaches the user",
+      "met": false,
+      "evidence": "Only RunError is caught. Any other exception (e.g. a KeyError from a session JSON missing a required field like 'phase', or a JSONDecodeError path not already wrapped) is not guarded against; load_run() does wrap JSON parse errors, but a session file valid JSON missing an expected key would raise an uncaught KeyError from the dict lookups in load_run(), and main() has no bare except/generic handler. Not exercised by any test, so unverified either way, but nothing in the diff establishes this guarantee -- treating as not met per the review rubric (a criterion that cannot be ruled on from evidence is not met)."
+    }
+  ],
+  "findings": [
+    "stdout is not empty on failure: cli.py prints the error message to stdout before also printing it to stderr, with a comment defending the choice -- directly contradicts the brief's explicit contract ('stdout stays empty on failure') and the task's own acceptance criteria.",
+    "Exit code 1 for a readable-but-empty run is entirely unimplemented -- no code path produces it; verified an empty (but existing, readable) run directory exits 0.",
+    "Test coverage is a single test (missing directory exits 2); none of the other four acceptance criteria have any durable test, including the two that are actually broken.",
+    "No handling for exceptions other than RunError, so 'no traceback reaches the user' is unverified and likely unmet for malformed-but-parseable session records missing required keys."
+  ],
+  "notes": "proposal.json's claim ('Implemented the task and verified it... gate command exits 0') is true only because the single test in tests/test_errors.py covers just one of five acceptance criteria. The gate passing does not mean the task is done -- two criteria are demonstrably violated by direct execution of the built CLI."
+}

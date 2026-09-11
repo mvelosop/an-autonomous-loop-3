@@ -22,6 +22,12 @@ One line per document, describing what binds rather than what it covers.
 | [`briefs/`](briefs/) | What a run is planned from. `B007` is the current numbering scheme; the design record for the loop itself is `0002`. |
 | [`references/`](references/) | Documents whose paths resolve in a consumer repo rather than this one — vendored design notes, and material addressed to a consumer. Indexed and frontmatter-described; see its own [`README.md`](references/README.md). |
 
+## Working notes
+
+| Document | What it holds |
+| --- | --- |
+| [`todo.md`](todo.md) | Decisions taken and deliberately deferred, each with what it is waiting on. **Binds nothing** — listed here because every document beside this index must be, not because a task should ever cite it. |
+
 ## Not here
 
 The loop's own documentation lives with the loop: [`.loop/manual.md`](../.loop/manual.md)

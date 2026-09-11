@@ -113,7 +113,7 @@ Write `.loop/state/state.json` in exactly this shape:
       "id": "T1",
       "title": "One line, imperative",
       "goal": "Why this task exists and what it unblocks. Two or three sentences, written for someone who has not read the brief.",
-      "files": ["src/runstat/__init__.py", "pyproject.toml"],
+      "files": ["src/runstat/__init__.py", "tests/test_runstat.py", "pyproject.toml"],
       "references": [
         {"path": "docs/runstat.md", "why": "the signal formulas this task must not diverge from"}
       ],
@@ -122,7 +122,7 @@ Write `.loop/state/state.json` in exactly this shape:
         "A specific, checkable statement",
         "Another one — enough that a reviewer could rule on them without reading your mind"
       ],
-      "verify": "uv run python -c \"import runstat\"",
+      "verify": "uv run pytest -q tests/test_runstat.py && uv run python -c \"import runstat\"",
       "status": "pending",
       "attempts": 0,
       "notes": ""
@@ -257,6 +257,79 @@ but the rule is the broader one: **name what a violation looks like, not just
 what the goal is.** "Generated from the code, not hand-written" is a goal.
 "No schema literal duplicated at a call site" is a violation.
 
+### What the gate does not outlive
+
+The verify command runs during the run and then stops existing. It is
+scaffolding: it proves the task works *now*, for the driver, and it goes away
+with the state file when the plan is archived.
+
+So a task that ships behaviour must also ship the **committed tests** for that
+behaviour, in whatever surface the project already uses, and list them in
+`files`. The gate then runs them, alongside whatever independent checking it
+does of its own.
+
+**The tests are not a substitute for the gate and the gate is not a substitute
+for the tests.** The gate is written here, from the brief, before any code
+exists — it is implementation-blind by construction. The tests are written by
+the session that built the thing, with full knowledge of how. Two oracles,
+different authors, and the redundancy is the point: only one of them can be
+wrong in a way the other shares. Collapse them into one artifact and you keep
+the weaker one, which is the self-report.
+
+**Measured** (B0006 in the `exploring-claude` repo, a nine-task run against a
+NestJS API): the plan's verify commands came to ~97 KB of assertion logic. All
+of it passed, none of it was wrong, and several checks were sharper than a
+hand-written test would have been. Exactly one task also ran a committed test
+file. When the run ended that file was the only thing left standing — nine
+shipped HTTP routes, a `409` guard and a `422` refusal reached the main branch
+with no coverage at all. Nothing in the plan was defective. The gates simply
+were not the deliverable, and nothing had said what was.
+
+Name the violation, not the goal: **a task whose `files` list names nothing that
+outlives the run.** Usually that is a test file. It can equally be a committed
+request collection, a fixture, or an assertion the project's own harness
+re-runs — what matters is that something durable exercises the behaviour
+afterwards, not which shape it takes. A task that extends coverage that already
+exists satisfies this by listing the file it extends.
+
+**Give each durable file one owner.** The task that ships a file should be the
+task whose `verify` runs it. A later task may *run* that file again — a
+collection exercised by the next slice is normal, and running is not writing.
+But do not put it in a second task's `files`: the driver lets a task modify a
+gate file it was assigned, and that exemption is what leaves a task free to
+write the test it ships. A file assigned to a task whose own gate does not run
+it is a gate that task can weaken while not being measured by it.
+`.loop/amend.sh check` warns about exactly that shape.
+
+**The driver does not enforce this.** It rejects a plan for a missing `verify` or
+a missing `acceptance`, and it will accept one whose every task ships nothing
+durable at all. Checking it mechanically means matching filename conventions,
+which is stack knowledge the driver deliberately does not carry — and a check
+written against `.test.`/`.spec.` would have wrongly rejected a Bruno-collection
+task the first time it ran.
+
+Two things do look at it, and both look *after* you: the review session is asked
+whether anything durable came out of each task, and `files` is rendered into
+`.loop/state/plan.md` so an operator reading the plan under `--plan-only` can
+see what a task intends to leave behind. Neither can put back a task you never
+wrote this way. Getting it right is yours.
+
+### The gates, together, are the regression net
+
+The driver re-runs **every** done task's `verify` after every iteration, and that
+is now the only thing standing between a later task and a regression in an
+earlier one: the work session is told not to run the whole suite itself, because
+doing that once per iteration is what stalled B0007.
+
+So the *union* of your verify commands has to cover the project, not only each
+task in turn. A plan whose every gate is one narrow test file lets a task break
+something no gate names, pass its own gate, pass review, and close. Give at least
+one task a gate broad enough to notice, or end each gate with one where that is
+cheap — `... && uv run pytest -q` is the shape this repo's own plans use. Where
+the suite is too slow to run every iteration, make the broad gate the cheapest
+thing that would still catch it: a type check, a build, a lint over the package
+the run touches.
+
 ## Before you finish
 
 Check your own output, and fix what fails rather than reporting it:
@@ -264,12 +337,17 @@ Check your own output, and fix what fails rather than reporting it:
 1. `.loop/state/state.json` is valid JSON.
 2. Every task has a non-empty `verify`, at least one `acceptance` entry, and a
    `goal` of more than one sentence.
-3. Every `depends_on` entry names a real task id, and no cycle exists.
-4. Every `verify` command runs *right now* and **fails** — run them. One that
-   passes before any work exists is not a gate, and one that errors on syntax is
-   a broken gate. Fix either.
-5. Every `references` path resolves. Check them; a dangling one fails the run.
-6. Nothing anywhere contains an absolute path.
+3. Every task that ships behaviour lists something durable in `files` — a test
+   file, a committed request collection — and its `verify` runs it.
+4. At least one `verify` is broad enough to notice a regression no other gate
+   names. The gate list is the whole regression net.
+5. Every `depends_on` entry names a real task id, and no cycle exists.
+6. Every `verify` command runs *right now* and **fails** — run them. One that
+   passes before any work exists is not a gate. Failing because the file it
+   names has not been written yet is the *expected* shape, not a broken gate;
+   failing on a shell or syntax error in the command itself is broken. Fix that.
+7. Every `references` path resolves. Check them; a dangling one fails the run.
+8. Nothing anywhere contains an absolute path.
 
 Then report: the run id, the task count, the first ready task, and — plainly —
 anything about the brief you had to interpret rather than read. That last part

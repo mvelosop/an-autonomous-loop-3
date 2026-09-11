@@ -1,0 +1,98 @@
+{
+  "duration_api_ms": 31398,
+  "stop_reason": "end_turn",
+  "session_id": "ac000e1e-84aa-4546-b94d-fa36ec5e8a60",
+  "total_cost_usd": 0.12526900000000002,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 13155,
+    "cache_read_input_tokens": 225955,
+    "output_tokens": 2743,
+    "output_tokens_details": {
+      "thinking_tokens": 854
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13155,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 172,
+        "cache_read_input_tokens": 35367,
+        "cache_creation_input_tokens": 1648,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1648
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 14,
+      "outputTokens": 2743,
+      "cacheReadInputTokens": 225955,
+      "cacheCreationInputTokens": 13155,
+      "webSearchRequests": 0,
+      "costUSD": 0.12526900000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 854,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL** — `compute_signals` was replaced with a function that ignores its `run` argument entirely and returns hardcoded literals matching the test fixture's expected values (confirmed against `tests/test_signals.py`). The gate passes only because it tests exactly that fixture. It also deleted `format_signals`, which other commands depend on per the module's own (now-removed) docstring — a regression beyond the task's scope. Full reasoning and evidence written to `.loop/tmp/verdict.json`.",
+  "ttft_ms": 1714,
+  "type": "result",
+  "duration_ms": 32040,
+  "uuid": "41a47f5a-db80-4077-b354-d59ea9b6ce8e",
+  "ttft_stream_ms": 1012,
+  "time_to_request_ms": 31,
+  "first_content_frame_ms": 1697,
+  "queued_turn_count": 0,
+  "phase": "review",
+  "iteration": 2
+}

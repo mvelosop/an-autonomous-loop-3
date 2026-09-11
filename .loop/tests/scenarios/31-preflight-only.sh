@@ -11,7 +11,11 @@
 # sanity check that can disagree with the thing it checks is worse than none.
 . "$(dirname "$0")/../lib.sh"
 
-check_run() { ( cd "$FX/repo" && HOME="$FX/testuser" bash .loop/run.sh "$@" >"$FX/out.log" 2>&1 ); }
+# $FX/bin first, like fixture_run: the tools preflight only probes for are
+# stubbed there, so "is this repo ready?" answers about the fixture and not
+# about what the developer happens to have installed.
+check_run() { ( cd "$FX/repo" && HOME="$FX/testuser" PATH="$FX/bin:$PATH" \
+                  bash .loop/run.sh "$@" >"$FX/out.log" 2>&1 ); }
 
 note "── a ready repo: exit 0, and nothing is created ──"
 fixture_new

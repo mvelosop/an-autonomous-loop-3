@@ -1,0 +1,98 @@
+{
+  "duration_api_ms": 48271,
+  "stop_reason": "end_turn",
+  "session_id": "b953f719-92d4-4fb5-9509-a6f78dcbc56f",
+  "total_cost_usd": 0.1402306,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 14721,
+    "cache_read_input_tokens": 194063,
+    "output_tokens": 4251,
+    "output_tokens_details": {
+      "thinking_tokens": 1897
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14721,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 147,
+        "cache_read_input_tokens": 37043,
+        "cache_creation_input_tokens": 1538,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1538
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 12,
+      "outputTokens": 4251,
+      "cacheReadInputTokens": 194063,
+      "cacheCreationInputTokens": 14721,
+      "webSearchRequests": 0,
+      "costUSD": 0.1402306,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 1897,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL.** `cli.py` hardcodes its own `_PREFIX = \"runstat: \"` instead of importing `messages.PREFIX`, with a comment admitting it must be kept in sync by hand — exactly the drift the catalogue was built to prevent, and a direct violation of the \"no separate hard-coded string table\" acceptance criterion. Details and evidence written to `.loop/tmp/verdict.json`.",
+  "ttft_ms": 2993,
+  "type": "result",
+  "duration_ms": 48452,
+  "uuid": "34f0a0ce-8871-4168-a766-b5c2edb2a5eb",
+  "ttft_stream_ms": 2278,
+  "time_to_request_ms": 34,
+  "first_content_frame_ms": 2654,
+  "queued_turn_count": 0,
+  "phase": "review",
+  "iteration": 9
+}

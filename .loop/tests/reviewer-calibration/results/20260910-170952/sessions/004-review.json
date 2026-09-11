@@ -1,0 +1,98 @@
+{
+  "duration_api_ms": 71442,
+  "stop_reason": "end_turn",
+  "session_id": "1f31cafc-4bda-4fdb-b285-b7fbe7a0def0",
+  "total_cost_usd": 0.207349,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 22138,
+    "cache_read_input_tokens": 288625,
+    "output_tokens": 6104,
+    "output_tokens_details": {
+      "thinking_tokens": 2524
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22138,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 276,
+        "cache_read_input_tokens": 43251,
+        "cache_creation_input_tokens": 2747,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2747
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 16,
+      "outputTokens": 6104,
+      "cacheReadInputTokens": 288625,
+      "cacheCreationInputTokens": 22138,
+      "webSearchRequests": 0,
+      "costUSD": 0.207349,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 2524,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 13,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL.** T4 fails 3 of 5 acceptance criteria: the `except RunError` handler in `src/runstat/cli.py` prints the error to *both* stdout and stderr (violating \"stdout stays empty on failure\"), there's no exit-1 path for an empty-but-valid run (it falls through to exit 0), and structurally malformed data (valid JSON, missing keys) raises an uncaught `KeyError` that leaks a full traceback and exits 1 instead of 2. All three were confirmed by directly running the CLI against a missing dir, an empty dir, and a malformed session file. The single test in `tests/test_errors.py` only checks the missing-directory exit code, so the gate passed without exercising any of the broken behavior. Verdict written to `.loop/tmp/verdict.json`.",
+  "ttft_ms": 2550,
+  "type": "result",
+  "duration_ms": 81224,
+  "uuid": "afdff7e3-0738-4609-8c47-787aaec29c1d",
+  "ttft_stream_ms": 1910,
+  "time_to_request_ms": 34,
+  "first_content_frame_ms": 2237,
+  "queued_turn_count": 0,
+  "phase": "review",
+  "iteration": 4
+}

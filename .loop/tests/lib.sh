@@ -38,6 +38,22 @@ fixture_new() {
   mkdir -p "$FX/repo" "$FX/testuser" "$FX/bin"
   FX_REPO="$(cd "$FX/repo" && pwd -P)"
 
+  # Preflight probes for tools it never runs: `uv`, for the demo target, and
+  # `claude` in the scenarios that stop before any session. Whether the
+  # developer happens to have those installed is not something a scenario
+  # should be able to see -- 31-preflight-only asserts "a ready repo exits 0"
+  # and failed on every machine without uv, which is the suite reporting on its
+  # host rather than on the driver. Plant inert stubs instead; fixture_stub
+  # overwrites the claude one in every scenario that actually runs a session.
+  #
+  # Safe to shadow because nothing here executes them -- fixture verify commands
+  # are `test -f`, not builds. A scenario that ever needs the real tool should
+  # delete the stub, not reorder PATH.
+  for t in uv claude; do
+    printf '#!/usr/bin/env bash\nexit 0\n' >"$FX/bin/$t"
+    chmod +x "$FX/bin/$t"
+  done
+
   cp -R "$REPO_ROOT/.claude" "$FX/repo/"
   # The skills are mechanism and must travel. The knowledge declaration is THIS
   # repo's content and must not: carried into a fixture it names roots the
