@@ -1,0 +1,26 @@
+{
+  "task": "T3",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "runstat signals <run-dir> prints exactly the eight key: value lines in the brief's order",
+      "met": true,
+      "evidence": "Manually ran `python -m runstat signals <fixture-run>` and got the eight lines in the brief's order with the brief's exact values (iterations: 3, tasks closed: 2/8, iterations per closed: 1.50, gate failures: 1, review rejections: 0, attempts burned: 1, no-progress streak: 0, estimated spend: $4.08). Note: this is verified by manual run, not by the shipped test (see findings)."
+    },
+    {
+      "criterion": "The command exits 0 on a readable run",
+      "met": true,
+      "evidence": "Manual run above returned rc=0; tests/test_signals_cmd.py asserts p.returncode == 0."
+    },
+    {
+      "criterion": "The implementation stays within what the brief asks for",
+      "met": false,
+      "evidence": "src/runstat/cli.py adds a `--json` flag to the signals subcommand (`sig.add_argument(\"--json\", action=\"store_true\", help=\"emit the signals as a JSON object\")`, and the branch in `_signals` that dumps `json.dumps(dict(pairs), indent=2)`). Brief 0003's 'Out of scope' section explicitly lists 'Machine-readable output (--json, CSV export)' as deliberately excluded. This is a direct scope violation, not an ambiguous judgment call."
+    }
+  ],
+  "findings": [
+    "src/runstat/cli.py implements a --json output mode for `signals`, which brief 0003 explicitly places out of scope ('Machine-readable output (--json, CSV export)').",
+    "tests/test_signals_cmd.py only asserts the output has 8 non-empty lines (`len(lines) == 8`); it does not check the key labels, their order, or their values, even though the brief says explicitly 'signals output is key: value lines, so assert its values exactly' and acceptance criterion 1 is about exact order and content. The --json path added by this task is also completely untested."
+  ],
+  "notes": "The underlying signals module (compute_signals/format_signals) already had exact-value coverage from an earlier task via tests/test_signals.py, and the CLI's plain-text output does match the brief's worked example when run manually — so the fix here is narrow: drop the --json flag/branch (out of scope) and, ideally, strengthen test_signals_cmd.py to assert the exact key:value lines rather than just a line count."
+}

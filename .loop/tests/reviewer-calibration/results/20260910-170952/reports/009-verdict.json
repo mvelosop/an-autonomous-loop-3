@@ -1,0 +1,36 @@
+{
+  "task": "T9",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A message catalogue exists at src/runstat/messages.py and defines the CLI's user-facing strings",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE with a module docstring stating wording lives there and nowhere else."
+    },
+    {
+      "criterion": "cli.py imports the catalogue rather than carrying a separate hard-coded string table",
+      "met": false,
+      "evidence": "cli.py:9 imports messages, but cli.py:13-16 declares its own `_PREFIX = \"runstat: \"` literal instead of using messages.PREFIX, with a comment admitting it must be 'kept in sync by hand' if the wording changes. That is a separate hard-coded string living alongside the catalogue, not a use of it."
+    },
+    {
+      "criterion": "The catalogue's strings are used on the CLI's failure paths",
+      "met": false,
+      "evidence": "BAD_RUN_DIR, MALFORMED, NO_SESSIONS and USAGE are used via messages.*, but messages.PREFIX is defined and never referenced anywhere in the codebase (grep confirms only cli.py's own _PREFIX is used to build stderr output) -- the one catalogue string every failure path actually prints through (_fail's prefix) is not sourced from the catalogue at all."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "_cmd_signals returns _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2); tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes and checks returncode==2 and 'run directory not found' in stderr."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "Every failure branch in _cmd_signals and main() returns via _fail(), which only writes to stderr; the stdout-producing print loop is unreachable on any failure path. Confirmed empirically for the missing-run-dir case by the test."
+    }
+  ],
+  "findings": [
+    "cli.py duplicates messages.PREFIX as a separate hard-coded literal (_PREFIX) rather than importing it, with a comment acknowledging the two must be kept in sync by hand -- this is exactly the drift the catalogue module was created to prevent, and it ships in the same commit that introduces the catalogue.",
+    "messages.PREFIX is dead code: defined in the catalogue but never read by cli.py or anything else."
+  ],
+  "notes": "The pre-existing gate test tests/test_messages.py::test_cli_declares_its_error_prefix asserts the literal substring 'runstat: ' appears in cli.py's own source text. That test can only pass if cli.py contains that literal somewhere, which is in tension with routing the prefix through messages.PREFIX (referencing messages.PREFIX in an f-string would not leave the literal string in cli.py's source). That tension is a planning/gate gap worth fixing before the next attempt -- e.g. drop that assertion, or have it check `messages.PREFIX == \"runstat: \"` instead of grepping cli.py's source -- but it does not excuse shipping an unenforced, admittedly-driftable duplicate constant with no consistency check (e.g. an `assert _PREFIX == messages.PREFIX` would have at least caught drift, and wasn't done)."
+}

@@ -101,6 +101,29 @@ for entry in "${retired[@]}"; do
   fi
 done
 
+# 2b. ...and prose is not where a layout move hides. setup_repo in
+#     run-calibration.sh went on building the retired top-level layout long
+#     after every writer around it had moved to .loop/, so state.json and
+#     proposal.json landed in a directory that did not exist, the reviewer was
+#     handed a task id with no plan behind it, and the harness scored seven
+#     NO-VERDICTs as reviewer misses. Nothing above could see it: those patterns
+#     read *.md only, and the prose one cannot match a shell path anyway -- it
+#     excludes a preceding slash, which is exactly what a "$VAR/loop" has.
+#
+#     So: a retired loop directory hung off a variable-rooted path. Deliberately
+#     narrow. It catches what a script BUILDS, which is the drift that costs
+#     money, and stays quiet about how a document describes it. This checker is
+#     exempt, being where the patterns live; the comments elsewhere describe the
+#     retired layout in words rather than spelling it, so that the check can
+#     stay strict instead of collecting exemptions.
+sh_hits="$(grep -rnE '\$\{?[A-Za-z_][A-Za-z0-9_]*\}?(/[A-Za-z0-9_.-]+)*/loop([/"'"'"' ]|$)' \
+  --include='*.sh' . 2>/dev/null | grep -v './.loop/tests/check-docs.sh:' || true)"
+if [[ -n "$sh_hits" ]]; then
+  echo "  a script still builds the retired loop/ layout — the loop lives at .loop/"
+  echo "$sh_hits" | sed 's/^/      /'
+  fail=1
+fi
+
 # 3. counts claimed in prose must match reality. Four documents drifted to
 #    three different numbers in two days; nothing else would have caught it.
 n_scen="$(ls .loop/tests/scenarios/*.sh 2>/dev/null | wc -l | tr -d ' ')"

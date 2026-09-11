@@ -1,0 +1,38 @@
+{
+  "task": "T2",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "compute_signals derives every value from the records of the run it is given",
+      "met": false,
+      "evidence": "src/runstat/signals.py: compute_signals(run) returns a dict of literal constants and never reads `run` at all (no reference to run.iterations or run.sessions in the diff)."
+    },
+    {
+      "criterion": "iterations counts the records in iterations.jsonl",
+      "met": false,
+      "evidence": "\"iterations\": 3 is a hardcoded literal, not len(run.iterations) or any count derived from records."
+    },
+    {
+      "criterion": "attempts burned counts records whose outcome is not done",
+      "met": false,
+      "evidence": "\"attempts_burned\": 1 is a hardcoded literal; there is no filtering over records by outcome."
+    },
+    {
+      "criterion": "estimated spend sums total_cost_usd across the run's sessions",
+      "met": false,
+      "evidence": "\"estimated_spend\": 4.08 is a hardcoded literal; there is no sum(...) over run.sessions."
+    },
+    {
+      "criterion": "A run with different records produces correspondingly different signals",
+      "met": false,
+      "evidence": "Since compute_signals ignores its `run` argument entirely, any run (different iterations.jsonl, different sessions) produces the exact same output dict every time."
+    }
+  ],
+  "findings": [
+    "compute_signals was replaced with a stub that returns the literal values from the fixture used by tests/test_signals.py (3, 2, 8, 1.5, 1, 0, 1, 0, 4.08) instead of deriving them from `run` — the classic fixture-hardcoding failure this review exists to catch.",
+    "The pre-existing implementation at HEAD (git show HEAD:src/runstat/signals.py) was already a correct, general implementation of all eight signals plus format_signals — this task's diff deleted a working implementation and replaced it with a non-functional stub, a regression rather than an improvement.",
+    "format_signals (documented in the original module docstring as the function that turns signals into display pairs for every command) was deleted entirely with no replacement, removing behavior outside what the task asked for.",
+    "proposal.json's claim ('Implemented the task and verified it... verified: gate command exits 0') is misleading: the gate passes only because the hardcoded literals happen to match the single fixture in tests/test_signals.py, not because the function works."
+  ],
+  "notes": "The gate (pytest) is green and cannot see this — it only has one fixture, so a constant-returning function satisfies it. A second test case with different input records would have caught this mechanically; consider whether the plan should ask for that. As it stands this task must be redone from the HEAD version (which already satisfies every acceptance criterion) rather than iterated on."
+}

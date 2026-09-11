@@ -50,7 +50,17 @@ setup_repo() {
   rm -rf "$WORK"; mkdir -p "$WORK"
   cp -R "$REPO_ROOT/.claude" "$WORK/"
   cp "$REPO_ROOT/CLAUDE.md" "$REPO_ROOT/.gitignore" "$WORK/"
-  mkdir -p "$WORK/loop" "$WORK/docs/briefs" "$WORK/docs/references" \
+  # .loop/state and .loop/tmp, because that is where every writer below puts
+  # the reviewer's inputs. This built the retired top-level layout instead --
+  # workdir root, then a bare loop directory beside it, with no leading dot --
+  # long after the move, so state.json and proposal.json were written
+  # into a directory that did not exist and the reviewer was handed a task id
+  # with no plan, no acceptance criteria and no proposal behind it. Seven of
+  # nine cases came back NO-VERDICT and the harness scored them as reviewer
+  # misses. check-docs.sh's retired-layout check only reads *.md, so a shell
+  # script could hold the old layout indefinitely without anything saying so.
+  mkdir -p "$WORK/.loop/state" "$WORK/.loop/tmp" \
+           "$WORK/docs/briefs" "$WORK/docs/references" \
            "$WORK/src/runstat" "$WORK/tests"
   cp "$REPO_ROOT/docs/briefs/0002-next-generation-autonomous-loop.md" \
      "$REPO_ROOT/docs/briefs/0003-runstat-cli.md" "$WORK/docs/briefs/"

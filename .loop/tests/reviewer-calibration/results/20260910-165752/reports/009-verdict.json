@@ -1,0 +1,36 @@
+{
+  "task": "T9",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A message catalogue exists at src/runstat/messages.py and defines the CLI's user-facing strings",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE"
+    },
+    {
+      "criterion": "cli.py imports the catalogue rather than carrying a separate hard-coded string table",
+      "met": false,
+      "evidence": "src/runstat/cli.py:12-15 imports messages and uses messages.BAD_RUN_DIR/MALFORMED/NO_SESSIONS/USAGE, but also declares its own `_PREFIX = \"runstat: \"` instead of using messages.PREFIX. The accompanying comment ('Declared here rather than taken from messages.PREFIX... Keep in sync with messages.PREFIX by hand if the wording changes') explicitly acknowledges this is a second, hand-maintained copy of a catalogue string -- exactly the drift messages.py's own docstring says the module exists to prevent ('A copy of any of these at a call site is the drift this module exists to prevent.')."
+    },
+    {
+      "criterion": "The catalogue's strings are used on the CLI's failure paths",
+      "met": false,
+      "evidence": "The BAD_RUN_DIR/MALFORMED/NO_SESSIONS/USAGE strings are used via messages.*, but the PREFIX that is prepended to every single failure message (cli.py _fail()) is not sourced from the catalogue at all -- it's a hand-copied duplicate."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py:_cmd_signals returns _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2); tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text asserts returncode 2 and 'run directory not found' in stderr; passes per gate.log (2 passed)."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "Every branch in _cmd_signals and main() returns via _fail() before any print to stdout; the only stdout print is on the success loop over compute_signals results. test_missing_run_dir_exits_2_with_catalogue_text asserts stdout == ''."
+    }
+  ],
+  "findings": [
+    "cli.py hardcodes its own `_PREFIX = \"runstat: \"` instead of importing messages.PREFIX, with a comment admitting it must be kept in sync by hand -- this is precisely the single-source-of-truth violation the task (and messages.py's own docstring) exists to prevent.",
+    "tests/test_messages.py::test_cli_declares_its_error_prefix only greps cli.py's source for the literal string 'runstat: ', so it passes regardless of whether that string comes from messages.PREFIX or a local duplicate -- it does not actually cover the catalogue-routing requirement."
+  ],
+  "notes": "Fix is small: replace `_PREFIX = \"runstat: \"` in cli.py with `from .messages import PREFIX as _PREFIX` (or reference messages.PREFIX directly in _fail), and update test_cli_declares_its_error_prefix to assert the import/usage rather than grepping for the literal string, so a future duplicate copy would fail the gate."
+}

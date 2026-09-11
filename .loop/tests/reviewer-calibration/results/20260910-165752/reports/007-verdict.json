@@ -1,0 +1,35 @@
+{
+  "task": "T7",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py:_cmd_signals catches RunError and prints f\"{messages.MALFORMED}: {exc}\". The `exc` text is not dynamic data (like a path) -- it is wording defined in src/runstat/loader.py, e.g. `raise RunError(f\"malformed session file: {session_path.name}\")`, plus the 'malformed record in iterations.jsonl' and 'malformed verdict file (missing ...)' variants. Ran the CLI against a run dir with a corrupt sessions/001.json: stderr was 'runstat: malformed run: malformed session file: 001.json' -- the substantive wording ('malformed session file') lives in loader.py, not messages.py."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": true,
+      "evidence": "cli.py's own strings (PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE) are all referenced via `messages.*`; no inline literal is written in cli.py itself."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes; manually confirmed rc=2 and 'run directory not found' from messages.BAD_RUN_DIR on stderr."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": false,
+      "evidence": "Same as criterion 1: the malformed-run error's actual wording ('malformed session file: X', 'malformed record in iterations.jsonl: ...', 'malformed verdict file: ... (missing ...)') is defined in src/runstat/loader.py's RunError messages. Editing that wording means editing loader.py, not messages.py."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "tests/test_messages.py asserts p.stdout == \"\" on the missing-run-dir path; manually confirmed empty stdout on the malformed-run path too."
+    }
+  ],
+  "findings": [
+    "src/runstat/messages.py:MALFORMED is only a prefix; the substantive error text for every malformed-run case is composed from loader.py's RunError messages, so the catalogue is not actually the single place to edit that wording -- directly contradicting acceptance criteria 1 and 4, which the task's own goal text calls out as the point of the task ('A copy left inline in cli.py reintroduces exactly the drift this task exists to remove')."
+  ],
+  "notes": "cli.py was a two-line stub before this task (`def main(argv=None): return 0`), so building enough argparse/dispatch scaffolding to exercise the error paths was reasonable and stayed within the task's declared files (messages.py, cli.py, plus the test file). One byproduct is out of scope but pre-existing and not a regression: _cmd_signals's success path prints raw compute_signals() keys instead of using signals.format_signals()'s labelled 'tasks closed: n/m' style, so tests/test_signals_cmd.py still fails (it failed before this task too, with a different assertion message -- confirmed via git stash). That belongs to a signals-command task, not T7, but the planner should make sure a task actually owns it."
+}

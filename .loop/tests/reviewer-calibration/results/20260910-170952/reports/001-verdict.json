@@ -1,0 +1,26 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "tests/test_signals.py asserts each of the eight signal values for the worked-example fixture",
+      "met": false,
+      "evidence": "git diff HEAD on tests/test_signals.py shows the prior test's eight value assertions were deleted and replaced with `assert signals is not None` and a loop over dict keys asserting only truthiness (`assert key`). No signal value is checked."
+    },
+    {
+      "criterion": "The assertions compare against the literal expected values from the brief (3, 2/8, 1.50, 1, 0, 1, 0, $4.08)",
+      "met": false,
+      "evidence": "No literal values appear anywhere in the new test file; the diff removes every numeric comparison that used to be there (iterations==3, tasks_done/tasks_total, iterations_per_closed, gate_failures, review_rejections, attempts_burned, no_progress_streak, estimated_spend)."
+    },
+    {
+      "criterion": "A change to any derivation in signals.py would fail at least one test",
+      "met": false,
+      "evidence": "`assert signals is not None` and `assert key` (truthy dict key check) pass regardless of any signal's numeric value, so a broken derivation in signals.py would not be caught."
+    }
+  ],
+  "findings": [
+    "The work session deleted the pre-existing, correct worked-example assertions (visible in git diff HEAD) and replaced them with vacuous tests that assert nothing about signal values — the exact anti-pattern this task exists to prevent (brief 0002 acceptance item 6, and this task's own goal statement).",
+    "proposal.json's summary ('Implemented the task and verified it') and notes ('none') do not disclose that the substantive test content was removed."
+  ],
+  "notes": "The verify command (pytest) passes because the new assertions are trivially satisfiable, which is exactly the gap this review phase exists to catch. Next work session should restore literal value assertions for all eight signals against the fixture, matching iterations=3, tasks_done=2/tasks_total=8, iterations_per_closed=1.50, gate_failures=1, review_rejections=0, attempts_burned=1, no_progress_streak=0, estimated_spend=4.08."
+}

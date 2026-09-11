@@ -1,0 +1,39 @@
+{
+  "task": "T4",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A missing or malformed run directory exits 2",
+      "met": false,
+      "evidence": "Missing directory does exit 2 (confirmed: `runstat signals /tmp/does-not-exist` -> exit 2). But malformed input does not reliably exit 2: a session file with valid JSON but missing a required key (e.g. no `phase`) raises an uncaught KeyError in loader.py load_run(), which is not a RunError, so cli.py's `except RunError` never fires and the process exits 1 with a raw traceback instead of 2. Confirmed by writing /tmp/bad-run/sessions/001-plan.json with `{\"bad\": \"missing keys\"}` and running the CLI: exit code was 1, stderr was a full Python traceback ending in `KeyError: 'phase'`."
+    },
+    {
+      "criterion": "A readable but empty run exits 1",
+      "met": false,
+      "evidence": "cli.py has no code path that returns 1 anywhere. An empty-but-valid run directory (no sessions/, no iterations.jsonl) is loaded successfully by load_run() and _signals() prints zeroed signals and returns 0. Confirmed: `mkdir /tmp/empty-run && runstat signals /tmp/empty-run` exits 0, not 1."
+    },
+    {
+      "criterion": "On every failing path stdout is completely empty",
+      "met": false,
+      "evidence": "cli.py main()'s except RunError block does `print(f\"runstat: {exc}\")` (goes to stdout) immediately before `print(f\"runstat: {exc}\", file=sys.stderr)`. Confirmed: `runstat signals /tmp/does-not-exist` prints `runstat: run directory not found: /tmp/does-not-exist` to stdout as well as stderr. A caller piping stdout on this failure receives the error text mixed into its data, exactly the failure mode the task goal describes."
+    },
+    {
+      "criterion": "On every failing path the explanation goes to stderr",
+      "met": true,
+      "evidence": "For the RunError path the same message is also written to stderr (src/runstat/cli.py: `print(f\"runstat: {exc}\", file=sys.stderr)`), so stderr does get the explanation on that path. (The uncaught-KeyError path also happens to put its traceback on stderr, though that is criterion 5's failure, not this one's.)"
+    },
+    {
+      "criterion": "No traceback reaches the user",
+      "met": false,
+      "evidence": "Any RunError subclass raised by loader.py for a *syntactic* JSON error is handled, but load_run() also raises plain KeyError for structurally malformed data (missing required keys in a session or verdict file that is nonetheless valid JSON), and cli.py only catches RunError. Confirmed above: a session file `{\"bad\": \"missing keys\"}` produces a full traceback on stderr and exit code 1."
+    }
+  ],
+  "findings": [
+    "except RunError block in src/runstat/cli.py prints the error to both stdout and stderr, directly violating the 'stdout stays empty on failure' contract from the brief's Behaviour contract section and this task's own acceptance criterion.",
+    "There is no exit-1 code path at all; the 'readable but empty run' case (brief: exit 1) is entirely unimplemented and falls through to exit 0.",
+    "load_run() in src/runstat/loader.py raises uncaught KeyError for structurally malformed (missing-key) session/verdict data, which escapes cli.py's `except RunError` and prints a raw Python traceback to the user, instead of exiting 2 as required both by the brief's exit-code contract and this task's acceptance criterion 1.",
+    "tests/test_errors.py contains exactly one test, covering only the missing-directory exit code. It asserts nothing about stdout content, stderr content, the empty-run case, or traceback suppression -- i.e. it exercises none of acceptance criteria 2-5, yet the gate (this single test) passes.",
+    "proposal.json's claim ('verified: gate command exits 0') is not evidence the task's actual behaviour contract was met -- the gate is the one test above, which does not check the things that are broken."
+  ],
+  "notes": "Task should be re-attempted: (1) do not print the RunError message to stdout, only stderr; (2) add a branch in _signals/main that returns 1 when load_run() succeeds but the run has no sessions (and, per the brief, presumably no iterations either -- worth checking the brief's exact 'no sessions' wording against iterations.jsonl too); (3) either make loader.py validate required keys and raise RunError (preferred, consistent with its own docstring 'a malformed file is a hard error') or wrap load_run() in main() with a broader except that maps any exception to exit 2 with a clean stderr message and no traceback; (4) tests/test_errors.py needs real coverage of the empty-run-exits-1 case, the stdout-empty-on-failure case, and the malformed-but-valid-JSON case, using subprocess capture like the existing test does, since that's the only way to actually observe stdout/stderr separation."
+}

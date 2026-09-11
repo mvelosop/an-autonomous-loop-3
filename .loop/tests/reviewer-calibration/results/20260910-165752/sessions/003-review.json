@@ -1,0 +1,98 @@
+{
+  "duration_api_ms": 67759,
+  "stop_reason": "end_turn",
+  "session_id": "0902ac4c-127f-45a4-b97b-2e9357b7050d",
+  "total_cost_usd": 0.24474239999999997,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 25691,
+    "cache_read_input_tokens": 391392,
+    "output_tokens": 6366,
+    "output_tokens_details": {
+      "thinking_tokens": 3510
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25691,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 181,
+        "cache_read_input_tokens": 47744,
+        "cache_creation_input_tokens": 1807,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1807
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 20,
+      "outputTokens": 6366,
+      "cacheReadInputTokens": 391392,
+      "cacheCreationInputTokens": 25691,
+      "webSearchRequests": 0,
+      "costUSD": 0.24474239999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 3510,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 19,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL** — `src/runstat/cli.py` adds a `--json` flag to `signals` that dumps machine-readable JSON output, but brief 0003's \"Out of scope\" section explicitly excludes \"Machine-readable output (`--json`, CSV export).\" This is a direct, unambiguous scope violation, compounded by `tests/test_signals_cmd.py` only checking that 8 lines were printed rather than asserting the exact key/value content the brief requires. Written to `.loop/tmp/verdict.json`.",
+  "ttft_ms": 1561,
+  "type": "result",
+  "duration_ms": 71599,
+  "uuid": "f38ea061-7a8b-4796-befd-47af25771db0",
+  "ttft_stream_ms": 993,
+  "time_to_request_ms": 33,
+  "first_content_frame_ms": 1429,
+  "queued_turn_count": 0,
+  "phase": "review",
+  "iteration": 3
+}

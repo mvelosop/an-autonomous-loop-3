@@ -1,0 +1,33 @@
+{
+  "task": "T7",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": true,
+      "evidence": "messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE (src/runstat/messages.py:9-13); cli.py's only error strings are these four names referenced via `messages.*` (src/runstat/cli.py:15,21,25,44), confirmed no other quoted error text exists in cli.py via grep."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": true,
+      "evidence": "grep of cli.py's string literals shows only messages.* references, argparse prog/help text, and the success-path `f\"{key}: {value}\"` print — no error text literals."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "src/runstat/cli.py:20-21 checks `is_dir()` and calls `_fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)`; test_missing_run_dir_exits_2_with_catalogue_text asserts returncode 2 and 'run directory not found' in stderr, and passes."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": true,
+      "evidence": "All four error strings and the prefix live only in messages.py; cli.py holds no duplicate copies."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_cmd_signals only calls stdout `print` after all failure checks (is_dir, load_run, sessions) have passed; test asserts p.stdout == \"\" on the missing-run-dir path."
+    }
+  ],
+  "findings": [],
+  "notes": "The work session also edited tests/test_messages.py (not in T7's declared files list), renaming test_cli_declares_its_error_prefix to test_catalogue_declares_the_error_prefix and repointing it from cli.py to messages.py. This was necessary, not scope creep: the pre-existing test asserted the literal 'runstat: ' must appear in cli.py, which directly contradicts this task's acceptance criterion 2. Leaving it as-is would have made the task's own acceptance criteria mutually unsatisfiable through the given verify command. The fix is narrow, explained in proposal.json, and doesn't touch behavior. Flagging for the plan: future tasks that supersede an earlier gate's assumptions should list the gate file in `files` up front."
+}

@@ -1,0 +1,16 @@
+{
+  "task": "T5",
+  "verdict": "FAIL",
+  "criteria": [
+    {"criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py", "met": false, "evidence": "messages.py:9 defines PREFIX = \"runstat: \", but cli.py:15 redeclares it as _PREFIX = \"runstat: \" instead of importing messages.PREFIX. The prefix string now exists in two places."},
+    {"criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py", "met": false, "evidence": "cli.py:11-15 hardcodes the literal \"runstat: \" as _PREFIX, with a comment explicitly saying it's declared there rather than taken from messages.PREFIX 'so the prefix is visible in this module' and must be 'kept in sync by hand'. That is precisely the inline literal this criterion forbids."},
+    {"criterion": "A missing run directory exits 2, with the catalogue's text on stderr", "met": true, "evidence": "cli.py:26-27 checks args.run_dir.is_dir() and calls _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2), printing to stderr with exit code 2."},
+    {"criterion": "Changing an error's wording requires editing only src/runstat/messages.py", "met": false, "evidence": "Changing the prefix wording requires editing both messages.py:9 (PREFIX) and cli.py:15 (_PREFIX), since cli.py never reads messages.PREFIX."},
+    {"criterion": "stdout is completely empty on every failing path", "met": true, "evidence": "All failure paths in cli.py route through _fail(), which only prints to sys.stderr; no print() to stdout occurs before a failing return."}
+  ],
+  "findings": [
+    "cli.py declares its own _PREFIX = \"runstat: \" literal instead of using messages.PREFIX, duplicating the exact string the catalogue was supposed to own once — the drift the task brief names as the reason the catalogue is the point of the task, not a tidy-up.",
+    "tests/test_messages.py (planted gate, committed in 133e27a) contains test_cli_declares_its_error_prefix, which asserts the literal string \"runstat: \" appears in cli.py's source — that test enshrines the same violation and let the gate pass despite the duplication. The gate passing does not establish this criterion; the diff contradicts it directly."
+  ],
+  "notes": "The fix is straightforward: cli.py should use messages.PREFIX in _fail() instead of declaring its own _PREFIX. Note the planted verify test (tests/test_messages.py::test_cli_declares_its_error_prefix) will need to change too, since as written it requires the very literal the acceptance criteria forbid — that's a defect in the gate itself, not something a work session can satisfy without violating the criteria. Flagging as a gap in the plan/gate, not the work session's fault for the gate's design, but the resulting code still fails the acceptance criteria as written."
+}
