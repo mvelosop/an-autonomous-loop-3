@@ -65,6 +65,43 @@ check() {
     say "  ✗ dependencies contain a cycle — no task would ever be ready"; problems=1
   fi
 
+  # A file a gate runs has one owner, and the owner is the task whose OWN gate
+  # runs it. That is the durable-artifact shape: the task ships the file, its
+  # verify exercises it, and the driver lets it create the file freely. A later
+  # task may then run that file -- your collection, exercised again -- because
+  # running it is not writing it, and the driver stops any task from modifying
+  # a gate file it was not assigned.
+  #
+  # What this catches is the third shape: a task assigned a file that some other
+  # task's gate runs while its OWN gate does not. The driver's guard is
+  # deliberately narrow -- it only stops a session rewriting the gate it is
+  # itself judged by, because widening it to any gate would have the driver
+  # restore a file a later task legitimately broke and hide the regression the
+  # gate re-run exists to catch. So this shape gets no protection at runtime at
+  # all: the task can weaken a gate it is not measured by, and a weakened gate
+  # passes, so no gate re-run finds it either. The plan is the only place left.
+  #
+  # Advisory, not fatal. Two tasks legitimately touching one file is a smell
+  # rather than a certainty, and this loop deliberately does not let a mechanical
+  # rule reject a plan it cannot fully judge. But the plan is the only place it
+  # can be fixed cheaply.
+  local shared
+  shared="$(jq -r '
+      . as $s
+      | [ $s.tasks[] as $a
+          | ($a.files // [])[] as $f
+          | select($f != "" and ((($a.verify // "") | contains($f)) | not))
+          | $s.tasks[] as $b
+          | select($b.id != $a.id and (($b.verify // "") | contains($f)))
+          | "      \($a.id) lists \($f), run by the gate of \($b.id) and not by its own" ]
+      | unique | .[]' "$STATE")"
+  if [[ -n "$shared" ]]; then
+    say "  ! a task is assigned a file that only another task's gate runs:"
+    printf '%s\n' "$shared"
+    say "    it can weaken a gate it is not measured by, and no runtime check"
+    say "    covers that shape. Give each gate file one owner."
+  fi
+
   # gates that already pass before the work exists are not gates
   local passing=() id cmd
   while read -r id; do

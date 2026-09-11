@@ -19,7 +19,7 @@
 # whose gate fails is measuring the gate, not the review, and is reported as
 # INVALID rather than scored.
 #
-# Costs roughly $0.35 per case. Unlike the fixture suite this calls a real
+# Costs roughly $0.15-0.20 per case. Unlike the fixture suite this calls a real
 # model, so it is not part of run-all.sh.
 
 set -uo pipefail

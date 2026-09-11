@@ -23,6 +23,8 @@
 
 `done` · depends on: none
 
+**Files:** `tests/fixtures.py`
+
 Every gate for this brief replays the tool against a fixed run directory, so that directory has to exist before anything else can be verified. This task adds two builders beside the existing write_fixture_run: the brief's worked-example run (three verdicts, one of them a FAIL carrying two findings) and a second run holding exactly one incoherent verdict. Their numbers are the arbiter for every later task's verify command, which is why they are pinned here rather than left to the code that consumes them.
 
 **Acceptance**
@@ -45,6 +47,8 @@ uv run python -c "import json,pathlib,sys,tempfile; sys.path.insert(0,'tests'); 
 ### T2 — Load reports/NNN-verdict.json in the existing loader
 
 `done` · depends on: T1
+
+**Files:** `src/runstat/loader.py`
 
 The verdicts are already on disk and nothing can read them. The brief requires reuse of the existing loader and error types rather than a second way to read a run, so this extends load_run instead of adding a parallel reader. It unblocks every later task: the review command, the findings section and the coherence checks all consume what this returns.
 
@@ -69,6 +73,8 @@ uv run python -c "import pathlib,sys,tempfile; sys.path.insert(0,'tests'); from 
 
 `done` · depends on: T2
 
+**Files:** `src/runstat/review.py`, `src/runstat/cli.py`
+
 This is the command the brief is about: it turns the verdicts the loader now reads into the per-iteration table and the totals block, and it inherits brief 0003's exit-code contract exactly. Two parts of the output land in later tasks and are deliberately not required here: the findings text (T4) and the coherence line and violations (T5). A reviewer should not fail this task for their absence.
 
 **Acceptance**
@@ -92,6 +98,8 @@ uv run python -c "import pathlib,subprocess,sys,tempfile; sys.path.insert(0,'tes
 
 `done` · depends on: T3
 
+**Files:** `src/runstat/review.py`
+
 The findings are the point of this command — a count of them is not, because the whole question the brief asks is what the reviewers actually caught. This adds the section that prints each finding's text under the iteration it came from, and the line that says plainly when a run recorded no findings at all, which is the result a reader most needs to not miss.
 
 **Acceptance**
@@ -112,6 +120,8 @@ uv run python -c "import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0
 ### T5 — Report the five coherence checks
 
 `done` · depends on: T4
+
+**Files:** `src/runstat/review.py`
 
 This is the part of the brief worth more than the summary: a verdict that passes a task while marking one of its own criteria not met is self-contradictory, and nothing checks for that today. Each check is a statement about one verdict that is either true or false; every violation is reported with its iteration and task. Violations are reported, never enforced — this command describes a finished run, and a run cannot be un-run.
 
@@ -135,6 +145,8 @@ uv run python -c "import json,pathlib,subprocess,sys,tempfile; sys.path.insert(0
 ### T6 — Document review and the reports/ directory in both docs
 
 `done` · depends on: T5
+
+**Files:** `docs/runstat-cli.md`, `docs/runstat.md`
 
 Both documents describe the telemetry contract and the commands, and a reader trusts them — so an example that has drifted from real output is worse than none. This task adds the review command and the reports/ directory to each, and its gate replays the tool and requires every printed line of the documented transcript to appear verbatim in what the tool actually produces. It also proves the existing commands never moved.
 

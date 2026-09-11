@@ -292,6 +292,15 @@ re-runs — what matters is that something durable exercises the behaviour
 afterwards, not which shape it takes. A task that extends coverage that already
 exists satisfies this by listing the file it extends.
 
+**Give each durable file one owner.** The task that ships a file should be the
+task whose `verify` runs it. A later task may *run* that file again — a
+collection exercised by the next slice is normal, and running is not writing.
+But do not put it in a second task's `files`: the driver lets a task modify a
+gate file it was assigned, and that exemption is what leaves a task free to
+write the test it ships. A file assigned to a task whose own gate does not run
+it is a gate that task can weaken while not being measured by it.
+`.loop/amend.sh check` warns about exactly that shape.
+
 **The driver does not enforce this.** It rejects a plan for a missing `verify` or
 a missing `acceptance`, and it will accept one whose every task ships nothing
 durable at all. Checking it mechanically means matching filename conventions,

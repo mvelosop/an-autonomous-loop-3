@@ -48,7 +48,7 @@ if [[ $fail -eq 0 ]]; then
   # Reviewer calibration is deliberately not run here: it calls a real model
   # and costs money, where everything above is free and offline.
   printf '\nreviewer calibration is separate and NOT run here — it calls a real\n'
-  printf 'model (~$1.20): .loop/tests/reviewer-calibration/run-calibration.sh\n'
+  printf 'model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh\n'
   exit 0
 fi
 printf '\033[32m%d passed\033[0m, \033[31m%d failed\033[0m\n' "$pass" "$fail"
