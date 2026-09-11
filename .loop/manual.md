@@ -146,7 +146,9 @@ into a repo's project settings would bind the operator's own interactive work
 too — deny beats allow, repo-wide — which on a repo whose agents commit and
 push is a bad first day.
 
-It stamps `.loop/.installed` with the source commit, and finishes by **running
+It stamps `.loop/.installed` with the release it came from and the commit that
+built it — propagated intact through a chained install, not re-derived from
+whatever repo the copy was taken from — and finishes by **running
 the loop's own suite in the target** — 35 checks, free and offline, no model.
 (You will see one fewer until you have briefs of your own: the brief checker
 sits out when `docs/briefs/` is empty.)

@@ -142,4 +142,23 @@ git -C "$TGT2" config user.email t@t && git -C "$TGT2" config user.name t
   && ok "example briefs chained — they live in examples/ once installed" \
   || bad "example briefs did not survive a chained install"
 
+# 7. Provenance survives the hop, rather than being re-derived from the wrong
+#    repo. At the second hop SRC's git history is the FIRST target's, so a
+#    stamp rebuilt from `git describe` there would name that repo's tags as the
+#    loop's release and its HEAD as the loop's build — confidently, and wrongly.
+note "── provenance is propagated, not re-derived ──"
+v1="$(jq -r '.version' "$TGT/.loop/.installed" 2>/dev/null)"
+c1="$(jq -r '.commit'  "$TGT/.loop/.installed" 2>/dev/null)"
+v2="$(jq -r '.version' "$TGT2/.loop/.installed" 2>/dev/null)"
+c2="$(jq -r '.commit'  "$TGT2/.loop/.installed" 2>/dev/null)"
+[[ -n "$v1" && "$v1" != "null" ]] && ok "the first install names a version ($v1)" \
+  || bad "no version in the first install's stamp"
+[[ "$v2" == "$v1" && "$c2" == "$c1" ]] \
+  && ok "the chained install carries the same version and commit" \
+  || bad "provenance was re-derived at the second hop: got $v2/$c2, want $v1/$c1"
+# The consumer repo's own HEAD is the thing a re-derived stamp would have named.
+[[ "$c2" != "$(git -C "$TGT" rev-parse --short HEAD 2>/dev/null)" ]] \
+  && ok "the stamp does not name the intermediate repo's commit" \
+  || bad "the chained stamp names the repo it was copied FROM, not the loop"
+
 finish

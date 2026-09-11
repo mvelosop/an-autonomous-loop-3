@@ -226,10 +226,37 @@ done
 
 # ---- provenance -----------------------------------------------------------
 
-jq -n --arg s "$(basename "$SRC")" --arg c "$(git -C "$SRC" rev-parse --short HEAD 2>/dev/null)" \
+# Two questions a vendored copy has to answer months later: WHICH RELEASE is
+# this, and which commit built it. The release is the thing a human can look up;
+# the commit is what pins a copy taken between releases, or from a dirty tree.
+#
+# A chained install -- an installed copy installing onward, which case 6 of
+# 26-install-boundary exercises -- cannot answer either from git. There SRC's
+# history is the CONSUMER's, so `git describe` would report their tags as the
+# loop's version and `rev-parse HEAD` their commit as its build. So a copy that
+# already carries a stamp propagates it, and git is consulted only in the repo
+# the loop actually lives in. Provenance stays transitive rather than becoming
+# a confident lie at the first hop.
+if [[ -f "$SRC/.loop/.installed" ]]; then
+  VERSION="$(jq -r '.version // "unknown"' "$SRC/.loop/.installed")"
+  COMMIT="$(jq -r '.commit // "unknown"' "$SRC/.loop/.installed")"
+  ORIGIN="$(jq -r '.source // "unknown"' "$SRC/.loop/.installed")"
+else
+  # --tags so a lightweight tag counts, --dirty so vendoring uncommitted work
+  # says so in the stamp rather than claiming to be the release it sits on.
+  VERSION="$(git -C "$SRC" describe --tags --dirty 2>/dev/null || echo untagged)"
+  COMMIT="$(git -C "$SRC" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  ORIGIN="$(basename "$SRC")"
+fi
+
+jq -n --arg s "$ORIGIN" --arg v "$VERSION" --arg c "$COMMIT" \
       --arg d "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  '{source:$s, commit:$c, installed:$d}' >"$TARGET/.loop/.installed"
-say "  stamped .loop/.installed (source commit $(git -C "$SRC" rev-parse --short HEAD 2>/dev/null))"
+  '{source:$s, version:$v, commit:$c, installed:$d}' >"$TARGET/.loop/.installed"
+say "  stamped .loop/.installed ($VERSION, commit $COMMIT)"
+case "$VERSION" in
+  untagged)  warn "  the source repo has no tags — this copy cannot name a release" ;;
+  *-dirty)   warn "  the source tree was dirty — this copy is uncommitted work" ;;
+esac
 
 # ---- prove it -------------------------------------------------------------
 #
