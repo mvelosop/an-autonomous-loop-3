@@ -97,6 +97,123 @@ elsewhere, where the other eight cases held twice.
 
 ---
 
+## Run metrics — a plan report and a cross-repo dataset
+
+**Proposed 2026-09-14.** Waiting on nothing but a slot. Prompted by a hand
+computation after `exploring-claude`'s `SPA-202-replay-and-finalize` run (two
+runs, one resumed after the cost ceiling), which took `jq` over
+`sessions/*.json` plus `git show --numstat` per iteration commit to answer
+questions the loop should answer by itself.
+
+### What is missing today
+
+`runstat` and the per-iteration signals judge a **run** against convergence.
+Nothing reports what a **plan** cost against what it produced, and nothing
+leaves data that can be compared across plans, repos, models or loop releases.
+
+1. **No plan-level rollup.** Signals are per run, so a resumed run distorts
+   them: the second SPA-202 run reported `iterations per closed 0.50` (3
+   iterations, 1 task closed, but 6/6 counted). The plan was 8 iterations for
+   6 tasks — 1.33 — and nothing says so.
+2. **No per-task cost.** Derivable: each session JSON carries `iteration`, and
+   `iterations.jsonl` maps iteration to task. Nobody joins them.
+3. **No output measure.** The driver makes exactly one commit per iteration, so
+   churn per task is a clean `git show --numstat <iteration commit>` excluding
+   `.loop/` — the join is unusually reliable because the driver owns commits.
+4. **Gate regressions are not a signal.** A done task reopened by the all-gates
+   re-run (`GATE REGRESSION T2 — reverting to pending`) leaves `gate failures`
+   at 0 and shows only in `loop.log` and as a streak bump.
+5. **Gate wall time is not recorded.** A heavier gate (a full request
+   collection, an integration suite) has a real per-iteration cost that cannot
+   be measured, so its price cannot be weighed against what it catches.
+6. **Rework cost is not separated.** Iterations that ended `review_fail`, and
+   re-verifications after a regression, are cost with no new output.
+
+### Evidence — SPA-202, by hand
+
+| Task | Cost | Churn (src / test / requests) | $/KLOC |
+| --- | --- | --- | --- |
+| T1 | $3.66 | 50 / 38 / – | $41.6 |
+| T2 (+ $1.31 regression re-verify) | $9.22 | 539 / 789 / – | $6.9 |
+| T3 | $5.08 | 239 / 644 / – | $5.8 |
+| T4 | $7.69 | 241 / 827 / – | $7.2 |
+| T5 | $7.20 | – / 413 / – | $17.4 |
+| T6 (incl. one `review_fail`) | $3.18 | – / – / 395 | $8.1 |
+| **Tasks** | **$36.03** | **4,175** | **$8.6** |
+| **+ plan session $9.25** | **$45.28** | | **$10.8** |
+
+Per task, $/KLOC measures **difficulty**, not productivity: T1 was an 88-line
+transaction-semantics fix and T5 a timing proof. It only means something
+aggregated — which is the argument for a dataset rather than a report alone.
+
+### What to build
+
+**A. End-of-run and end-of-plan report.** Appended to the plan's journal (the
+human view) whenever a run ends, with a plan section once the plan completes:
+
+- per task: iterations, attempts, cost (work / review split), churn, $/KLOC,
+  tokens (cache read, cache write, fresh input, output), wall time, gate wall
+  time, outcome history (`review_fail`, regression reopens)
+- per plan, across every run that touched it: the same totals, planning cost
+  and its share, rework cost and its share, iterations per closed task, gate
+  regressions caught
+- the dimensions below, so a report is self-describing
+
+**B. A dataset that aggregates across repos.** Written by the driver into
+`.loop/state/metrics/` — under `state/`, so the installer never touches it and
+it is committed with the branch that produced it. Two tables:
+
+- `tasks.csv` — one row per task per plan
+- `plans.csv` — one row per plan
+
+CSV rather than JSONL because the consumer is a spreadsheet or
+`cat repo-*/…/plans.csv`, and the rows are flat. Rules that make concatenation
+safe:
+
+- a `schema_version` column, and a header that only ever grows at the end
+- a stable row key: `repo`, `plan_id`, `task_id` — `repo` is a **name**
+  (the git remote's basename, or a declared value), never a path, so the
+  `$HOME` mask has nothing to do
+- raw counts alongside every derived number — tokens as well as dollars, lines
+  added and deleted as well as churn — so a future repricing or a different
+  churn definition can be recomputed without re-running anything
+- dollars labelled as the CLI's `total_cost_usd` estimate, not a bill
+
+**Dimensions every row carries:**
+
+| Dimension | Source |
+| --- | --- |
+| loop release + commit | `.loop/.installed` (`version`, `commit`) |
+| Claude Code version | `claude --version` at preflight |
+| model per phase | `modelUsage` keys in the session JSON — the **resolved** model (`claude-opus-5`), not the alias in `LOOP_WORK_MODEL`; a phase that used more than one model records all |
+| language(s) | churned files by extension, as a line-weighted mix (`typescript 0.93, bru 0.07`) |
+| churn class | `test` / `source` / `other`, see below |
+| brief id, branch, run ids | `state.json`, the run directory |
+
+**Language and churn class stay stack-agnostic by being declared, not known.**
+The loop cannot know that `*.test.ts` is a test or that `.bru` is a request
+collection — `loop-plan` already records that a filename-convention check
+"would have wrongly rejected a Bruno-collection task the first time it ran".
+So: an extension-to-language map shipped as data with a sensible default, and
+the test/source split taken from globs the repo declares (in the knowledge file
+or beside it), defaulting to `other` when nothing is declared. An undeclared
+repo still gets totals; it just does not get the split.
+
+### Constraints to respect
+
+- **`run.sh` and `runstat` must agree** (`.loop/README.md` §Signals). Any new
+  formula lands in both, with a fixture arbitrating — most naturally as
+  `runstat plan <state-dir>` plus the driver writing the CSV rows.
+- **Scenarios stay free and offline.** The stubbed `claude` must emit
+  `modelUsage` and a version string so the dimension columns are testable.
+- **A comparison with `exploring-claude`'s `packages/loop-telemetry` is not
+  like for like.** That tool prices every model on one flat rate card and counts
+  subagent calls only; this loop's sessions carry model-aware `total_cost_usd`
+  and include planning. Keeping raw tokens in the dataset is what makes a
+  reconciliation possible later.
+
+---
+
 ## Releases
 
 **Tags go on `main`, after the squash-merge** — never on a branch commit. See
