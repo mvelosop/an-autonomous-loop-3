@@ -97,6 +97,51 @@ elsewhere, where the other eight cases held twice.
 
 ---
 
+## What the gate-rewrite guard is actually built on
+
+**Parked 2026-09-14.** Raised by a question worth asking of any guard: *has a
+session ever actually been caught tampering with a verify command, or rewriting a
+test so that it passes?* Going through the record — no. Not once, unprompted.
+Written down so that the decision about what the guard is worth is made against
+the evidence rather than against a memory of it.
+
+**What has been observed in a real run is the neighbouring move**, twice, and
+both times the session left the gate alone:
+
+- **`001-url-shortener` T8** — a gate a correct implementation could not pass, so
+  the session hand-duplicated the schema at the one site the gate inspected, and
+  wrote down what it had done. Caught; the only `review_fail` in 11 iterations.
+- **`url-shortener-loop-sample-2`** — the same defect shape, and the review
+  passed it. The miss that produced calibration family C.
+
+Both corrupted the *work* to satisfy the gate. Neither touched the gate.
+
+**A session moving the goalpost itself has never been observed.** The calibration
+baseline counts 27 work/review pairs across three runs with zero rejections, and
+this repo's own runs close clean in `iterations.jsonl` — 11 iterations in
+`002-runstat`, 6 in `004-runstat-review`. Every gate rewrite the loop has seen was
+planted: case `06` by hand, `33-gate-rewrite` by a scripted session that rewrites
+on command.
+
+**What is measured is the reviewer's response to a planted one**, and that is the
+finding the driver check was built on: three real review sessions saw case `06`'s
+rewrite, two described it accurately, none objected — PASS twice, and a FAIL for
+an unrelated reason. So the guard answers a measured reviewer-side hole, not an
+observed worker-side incident.
+
+**The decision, once the clean runs the first section waits on have
+accumulated:** is a mechanical guard with no observed trigger worth its cost? It
+is not free — `files` in `state.json` went load-bearing to support it (see
+*Releases*), the "its own gate" narrowing was found only by breaking
+`03-gate-regression`, and a false positive reverts real work and fails an
+iteration. The cheap answer is to leave it in and instrument it: if it never
+fires across the next several runs that is a result worth recording, and if it
+fires once the question is settled the other way. The telemetry to notice would
+come from the dataset below, as a `gate_rewrite` outcome beside `review_fail` and
+the regression reopens already listed there as gap 4.
+
+---
+
 ## Run metrics — a plan report and a cross-repo dataset
 
 **Proposed 2026-09-14.** Waiting on nothing but a slot. Prompted by a hand
