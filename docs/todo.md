@@ -214,6 +214,54 @@ reads the brief and has to write files.
 
 ---
 
+## The regression net has no flake discipline, and the humans it replaced did
+
+**Parked 2026-09-16**, from `exploring-claude`'s SPA-207 run.
+
+The driver re-runs **every done task's gate** each iteration — that list is the
+whole regression net, and it is the right design. But a gate that fails
+*intermittently* therefore reverts work that was correct, and the exposure grows
+with every task closed, because the re-run set grows.
+
+Observed three times in one run, at roughly the rate that repo documents (~20%):
+
+| | |
+| --- | --- |
+| Signature | `socket hang up`, transport-shaped, **zero failed assertions** |
+| Location | always a file the task under test does not touch |
+| Verdict in isolation | green 3/3, every time |
+| Cost | T1 and T3 reverted to `pending` on phantoms; both re-closed unchanged next iteration |
+| Secondary cost | iterations-per-closed reached 2.67 against the 3.0 convergence halt |
+
+The last row is the dangerous one. Two more flakes and the run stops itself as
+`not converging` — a verdict that reads as "this plan is going nowhere" when
+nothing was wrong with the plan at all.
+
+**The consumer repo already knows how to handle this, and says so in a binding
+guideline**: on a transport-shaped failure in a file the diff does not touch,
+re-run or isolate before calling it a regression; a failure that reproduces in
+isolation is real. It even ships a script (`isolate-red.sh`) that automates the
+verdict. But that obligation is written for the *implementer and reviewer*. The
+**driver** re-runs the gate itself, believes the first result, and reverts — so
+the one actor whose judgement is mechanical is also the one with no flake
+discipline at all.
+
+**What to consider.** Not a blanket retry: that disarms the net, and the same
+guideline refuses one for assertion-shaped failures for exactly that reason. The
+narrow version is that a *regression* (a gate that passed when the task closed
+and fails now, on a task the current diff does not touch) is the one case where
+a single confirming re-run is clearly worth its cost — it is not the gate's
+first verdict on new work, it is a claim that finished work broke. Deciding it
+needs a way to express "confirm before reverting" that cannot become "retry
+until green", and probably a telemetry line, since a revert that a re-run undoes
+is invisible today except by reading the log.
+
+**What it is waiting on.** A decision on that shape. Note it is cheap to get
+wrong in the safe direction: doing nothing costs occasional re-work, which is
+what happened here — both tasks re-closed unchanged.
+
+---
+
 ## Waiting on the first clean run
 
 **Parked 2026-09-11.** All three wait on the same thing: **one clean run in the
