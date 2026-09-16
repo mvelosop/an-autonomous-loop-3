@@ -9,6 +9,59 @@ Each entry says what it is waiting on, so a stale one is visible.
 
 ---
 
+## Bug — the driver's dependency gating is inert
+
+**Found 2026-09-16**, in the `exploring-claude` SPA-207 run (loop brief
+`B20260916-0045-implement-classification-backend-corrections`). Not yet fixed:
+it wants its own commit and a scenario, and the run that found it was mid-flight.
+
+`.loop/run.sh`'s next-ready-task selector reads:
+
+```jq
+[.tasks[]|select(.status=="done")|.id] as $d
+| [.tasks[]|select(.status=="pending")
+   | select(([.depends_on[]?|select(($d|index(.))==null)]|length)==0)][0].id
+```
+
+Inside `index(...)`, `.` is **the input to `index`** — which is `$d`, the
+done-list — not the dependency being tested. So it evaluates `$d|index($d)`:
+where does `$d` occur as a subsequence of itself. The answer is always `0`,
+never `null`, so the missing-dependency list is **always empty** and every
+pending task always passes the readiness check.
+
+```
+$ jq -nc '["T1","T2"] as $d | "T4" | $d|index(.)'
+0                                   # expected null
+$ jq -nc '["T1","T2","T3"] | index("T4")'
+null                                # the literal form is correct
+```
+
+**What it means.** `depends_on` has never gated anything. Task selection is
+really *"first pending task in array order"*. Plans list tasks in dependency
+order, so the two agree almost always — which is why this survived 35 scenarios
+and several real runs.
+
+**How it surfaced.** SPA-207's T4 hit its attempt ceiling and went `blocked`.
+T10 depends on T4. The driver dispatched T10 anyway, with T4 unmet — the first
+time a plan had a *hole* in the middle rather than a prefix of done tasks.
+
+**The fix** — bind the dependency before testing it:
+
+```jq
+select([.depends_on[]? as $x | select(($d|index($x))==null)] | length == 0)
+```
+
+**What it is waiting on.** Nothing external — but it should land with a scenario
+that fails on the old expression, which means a fixture plan whose ready task is
+*not* first in array order (a blocked or out-of-order mid-plan task). Every
+existing scenario's plan is ordered, so none of them can fail on this.
+
+**Worth noting for the metrics work**: a run whose dependencies silently did not
+hold is not obviously distinguishable, after the fact, from one whose plan was
+simply ordered. Runs before the fix carry that ambiguity.
+
+---
+
 ## Waiting on the first clean run
 
 **Parked 2026-09-11.** All three wait on the same thing: **one clean run in the
