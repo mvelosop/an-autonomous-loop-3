@@ -165,6 +165,55 @@ re-run is a gate defect, not a work failure, and the driver could say so.
 
 ---
 
+## The planner must retire the brief it consumed
+
+**Parked 2026-09-16.** A brief that has been planned still reads `ready to
+plan`. Nothing marks it spent, so the state of a `docs/briefs/` directory
+several runs in does not say which briefs are live — a question anyone opening
+it has, and which currently needs git archaeology to answer.
+
+**What the planning session should do**, at the end of a successful plan:
+
+1. **Stamp the brief consumed.**
+2. **Append a `## Consumed` section** recording what consumed it — the run id,
+   the branch, and anything a future brief on the same surface would want.
+
+The consumer side already has this convention for a *different* document: the
+architect briefs in `exploring-claude` carry a `## Consumed` section, opened by
+a blockquote saying the section must be completed by the `/architect` skill,
+then the date, the act, and — most of the value — the **drift it found**
+between what the brief assumed and what was actually shipped. Loop briefs have
+no equivalent, and the planner is the session in the same position.
+
+### Two things to settle first
+
+**Which status field.** There are two, and they disagree on the brief that
+prompted this. `check-brief.sh` keys off the **body** line
+(`**Status:** ready to plan`, line 35). The YAML frontmatter `status:` is read
+**nowhere in the loop** — `draft` / `consumed` / `superseded` are a consumer
+convention only. So stamping the frontmatter alone changes nothing the loop can
+see: a brief marked `status: consumed` there is still checked, and still
+plannable, because its body still says otherwise. Whatever the planner writes
+has to be the field something reads, or it is decoration. Either collapse the
+two, or have the planner write both and say which wins.
+
+**When, and therefore what it can say.** The planner runs once, *before* the
+run. At that moment the only honest content is "consumed by run X on branch Y"
+— the interesting part (what shipped, what the brief got wrong, what the run
+discovered) is not known until the run ends. The architect-brief precedent
+writes its `## Consumed` *after* the act, which is why those sections carry
+real findings rather than a timestamp. So either the planner writes a thin stub
+and something at run-end enriches it, or the stamping belongs at run-end and
+not to the planner at all. Worth deciding before building, because the thin
+version is nearly worthless and the rich version is not the planner's to write.
+
+### What it is waiting on
+
+Those two decisions. The mechanism is small either way: the planner already
+reads the brief and has to write files.
+
+---
+
 ## Waiting on the first clean run
 
 **Parked 2026-09-11.** All three wait on the same thing: **one clean run in the
