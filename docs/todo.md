@@ -62,6 +62,109 @@ simply ordered. Runs before the fix carry that ambiguity.
 
 ---
 
+## The gate database — a project-specific convention the planner cannot see
+
+**Parked 2026-09-16**, from `exploring-claude`'s SPA-207 run. Three findings
+that turn out to be one design gap, so they are written together.
+
+### What happened
+
+SPA-207's T4 had to write an idempotent backfill migration. `exploring-claude`'s
+`migrations.guidelines.md` Rule 8 forbids the loop from authoring **or running**
+any data-lossy `UPDATE`, and tells the reviewer to treat one as a halt. The
+brief commissioned exactly that migration. Both agents behaved correctly and the
+task deadlocked: the reviewer halted it, then two successive work sessions
+refused to re-author it — while the deliverable, authored on attempt 1 and
+committed by the driver, sat complete with its gate exiting 0.
+
+Meanwhile the gate ran against `xc_dev`, the operator's real working database,
+and a work session applied the migration to it **on its own initiative** — no
+gate asked for it. Gates inspect the repo, not the database, so nothing could
+have caught that.
+
+### The part that makes it a loop problem
+
+`exploring-claude` already had the answer and lost it. Its SPA-200 run
+established a convention: every gate boots the app with `DB_NAME=xc_gate`, a
+throwaway clone, so the loop never touches real data. That run's planner even
+verified the override reaches the migration CLI. **Four plans later the
+convention was gone** — SPA-207's ten verify commands contain zero `DB_NAME`
+overrides, and `xc_gate` is stale by two migrations.
+
+It decayed because it lived nowhere a planner reads. It is not in `CLAUDE.md`
+(too specific), not in a guideline (it is not a coding convention), and
+`.claude/loop-knowledge.md` currently describes **document roots only** — where
+knowledge lives, not how the project is operated.
+
+### What to build
+
+**1. Let `loop-knowledge.md` carry operational facts, not just document roots.**
+The planner needs to know "gates run against `xc_gate`, never `xc_dev`" the same
+way it needs to know where ADRs live. Open question — and the reason this is
+parked rather than done — is how far that goes before it becomes a second
+`CLAUDE.md`. A named-commands table (`gate database`, `reset command`) is
+probably the whole of it; anything more open-ended will rot the same way.
+The consumer side is a `package.json` script the knowledge file can name, so
+the fact is a command rather than a paragraph.
+
+**2. A plan-time check that gates do not touch the real database.** Every
+`verify` that boots the app or runs migrations must carry the gate-DB override.
+Mechanical, fixture-testable, fails before the run spends anything. This is the
+"prefer a check to a rule" case exactly: the convention existed as lore, was
+never a gate, and decayed silently.
+
+**3. Split Rule 8's authoring from its running** (consumer-side, but it only
+works once 1 and 2 exist). Authoring a destructive migration is low-risk — it is
+text, and its effect is provable against a disposable database. Applying one to
+a database someone cares about is the actual risk. With a gate DB the loop may
+author, apply and test freely, and Rule 8 stays **unrelaxed** for real data
+rather than needing a carve-out.
+
+### Why this is worth more than unblocking one task
+
+**The migration tests currently run against a brand-new empty database.** A
+backfill asserted only against planted fixtures never meets the shapes real data
+has — so a whole class of error is invisible today. A gate database cloned from
+real data closes that gap, and it is the same mechanism. That is the larger
+prize here; unblocking T4 is incidental.
+
+### What it is waiting on
+
+A decision on how much operational surface `loop-knowledge.md` should carry
+(item 1) — items 2 and 3 are straightforward once that is settled. Note also
+that the gate DB needs a provisioning story: `exploring-claude`'s `xc_gate` was
+cloned by hand in SPA-200 and nothing has refreshed it since, which is how it
+ended up two migrations stale.
+
+---
+
+## Gate authoring — two defects SPA-207 surfaced
+
+**Parked 2026-09-16.** Neither is a loop bug; both are things a planner got
+wrong that nothing checked. Recorded because the second is checkable and the
+first may not be.
+
+**A gate demanded work its own brief put out of scope.** SPA-207's Bruno task
+required `bruno-coverage.sh` to report zero uncovered routes. Ten routes were
+already uncovered on `main` and the branch added no controller routes, so the
+bar could only be met by covering ten routes the brief excluded. The task
+burned its attempts and blocked while its actual regression net — the whole
+collection, 166/166 requests — was green. `amend.sh check` cannot catch this:
+the gate failed before the work *and* after it, which is exactly what a correct
+gate looks like. What distinguishes them is whether the residue is in scope,
+and that is a judgement. **Possibly checkable** as: a gate whose failure output
+is identical before and after the task closed is suspect.
+
+**A gate that cannot be satisfied is indistinguishable from work that is not
+done.** Both of SPA-207's stuck tasks (this one and the Rule 8 deadlock above)
+read `blocked` with complete, green deliverables. The plan said 8/10; the branch
+had 10/10. Nothing in the run distinguishes "the session could not do it" from
+"the session did it and the gate is wrong" — the operator had to run both gates
+by hand to find out. Worth a signal: a blocked task whose `verify` exits 0 when
+re-run is a gate defect, not a work failure, and the driver could say so.
+
+---
+
 ## Waiting on the first clean run
 
 **Parked 2026-09-11.** All three wait on the same thing: **one clean run in the
