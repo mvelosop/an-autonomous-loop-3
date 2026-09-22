@@ -101,6 +101,87 @@ proof it ran.
 
 ---
 
+<!-- _class: loop minimal lead -->
+
+## Three ideas
+
+# A loop.<br/>Files.<br/>Hard gates.
+
+<!--
+The map for the four slides that follow. Say each idea as a sentence; the slide
+only carries the word.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## 1 · Why a loop
+
+# Fresh context,<br/>every task.
+
+- **Resume** is reading a file
+- **Failure** stops at one task
+
+<!--
+Tell the rest: a long session degrades as the window
+fills; the loop never asks the model to hold the whole project at once.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## 2 · Why files
+
+# A prompt you can<br/>review like code.
+
+- **Versioned · linkable · reusable**
+- Broken? **Edit the file, re-run**
+
+<!--
+Tell the rest: no chat box ever gets the prompt
+right; a brief is argued with before a token is spent, and the same references
+bind the work session and the reviewer.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## 3 · Why hard gates
+
+# A rule is read<br/>three different ways.
+
+- `exit 0` **is not**
+- Written **before** the code exists
+
+<!--
+Tell the rest: gates are authored by a session that
+cannot benefit from them, re-run on every iteration, and restored by the driver
+if a session edits one — the cheating is helpful, not malicious.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## The model
+
+# The loop is a state<br/>machine over artifacts.
+
+- It never reads **your code**
+- It asks: **did the gate pass?**
+- So it is **tech agnostic**
+
+<!--
+Tell the rest: the driver runs a command and reads an exit code and a log. It has
+no model of Python, of pytest, of this program at all — that is why the core can
+be tech-agnostic. Swap the stack and the gates change; the loop does not.
+-->
+
+---
+
 ## The shape of one run
 
 ![loop w:1000](assets/loop-sequence.svg)
@@ -275,147 +356,6 @@ runstat is the program the loop was pointed at first: summary, signals, compare,
 review. The loop built the tool that reads the loop. `compare` puts two runs
 side by side with a delta — that is how you tell whether a change to a prompt
 actually helped.
--->
-
----
-
-<!-- _class: loop minimal lead -->
-
-## Three ideas
-
-# A loop.<br/>Files.<br/>Hard gates.
-
-<!--
-SUCCINCT VARIANT of the ideas list — pick this or the denser slide that follows.
-Say the three sentences; do not put them on the slide.
--->
-
----
-
-<!-- _class: loop lead -->
-
-## Three ideas worth stealing
-
-<br/>
-
-**1. Why a loop** — context is finite; a run you can resume is worth more than a run that is clever.
-
-**2. Why files** — no chat prompt is ever good enough. Files are reusable, durable, versioned, reviewable.
-
-**3. Why hard gates** — a rule is reinterpreted by every session. A command exits 0 or it does not.
-
----
-
-<!-- _class: loop minimal -->
-
-## 1 · Why a loop
-
-# Fresh context,<br/>every task.
-
-- **Resume** is reading a file
-- **Failure** stops at one task
-
-<!--
-SUCCINCT VARIANT of idea 1. Tell the rest: a long session degrades as the window
-fills; the loop never asks the model to hold the whole project at once.
--->
-
----
-
-<!-- _class: loop tweet -->
-
-## 1 · Why a loop
-
-## *Context is the budget. Spend it once per task.*
-
-<br/>
-
-- One long session degrades: the window fills, early decisions fade, quality drifts down.
-- A loop spends a **fresh window per task** — the model is never asked to hold the whole project in its head.
-- Crash, ^C, laptop closed, 3 a.m. — **resume is just reading `state.json` again**.
-- Failure is bounded: one task fails, burns an attempt, blocks at three. It cannot take the run with it.
-
-<!--
-The loop does not make the model smarter. It makes the *expensive* part — a
-fresh, uncontaminated context — cheap enough to spend on every single task.
--->
-
----
-
-<!-- _class: loop minimal -->
-
-## 2 · Why files
-
-# A prompt you can<br/>review like code.
-
-- **Versioned · linkable · reusable**
-- Broken? **Edit the file, re-run**
-
-<!--
-SUCCINCT VARIANT of idea 2. Tell the rest: no chat box ever gets the prompt
-right; a brief is argued with before a token is spent, and the same references
-bind the work session and the reviewer.
--->
-
----
-
-<!-- _class: loop tweet -->
-
-## 2 · Why files, not a conversation
-
-## *You cannot write a good enough prompt in a chat box.*
-
-<br/>
-
-- A brief is **edited, reread and argued with** before a single token is spent.
-- Files **link to context**: briefs, references with a `why`, a knowledge seam the plan points at.
-- Context becomes **reusable** — the same references bind the work session and the reviewer.
-- Everything is **version controlled**: the plan, the journal, the telemetry, the diff, in one commit per iteration.
-- So it is **traceable** (why did it do that?), **team friendly** (review a plan like a PR), and **recoverable** (fix the file, re-run).
-
-<!--
-Chat is a medium with no memory and no diff. Every durable decision in this
-system is a file in the repo — which is also why nothing is ever written to
-~/.claude.
--->
-
----
-
-<!-- _class: loop minimal -->
-
-## 3 · Why hard gates
-
-# A rule is read<br/>three different ways.
-
-- `exit 0` **is not**
-- Written **before** the code exists
-
-<!--
-SUCCINCT VARIANT of idea 3. Tell the rest: gates are authored by a session that
-cannot benefit from them, re-run on every iteration, and restored by the driver
-if a session edits one — the cheating is helpful, not malicious.
--->
-
----
-
-<!-- _class: loop tweet -->
-
-## 3 · Why hard gates, not rules
-
-## *A rule is a suggestion with good intentions.*
-
-<br/>
-
-- Prose — *"make sure the tests pass"* — is **reinterpreted by every fresh session**. Three sessions, three readings.
-- A `verify` command **exits 0 or it does not**. No judgment, no negotiation, no drift.
-- Gates are authored **before the code exists**, by a session that cannot benefit from them — so nobody grades their own homework.
-- The driver **restores** a `state.json` or a gate file a session edits: moving the goalpost is a finding, even when the rewrite is an improvement.
-- Every done task is re-gated **every iteration** — that is what catches the regression nobody was looking for.
-
-<!--
-This is the one that surprises people: the cheating is not malicious, it is
-helpful. A session that fixes a failing test by relaxing it is being nice. The
-gate is what makes nice unprofitable.
 -->
 
 ---
