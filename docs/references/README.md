@@ -20,9 +20,9 @@ cite.
 
 | File | Source | Snapshot taken from | Status at snapshot |
 | --- | --- | --- | --- |
-| `executable-loop-harness.md` | `exploring-claude` · `docs/design-notes/` | `c09765ca` (2026-08-04) | Proposed |
-| `loop-decoupling-pivot.md` | `exploring-claude` · `docs/design-notes/` | `57020103` (2026-08-09) | Proposed |
-| `loop-brief-skill-prompt.md` | authored here, addressed to `exploring-claude` | — | current |
+| [`executable-loop-harness.md`](executable-loop-harness.md) | `exploring-claude` · `docs/design-notes/` | `c09765ca` (2026-08-04) | Proposed |
+| [`loop-decoupling-pivot.md`](loop-decoupling-pivot.md) | `exploring-claude` · `docs/design-notes/` | `57020103` (2026-08-09) | Proposed |
+| [`loop-brief-skill-prompt.md`](loop-brief-skill-prompt.md) | authored here, addressed to `exploring-claude` | — | current |
 
 The two snapshots are marked **Proposed**, not Accepted — they are argued positions with
 measured evidence behind them, not settled policy. `docs/briefs/0002-*` treats

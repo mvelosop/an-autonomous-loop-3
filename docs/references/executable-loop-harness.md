@@ -1,6 +1,6 @@
 ---
 name: executable-loop-harness
-description: The loop's mechanical operations belong in a tested harness with schema-validated state, not in hand-parsed markdown described by prose contracts; the core is tech-agnostic (measured: 6% of the loop's contracts are stack-coupled, all of it the gate list) so it splits core/adapter/config, and the seam should be extracted at a second consumer rather than designed against one stack. Also records the result that generalizes furthest: no in-loop gate detects that the loop is globally stuck, so the operator must stay positioned to notice. The script-vs-prose split reproduced post-authoring at plan 0139 — one prose rule, six correction events, convergence only at the script pointer.
+description: The loop's mechanical operations belong in a tested harness with schema-validated state, not in hand-parsed markdown described by prose contracts; the core is tech-agnostic (measured, 6% of the loop's contracts are stack-coupled, all of it the gate list) so it splits core/adapter/config, and the seam should be extracted at a second consumer rather than designed against one stack. Also records the result that generalizes furthest,  no in-loop gate detects that the loop is globally stuck, so the operator must stay positioned to notice. The script-vs-prose split reproduced post-authoring at plan 0139 — one prose rule, six correction events, convergence only at the script pointer.
 category: process
 status: Proposed
 decided: 2026-08-04
