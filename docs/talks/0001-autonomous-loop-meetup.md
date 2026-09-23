@@ -250,7 +250,7 @@ gate log is overwritten by the next passing run of the same task.
 
 ---
 
-## Two ways to read it
+## Some basic metrics - Two ways to read them
 
 <div class="cols">
 
@@ -318,15 +318,15 @@ actually helped.
 <div>
 
 **This talk**
-- The post — [miguelveloso.dev/blog/an-autonomous-loop](https://miguelveloso.dev/blog/an-autonomous-loop/) 
+- The post — [`miguelveloso.dev/blog/an-autonomous-loop/`](https://miguelveloso.dev/blog/an-autonomous-loop/)
+- The deck — [`miguelveloso.dev/talks/an-autonomous-loop/`](https://miguelveloso.dev/talks/an-autonomous-loop/)
 - The repo — [`github.com/mvelosop/an-autonomous-loop-3`](https://github.com/mvelosop/an-autonomous-loop-3)
-- The loop — `.loop/` · the briefs — `docs/briefs/`
-- The deck — `docs/presentations/`
+- The loop — [`.loop/`](https://github.com/mvelosop/an-autonomous-loop-3/tree/main/.loop) · the briefs — [`docs/briefs/`](https://github.com/mvelosop/an-autonomous-loop-3/tree/main/docs/briefs) · references — [`docs/references/`](https://github.com/mvelosop/an-autonomous-loop-3/tree/main/docs/references)
 
 **The tools**
-- Claude Code — `docs.claude.com/en/docs/claude-code`
-- Marp — `marp.app`
-- uv — `docs.astral.sh/uv`
+- Claude Code — [`docs.claude.com/en/docs/claude-code`](https://docs.claude.com/en/docs/claude-code)
+- Marp —        [`marp.app`](https://marp.app)
+- uv —          [`docs.astral.sh/uv`](https://docs.astral.sh/uv)
 
 </div>
 

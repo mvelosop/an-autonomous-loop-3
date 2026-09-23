@@ -1,0 +1,176 @@
+/* @theme loop */
+
+/*
+ * One theme, two palettes. The dark one lives on `section.loop`; the light one
+ * overrides the same custom properties under `section.loop.lightmode`, which
+ * the script in the deck adds to every slide at view time — from the viewer's
+ * own prefers-color-scheme, or from pressing "t".
+ *
+ * A light-on-paper export needs the class without the script, so build it from
+ * a copy whose front matter says `class: loop lightmode`.
+ *
+ * Every rule below reads the palette through var(), so a palette change never
+ * means touching a layout rule. Marp scopes theme selectors under `section`, so
+ * a class on the sections is the only hook a runtime switch can use — an
+ * attribute on <html> or <body> would never reach these rules.
+ */
+
+@import 'default';
+
+section.loop {
+  --bg: #0E1116;
+  --fg: #E6EAF0;
+  --accent: #5FBFA3;
+  --dim: #9FB0C3;
+  --muted: #6B7A8C;
+  --code-bg: #171C23;
+  --code-fg: #C9D4E0;
+  --rule: #2A313B;
+  --zebra: #12171E;
+  --hl-string: #9FD8C2;
+  --hl-attr: #86B8EA;
+  --hl-comment: #7E8C9C;
+  --hl-number: #E0A75E;
+
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 26px;
+  padding: 60px 70px;
+}
+
+section.loop.lightmode {
+  --bg: #FFFFFF;
+  --fg: #1B2430;
+  --accent: #12795F;
+  --dim: #5B6B7C;
+  --muted: #7A8796;
+  --code-bg: #F1F4F8;
+  --code-fg: #33404F;
+  --rule: #D9E0E8;
+  --zebra: #F6F8FA;
+  --hl-string: #1F6F4A;
+  --hl-attr: #2A5DA8;
+  --hl-comment: #7A8796;
+  --hl-number: #9A6A12;
+}
+
+section.loop h1,
+section.loop h2 { color: var(--accent); }
+section.loop h1 { font-size: 1.9em; }
+section.loop h2 { font-size: 1.25em; margin-bottom: .4em; }
+section.loop strong { color: var(--accent); }
+
+section.loop code {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  font-size: .85em;
+}
+section.loop pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: .62em;
+  line-height: 1.45;
+}
+section.loop pre code { background: none; }
+section.loop .hljs-string { color: var(--hl-string); }
+section.loop .hljs-attr,
+section.loop .hljs-keyword,
+section.loop .hljs-built_in { color: var(--hl-attr); }
+section.loop .hljs-comment { color: var(--hl-comment); }
+section.loop .hljs-number,
+section.loop .hljs-literal { color: var(--hl-number); }
+
+section.json pre { font-size: .56em; }
+section.json pre code { white-space: pre-wrap; word-break: break-word; }
+
+section.loop table { font-size: .74em; border-collapse: collapse; }
+section.loop table,
+section.loop thead,
+section.loop tbody,
+section.loop tr,
+section.loop tr:nth-child(even),
+section.loop tr:nth-child(odd),
+section.loop td,
+section.loop th { background: transparent !important; color: var(--fg); }
+section.loop tr:nth-child(even) td { background: var(--zebra) !important; }
+section.loop th { color: var(--accent); text-align: left; }
+section.loop td,
+section.loop th {
+  border: 1px solid var(--rule);
+  padding: .45em .7em;
+  vertical-align: top;
+}
+
+section.loop blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: .8em;
+  color: var(--dim);
+}
+section.loop a { color: var(--accent); }
+section.loop footer,
+section.loop::after { color: var(--muted); }
+
+section.lead { justify-content: center; text-align: center; }
+section.lead h1 { font-size: 2.3em; }
+
+section.tweet { justify-content: center; }
+section.tweet h2 { font-size: 1.9em; line-height: 1.25; }
+
+section.minimal { justify-content: center; }
+section.minimal h1 { font-size: 2.5em; line-height: 1.2; margin: .1em 0 .5em; }
+section.minimal h2 {
+  font-size: .8em;
+  color: var(--muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: .2em;
+}
+section.minimal ul { list-style: none; padding: 0; margin: 0; }
+section.minimal li { font-size: 1.15em; color: var(--dim); margin: .3em 0; }
+section.minimal li strong { color: var(--fg); }
+section.minimal code { font-size: .95em; }
+
+section.loop .cols { display: flex; gap: 20px; align-items: flex-start; }
+section.loop .cols > pre { flex: 1; min-width: 0; margin: 0; }
+section.loop .cols + p { margin-top: .7em; }
+
+/* The diagram cannot recolor itself, so the slide carries both and the palette
+   in force decides which one is visible. */
+section.loop img[alt^="loop-"] { background: none; }
+section.loop img[alt="loop-light"] { display: none; }
+section.loop.lightmode img[alt="loop-dark"] { display: none; }
+section.loop.lightmode img[alt="loop-light"] { display: revert; }
+
+/* Footer: present on every slide, and never competing with the content. */
+section.loop footer {
+  font-size: .55em;
+  opacity: .75;
+  left: 70px;
+  bottom: 24px;
+}
+
+/* QR codes are drawn dark-on-white so they scan against either palette. The
+   white card is the quiet zone, so it must not be cropped or tinted. */
+section.loop .qr { text-align: center; }
+section.loop .qr img {
+  background: #FFFFFF;
+  border-radius: 6px;
+  display: inline-block;
+}
+section.loop .qr strong {
+  display: block;
+  margin-top: .5em;
+  font-size: .62em;
+  color: var(--dim);
+}
+section.lead .qr {
+  position: absolute;
+  right: 70px;
+  bottom: 80px;
+}
+section.refs ul { margin: .2em 0 1em; font-size: .78em; }
+section.refs li { margin: .25em 0; color: var(--dim); }
+section.refs p strong { color: var(--accent); }
+section.refs .cols > div:first-child { flex: 1 1 auto; }
+section.refs .cols > div:last-child { flex: 0 0 auto; }
