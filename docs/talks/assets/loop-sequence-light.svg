@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" width="1200" height="520" role="img"
+     aria-label="The driver's sequence. A brief goes to a loop-plan session, which writes state.json holding the tasks and a gate for each. Then for every task the driver runs loop-work, the gate, loop-review, and commits only if both passed, before looping back for the next task. The three loop sessions are shown in amber: each is a separate operating system process. The driver's own artifacts, state.json, the gate and the commit, are shown in green.">
+  <defs>
+    <style>
+      .ink   { fill: #1B2430; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .mono  { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+      .muted { fill: #5B6B7C; }
+      .good  { fill: #12795F; }
+      .warm  { fill: #8A6516; }
+      .art   { fill: #F1F4F8; stroke: #6C7A89; stroke-width: 1.5; }
+      .sess  { fill: #FCF5E6; stroke: #8A6516; stroke-width: 1.5; }
+      .gate  { fill: #EAF5F1; stroke: #12795F; stroke-width: 1.5; }
+      .wire  { fill: none; stroke: #6C7A89; stroke-width: 2; }
+      .head  { fill: #6C7A89; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="520" fill="#FFFFFF"/>
+  <rect width="1200" height="3" fill="#12795F"/>
+
+  <text class="mono muted" x="72" y="76" font-size="20" letter-spacing="3">THE LOOP &#183; ONE TASK, START TO COMMIT</text>
+  <line x1="72" y1="104" x2="1128" y2="104" stroke="#D9E0E8" stroke-width="1"/>
+
+  <rect class="art" x="72" y="150" width="230" height="62" rx="5"/>
+  <text class="mono ink" x="187" y="189" font-size="23" text-anchor="middle">brief</text>
+  <path class="wire" d="M302 181 L338 181"/>
+  <path class="head" d="M332 174 L346 181 L332 188 Z"/>
+  <rect class="sess" x="352" y="150" width="270" height="62" rx="5"/>
+  <text class="mono warm" x="487" y="189" font-size="23" text-anchor="middle">loop-plan</text>
+  <path class="wire" d="M622 181 L658 181"/>
+  <path class="head" d="M652 174 L666 181 L652 188 Z"/>
+  <rect class="gate" x="672" y="150" width="300" height="62" rx="5"/>
+  <text class="mono good" x="822" y="189" font-size="23" text-anchor="middle">state.json</text>
+  <text class="mono muted" x="996" y="188" font-size="19">tasks + gates</text>
+
+  <path class="wire" d="M822 212 L822 244 L270 244 L270 278"/>
+  <path class="head" d="M263 272 L270 286 L277 272 Z"/>
+
+  <text class="mono muted" x="72" y="272" font-size="19" letter-spacing="2">FOR EACH TASK</text>
+
+  <rect class="sess" x="72" y="290" width="240" height="62" rx="5"/>
+  <text class="mono warm" x="192" y="329" font-size="22" text-anchor="middle">loop-work</text>
+  <path class="wire" d="M312 321 L338 321"/>
+  <path class="head" d="M332 314 L346 321 L332 328 Z"/>
+  <rect class="gate" x="352" y="290" width="200" height="62" rx="5"/>
+  <text class="mono good" x="452" y="329" font-size="22" text-anchor="middle">gate</text>
+  <path class="wire" d="M552 321 L578 321"/>
+  <path class="head" d="M572 314 L586 321 L572 328 Z"/>
+  <rect class="sess" x="592" y="290" width="260" height="62" rx="5"/>
+  <text class="mono warm" x="722" y="329" font-size="22" text-anchor="middle">loop-review</text>
+  <path class="wire" d="M852 321 L878 321"/>
+  <path class="head" d="M872 314 L886 321 L872 328 Z"/>
+  <rect class="gate" x="892" y="290" width="236" height="62" rx="5"/>
+  <text class="mono good" x="1010" y="329" font-size="22" text-anchor="middle">commit</text>
+
+  <path class="wire" d="M1010 352 L1010 392 L192 392 L192 364"/>
+  <path class="head" d="M185 370 L192 356 L199 370 Z"/>
+  <text class="mono muted" x="601" y="386" font-size="19" text-anchor="middle">next task</text>
+
+  <line x1="72" y1="424" x2="1128" y2="424" stroke="#D9E0E8" stroke-width="1"/>
+  <text class="ink" x="72" y="470" font-size="31" font-weight="600">Every session is a separate process. Only the driver commits.</text>
+  <text class="mono muted" x="72" y="502" font-size="19">claude -p &#183; <tspan class="warm">sessions</tspan> do work and give opinions, never set status</text>
+</svg>
