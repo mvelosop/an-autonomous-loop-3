@@ -1,87 +1,11 @@
 ---
 marp: true
-theme: default
+theme: loop
 paginate: true
 class: loop
 title: An autonomous loop
 description: Three fresh sessions, one state file, and a gate that cannot be argued with
 ---
-
-<style>
-section.loop {
-  background: #0E1116;
-  color: #E6EAF0;
-  font-size: 26px;
-  padding: 60px 70px;
-}
-section.loop h1, section.loop h2 { color: #5FBFA3; }
-section.loop h1 { font-size: 1.9em; }
-section.loop h2 { font-size: 1.25em; margin-bottom: .4em; }
-section.loop strong { color: #5FBFA3; }
-section.loop code {
-  background: #171C23;
-  color: #C9D4E0;
-  font-size: .85em;
-}
-section.loop pre {
-  background: #171C23;
-  border: 1px solid #2A313B;
-  border-radius: 8px;
-  font-size: .62em;
-  line-height: 1.45;
-}
-section.loop pre code { background: none; }
-section.loop .hljs-string { color: #9FD8C2; }
-section.loop .hljs-attr, section.loop .hljs-keyword, section.loop .hljs-built_in { color: #86B8EA; }
-section.loop .hljs-comment { color: #7E8C9C; }
-section.loop .hljs-number, section.loop .hljs-literal { color: #E0A75E; }
-section.json pre { font-size: .56em; }
-section.json pre code { white-space: pre-wrap; word-break: break-word; }
-section.loop table { font-size: .74em; border-collapse: collapse; }
-section.loop table,
-section.loop thead,
-section.loop tbody,
-section.loop tr,
-section.loop tr:nth-child(even),
-section.loop tr:nth-child(odd),
-section.loop td,
-section.loop th { background: transparent !important; color: #E6EAF0; }
-section.loop tr:nth-child(even) td { background: #12171E !important; }
-section.loop th { color: #5FBFA3; text-align: left; }
-section.loop td, section.loop th {
-  border: 1px solid #2A313B;
-  padding: .45em .7em;
-  vertical-align: top;
-}
-section.loop blockquote {
-  border-left: 4px solid #5FBFA3;
-  padding-left: .8em;
-  color: #9FB0C3;
-}
-section.loop a { color: #5FBFA3; }
-section.loop footer, section.loop::after { color: #6B7A8C; }
-section.lead { justify-content: center; text-align: center; }
-section.lead h1 { font-size: 2.3em; }
-section.tweet { justify-content: center; }
-section.tweet h2 { font-size: 1.9em; line-height: 1.25; }
-section.minimal { justify-content: center; }
-section.minimal h1 { font-size: 2.5em; line-height: 1.2; margin: .1em 0 .5em; }
-section.minimal h2 {
-  font-size: .8em;
-  color: #6B7A8C;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: .2em;
-}
-section.minimal ul { list-style: none; padding: 0; margin: 0; }
-section.minimal li { font-size: 1.15em; color: #9FB0C3; margin: .3em 0; }
-section.minimal li strong { color: #E6EAF0; }
-section.minimal code { font-size: .95em; }
-section.loop .cols { display: flex; gap: 20px; align-items: flex-start; }
-section.loop .cols > pre { flex: 1; min-width: 0; margin: 0; }
-section.loop .cols + p { margin-top: .7em; }
-section.loop img[alt="loop"] { background: none; }
-</style>
 
 <!-- _class: loop lead -->
 <!-- _paginate: false -->
@@ -184,7 +108,8 @@ be tech-agnostic. Swap the stack and the gates change; the loop does not.
 
 ## The shape of one run
 
-![loop w:1000](assets/loop-sequence.svg)
+![loop-dark w:1000](assets/loop-sequence.svg)
+![loop-light w:1000](assets/loop-sequence-light.svg)
 
 <!--
 A brief becomes state.json with a gate per task. Then for every task: loop-work,
