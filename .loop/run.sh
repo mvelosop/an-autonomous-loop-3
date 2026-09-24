@@ -323,6 +323,43 @@ gate_inspected_paths() {
   } | sort -u
 }
 
+# Refs a `git diff`/`log`/`rev-list` in a verify command is baselined against,
+# other than HEAD -- used by the plan-time gate-shape lint (rule 4) to catch a
+# baseline that decays the moment any other task commits. A range like
+# `origin/main..HEAD` still fails: the left side is the fixed part, so it is
+# what gets reported. Not a full shell parse, on purpose, same spirit as
+# gate_inspected_paths above: skips flags, stops at a `--` pathspec separator,
+# and reassembles a `$(...)` command-substitution ref that word-splitting would
+# otherwise cut at its first internal space.
+gate_diff_refs() {
+  local cmd="$1" rest tok ref
+  # Greedy to end of string, on purpose: a $(...) ref needs its closing paren
+  # still present to be reassembled below, and a verify is one line, so this
+  # loses nothing except a second, later diff/log/rev-list call in the same
+  # command -- a shape none of this rule's cases actually write.
+  rest="$(grep -oE 'git[[:space:]]+(diff|log|rev-list)[[:space:]]+.*' <<<"$cmd" \
+          | sed -E 's/^git[[:space:]]+(diff|log|rev-list)[[:space:]]+//')"
+  [[ -n "$rest" ]] || return 0
+  ref=""
+  for tok in $rest; do
+    case "$tok" in
+      --) break ;;
+      -*) continue ;;
+      *) ref="$tok"; break ;;
+    esac
+  done
+  [[ -n "$ref" ]] || return 0
+  case "$ref" in
+    \"\$\(*|\$\(*) ref="$(grep -oE '\$\([^)]*\)' <<<"$rest" | head -1)" ;;
+  esac
+  ref="${ref#\"}"; ref="${ref%\"}"; ref="${ref#\'}"; ref="${ref%\'}"
+  [[ -n "$ref" && "$ref" != "HEAD" ]] || return 0
+  if [[ "$ref" == *..* ]]; then
+    printf '%s\n' "${ref%%..*}"
+  else
+    printf '%s\n' "$ref"
+  fi
+}
 
 # Re-run the verify command of every task named. This is the whole point of the
 # external gate: "done" has to survive a command the session neither runs nor can
@@ -763,6 +800,27 @@ $bad_gate3
   provenance instead of the gate re-asserting it. Handing the path to a
   runner (uv run pytest -q path, bash path) rather than reading it is fine
   and is not flagged."
+
+  # Gate-shape lint, rule 4. A gate re-runs for the life of the plan, so a
+  # baseline fixed at plan time decays the moment any other task commits --
+  # failure E in the brief this rule answers, twice over. git diff/log/rev-list
+  # against HEAD stays sound and unflagged: a work session cannot commit, so
+  # HEAD still discriminates a session's edits from committed history, which is
+  # exactly what the runtime gate-rewrite guard depends on.
+  bad_gate4=""
+  while IFS=$'\t' read -r id cmd; do
+    [[ -n "$id" ]] || continue
+    while IFS= read -r ref; do
+      [[ -n "$ref" ]] || continue
+      bad_gate4+="    $id  diffs against $ref rather than HEAD; a gate re-runs for the life of the plan and that baseline decays on the next commit"$'\n'
+    done < <(gate_diff_refs "$cmd")
+  done < <(state_get '.tasks[] | [.id, .verify] | @tsv')
+  [[ -z "$bad_gate4" ]] || die "gate shape rejected -- fix the plan:
+
+$bad_gate4
+  Diff against HEAD instead. It is the one baseline a gate can hold for the
+  life of the plan without decaying: a work session cannot commit, so HEAD
+  still separates a session's edits from everything committed before it."
 
   # The driver stamps both, rather than trusting the plan session to record
   # them: which branch and which brief a plan belongs to are facts the driver

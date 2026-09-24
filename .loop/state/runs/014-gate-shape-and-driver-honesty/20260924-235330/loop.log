@@ -1,0 +1,19 @@
+[36m[loop][0m preflight
+[36m[loop][0m   [x] jq
+[36m[loop][0m   [x] claude
+[36m[loop][0m   [x] git
+[36m[loop][0m   [x] uv
+[36m[loop][0m   [x] workspace trusted
+[36m[loop][0m   [x] .loop/settings.json parses — 18 allow, 16 deny rules
+[36m[loop][0m   [x] 2 knowledge root(s) scannable
+[36m[loop][0m   [x] git identity (mvelosop@gmail.com)
+[36m[loop][0m   [x] masking active ($HOME and username)
+[36m[loop][0m   [x] telemetry dir .loop/state/runs/014-gate-shape-and-driver-honesty/20260924-235330
+[36m[loop][0m   [x] state.json valid — 8 pending
+[36m[loop][0m preflight ok
+[36m[loop][0m resuming B20260924-1947-gate-shape-and-driver-honesty — 1/9 done
+[36m[loop][0m ── iteration 2 (1/30 this run) · T2 · 1/9 done ──
+[36m[loop][0m    Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD
+[36m[loop][0m cost=$1.1885723999999998 turns=1 dur=3s error=false
+[33m[loop][0m    GATE REWRITE T2 — .loop/state/state.json restored from HEAD; a gate is not a session's to rewrite
+[33m[loop][0m    T2 failed on state tampering — the work is reverted whatever the gate said

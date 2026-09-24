@@ -85,6 +85,19 @@ file in that task's `files` if the task is meant to own it, or move the claim
 to the acceptance criteria, where the review session can read provenance
 directly instead of the gate re-asserting a file it doesn't control.
 
+**A fourth shape decays rather than starting broken.** A gate re-runs for the
+life of the plan, so `git diff`/`log`/`rev-list` against a baseline fixed at
+plan time — a commit, a tag, a branch, `HEAD~1`, `v1.0..HEAD`,
+`origin/main..HEAD`, `$(git merge-base HEAD main)` — is sound the moment the
+plan is written and unpassable the moment any other task commits, because that
+commit moves `HEAD` and the named baseline stays where it was. A range that
+merely *ends* in `HEAD` is still rejected: the left side is the fixed part, and
+it is what decays. `git diff`/`log`/`rev-list` against `HEAD` itself is the one
+baseline that stays sound for the whole plan and is not flagged — a work
+session cannot commit, so `HEAD` still separates that session's edits from
+everything committed before it, which is exactly what the driver's own
+gate-rewrite guard relies on.
+
 Known trap: `uv run pytest` exits **5**, not 0, when it collects zero tests. A
 scaffolding task whose verify command is a bare test run can therefore never
 pass. Author around it — assert on the thing the task actually produces
