@@ -435,6 +435,6 @@ slower path to the same fact.
 One task must carry a gate broad enough to notice a regression no other names:
 the existing suite (`.loop/tests/run-all.sh` plus `uv run pytest -q`) is that
 gate, and it is cheap enough to end every gate with. Three of these changes
-touch code paths the existing 33 scenarios already exercise — a plan whose
+touch code paths the existing 34 scenarios already exercise — a plan whose
 gates only run its own new scenarios would let this brief break the driver's
 existing behaviour and close green.

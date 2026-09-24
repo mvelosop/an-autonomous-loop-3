@@ -42,6 +42,12 @@ printf '\n\033[1mcheck-docs\033[0m\n'
 if bash ./check-docs.sh; then pass=$((pass + 1))
 else fail=$((fail + 1)); failed+=("check-docs.sh"); fi
 
+# Free and offline like the rest. Skips itself in an installed copy and in a
+# tree with no .loop/todo/, so it is safe to run unconditionally here.
+printf '\n\033[1mcheck-todo\033[0m\n'
+if bash ./check-todo.sh; then pass=$((pass + 1))
+else fail=$((fail + 1)); failed+=("check-todo.sh"); fi
+
 printf '\n────────────────────────\n'
 if [[ $fail -eq 0 ]]; then
   printf '\033[32m%d passed\033[0m\n' "$pass"

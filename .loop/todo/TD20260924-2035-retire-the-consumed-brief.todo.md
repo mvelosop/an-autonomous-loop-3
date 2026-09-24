@@ -4,7 +4,7 @@ description: Two directories carry a lifecycle field that nothing retires, so bo
 status: open
 created: 2026-09-24
 source: migrated from `docs/todo.md` § *The planner must retire the brief it consumed* (parked 2026-09-16), with field evidence from the `exploring-claude` consumer's nine-brief classification arc, swept by hand 2026-09-24
-waiting-on: The brief half only — which status field is authoritative, and whether the stamp happens at plan time or run-end. The `.loop/todo/` half is settled, not pending (by hand, 2026-09-24).
+waiting-on: The brief half only — which status field is authoritative, and whether the stamp happens at plan time or run-end. The `.loop/todo/` half is settled and enforced by `.loop/tests/check-todo.sh` (2026-09-24).
 ---
 # A consumed document is not retired, in either directory
 
@@ -175,7 +175,26 @@ One design note earned by writing the throwaway: the verbatim rule forces a
 That is a small constraint on how these are written, and it is the reason the
 rule is verbatim rather than "a faithful summary" — a summary is what drifted.
 
-Its natural home is beside `.loop/tests/check-docs.sh`, which already walks the
-docs tree and already fails on a dead path. **Not written here** only because
-this entry is a parked decision and writing it is a change; it needs no decision
-from anyone.
+**Written, 2026-09-24**, as `.loop/tests/check-todo.sh` — beside
+`.loop/tests/check-docs.sh`, whose shape it copies: an optional root argument so
+a scenario can point it at a planted tree, a skip on `.loop/.installed` because
+this directory ships to consumers who do not own it, and a skip when there is no
+`.loop/todo/` at all. Wired into `.loop/tests/run-all.sh` beside the other two
+free offline checks. Its fixture is `.loop/tests/scenarios/34-todo-index-drift.sh`,
+nine assertions over a planted directory: the consistent case passes, and each
+defect is one thing moved in a tree a reader would call fine.
+
+**The fixture earned its keep immediately, on itself.** The case for *a closed
+entry that still says what it awaits* appended `waiting-on:` to the end of the
+file — after the body, where a frontmatter parser never looks — so it asserted
+nothing and reported `ok`. Writing the check found nothing; writing the attempt
+to break it found that one of the breaks was not a break. That is the run
+journal's own lesson at one more level down: **a check nobody tried to break is
+a check nobody has tested**, and a fixture is a check.
+
+One thing the check does not do, deliberately: it does not enforce a status
+*vocabulary*. `closed` is the only value with mechanical consequences; everything
+else is the open case, including a sentence describing a part-done entry. Two of
+the current entries use exactly that, and turning `status:` into an enum would
+reject them to no purpose. The brief half of this entry is where a vocabulary
+question actually lives, because there a session has to write the value.

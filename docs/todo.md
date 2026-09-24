@@ -38,8 +38,8 @@ null                                # the literal form is correct
 
 **What it means.** `depends_on` has never gated anything. Task selection is
 really *"first pending task in array order"*. Plans list tasks in dependency
-order, so the two agree almost always — which is why this survived 35 scenarios
-and several real runs.
+order, so the two agree almost always — which is why this survived the whole
+scenario suite and several real runs.
 
 **How it surfaced.** SPA-207's T4 hit its attempt ceiling and went `blocked`.
 T10 depends on T4. The driver dispatched T10 anyway, with T4 unmet — the first
@@ -70,7 +70,7 @@ that turn out to be one design gap, so they are written together.
 ### What happened
 
 SPA-207's T4 had to write an idempotent backfill migration. `exploring-claude`'s
-`migrations.guidelines.md` Rule 8 forbids the loop from authoring **or running**
+the consumer's *migrations.guidelines.md* Rule 8 forbids the loop from authoring **or running**
 any data-lossy `UPDATE`, and tells the reviewer to treat one as a halt. The
 brief commissioned exactly that migration. Both agents behaved correctly and the
 task deadlocked: the reviewer halted it, then two successive work sessions
@@ -104,7 +104,7 @@ way it needs to know where ADRs live. Open question — and the reason this is
 parked rather than done — is how far that goes before it becomes a second
 `CLAUDE.md`. A named-commands table (`gate database`, `reset command`) is
 probably the whole of it; anything more open-ended will rot the same way.
-The consumer side is a `package.json` script the knowledge file can name, so
+The consumer side is a *package.json* script the knowledge file can name, so
 the fact is a command rather than a paragraph.
 
 **2. A plan-time check that gates do not touch the real database.** Every
@@ -145,7 +145,7 @@ wrong that nothing checked. Recorded because the second is checkable and the
 first may not be.
 
 **A gate demanded work its own brief put out of scope.** SPA-207's Bruno task
-required `bruno-coverage.sh` to report zero uncovered routes. Ten routes were
+required the consumer's *bruno-coverage.sh* to report zero uncovered routes. Ten routes were
 already uncovered on `main` and the branch added no controller routes, so the
 bar could only be met by covering ten routes the brief excluded. The task
 burned its attempts and blocked while its actual regression net — the whole
@@ -206,7 +206,7 @@ nothing was wrong with the plan at all.
 **The consumer repo already knows how to handle this, and says so in a binding
 guideline**: on a transport-shaped failure in a file the diff does not touch,
 re-run or isolate before calling it a regression; a failure that reproduces in
-isolation is real. It even ships a script (`isolate-red.sh`) that automates the
+isolation is real. It even ships a script (*isolate-red.sh*) that automates the
 verdict. But that obligation is written for the *implementer and reviewer*. The
 **driver** re-runs the gate itself, believes the first result, and reverts — so
 the one actor whose judgement is mechanical is also the one with no flake

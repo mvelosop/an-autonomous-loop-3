@@ -24,7 +24,7 @@ being created (see `TD20260924-2035`, § *The second instance*). The rule has a 
 | [TD20260924-1725-windows-git-bash-support](TD20260924-1725-windows-git-bash-support.todo.md) | Visum (Windows machine) | The next final version. The interim bash fix is briefed and plannable today, but it ships in the release that carries the `TD20260924-1720` work (`docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`) rather than on its own — operator decision, 2026-09-24. The residue waits on the `B008-driver-in-python` brief. |
 | [TD20260924-1955-plan-review-session](TD20260924-1955-plan-review-session.todo.md) | `docs/todo.md`, plus the consumer's nine-brief arc | A decision on the session's shape — what it emits, whether it may refuse a plan, and how it avoids becoming a prose reviewer. Its precondition is satisfied; only the design is open |
 | [TD20260924-2005-files-array-three-jobs](TD20260924-2005-files-array-three-jobs.todo.md) | `exploring-claude`, four runs of the classification arc | Nothing external. It needs a decision on what `files` is FOR, which is cheap to defer and expensive to get wrong, so it is recorded rather than briefed |
-| [TD20260924-2035-retire-the-consumed-brief](TD20260924-2035-retire-the-consumed-brief.todo.md) | `docs/todo.md`, plus a hand sweep of the consumer's nine briefs | The brief half only — which status field is authoritative, and whether the stamp happens at plan time or run-end. The `.loop/todo/` half is settled, not pending (by hand, 2026-09-24). |
+| [TD20260924-2035-retire-the-consumed-brief](TD20260924-2035-retire-the-consumed-brief.todo.md) | `docs/todo.md`, plus a hand sweep of the consumer's nine briefs | The brief half only — which status field is authoritative, and whether the stamp happens at plan time or run-end. The `.loop/todo/` half is settled and enforced by `.loop/tests/check-todo.sh` (2026-09-24). |
 
 ## Closed
 
@@ -42,8 +42,12 @@ decision is taken.
 and says which part is done — `TD20260924-1725` and `TD20260924-2035` both do.
 A closed entry drops `waiting-on:` and gains `closed:` and `closed-by:`.
 
-Nothing enforces this. Four entries do not justify a check; the trigger to write
-one is the next time an index row and a file disagree.
+Enforced by `.loop/tests/check-todo.sh`, in the suite. It checks that a `closed`
+entry carries `closed:` and `closed-by:` and no `waiting-on:`, that every other
+entry carries a `waiting-on:` quoted verbatim in the table above, that each is
+listed under the section its status implies, and that no entry is unindexed and
+no row dangles. It deliberately does not enforce a vocabulary for `status:` —
+only `closed` has consequences.
 
 ## Not yet migrated
 

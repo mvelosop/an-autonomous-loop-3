@@ -127,7 +127,8 @@ fi
 # 3. counts claimed in prose must match reality. Four documents drifted to
 #    three different numbers in two days; nothing else would have caught it.
 n_scen="$(ls .loop/tests/scenarios/*.sh 2>/dev/null | wc -l | tr -d ' ')"
-actual=$(( n_scen + 2 ))
+#    +3: check-brief, check-docs and check-todo all run beside the scenarios.
+actual=$(( n_scen + 3 ))
 #    Two things made this blind to the drift it exists for. An adjective between
 #    the number and the noun hid the claim entirely -- "24 offline checks" and
 #    "31 fixture scenarios" both sat in README.md while this read only the
