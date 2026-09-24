@@ -165,52 +165,18 @@ re-run is a gate defect, not a work failure, and the driver could say so.
 
 ---
 
-## The planner must retire the brief it consumed
+## The planner must retire the brief it consumed — migrated
 
-**Parked 2026-09-16.** A brief that has been planned still reads `ready to
-plan`. Nothing marks it spent, so the state of a `docs/briefs/` directory
-several runs in does not say which briefs are live — a question anyone opening
-it has, and which currently needs git archaeology to answer.
-
-**What the planning session should do**, at the end of a successful plan:
-
-1. **Stamp the brief consumed.**
-2. **Append a `## Consumed` section** recording what consumed it — the run id,
-   the branch, and anything a future brief on the same surface would want.
-
-The consumer side already has this convention for a *different* document: the
-architect briefs in `exploring-claude` carry a `## Consumed` section, opened by
-a blockquote saying the section must be completed by the `/architect` skill,
-then the date, the act, and — most of the value — the **drift it found**
-between what the brief assumed and what was actually shipped. Loop briefs have
-no equivalent, and the planner is the session in the same position.
-
-### Two things to settle first
-
-**Which status field.** There are two, and they disagree on the brief that
-prompted this. `check-brief.sh` keys off the **body** line
-(`**Status:** ready to plan`, line 35). The YAML frontmatter `status:` is read
-**nowhere in the loop** — `draft` / `consumed` / `superseded` are a consumer
-convention only. So stamping the frontmatter alone changes nothing the loop can
-see: a brief marked `status: consumed` there is still checked, and still
-plannable, because its body still says otherwise. Whatever the planner writes
-has to be the field something reads, or it is decoration. Either collapse the
-two, or have the planner write both and say which wins.
-
-**When, and therefore what it can say.** The planner runs once, *before* the
-run. At that moment the only honest content is "consumed by run X on branch Y"
-— the interesting part (what shipped, what the brief got wrong, what the run
-discovered) is not known until the run ends. The architect-brief precedent
-writes its `## Consumed` *after* the act, which is why those sections carry
-real findings rather than a timestamp. So either the planner writes a thin stub
-and something at run-end enriches it, or the stamping belongs at run-end and
-not to the planner at all. Worth deciding before building, because the thin
-version is nearly worthless and the rich version is not the planner's to write.
-
-### What it is waiting on
-
-Those two decisions. The mechanism is small either way: the planner already
-reads the brief and has to write files.
+**Migrated 2026-09-24** to
+[`.loop/todo/TD20260924-2035-retire-the-consumed-brief.todo.md`](../.loop/todo/TD20260924-2035-retire-the-consumed-brief.todo.md).
+Both open decisions are unchanged. What is new is field evidence from the
+consumer repo: eight of nine consumed briefs still declared themselves
+plannable, and **three of those had already been stamped `status: consumed` in
+the frontmatter this loop reads nowhere** — which is this entry's own *Which
+status field* question, confirmed, and settles half of it by elimination. The
+safety half is separately closed by item 8 of
+`docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`, so
+what remains here is legibility rather than protection.
 
 ---
 
@@ -262,71 +228,16 @@ what happened here — both tasks re-closed unchanged.
 
 ---
 
-## Waiting on the first clean run
+## Waiting on the first clean run — migrated
 
-**Parked 2026-09-11.** All three wait on the same thing: **one clean run in the
-`exploring-claude` repo under the durable-artifact rule and the gate-rewrite
-guard.** Both shipped in `1.0.0-rc.1` and neither has executed in a real
-iteration. Tuning gates against no evidence of how the new rules behave is the
-thing to avoid.
-
-They are listed in the order they unlock each other.
-
-### 1. Warn when a task's `verify` runs only files the task itself ships
-
-The planner-authored half of a gate — the `&& uv run python -c "…"` beside the
-test file — is load-bearing for **two** invariants, and nothing checks it exists:
-
-- It is the independent oracle when the session writes the test file the gate
-  runs. Without it the gate is a self-report.
-- It is what keeps *"the gate must fail before the work exists"* true for a task
-  that **extends** existing coverage. There the test-file half is already green,
-  so if the planner-authored half is absent the gate passes before any work and
-  the invariant is silently gone.
-
-Plan-time, in `.loop/amend.sh`. Heuristic — deciding whether a command does
-anything besides run that file means looking for a second command or a path the
-task does not own — so advisory, like the one-owner warning beside it.
-
-### 2. Enforce "every pending gate fails now" in the driver
-
-Already computed in `.loop/amend.sh` as an advisory. Cannot be made fatal until
-(1) lands: the extension case above legitimately presents a partly-green gate,
-and a fatal check would reject a correct plan.
-
-### 3. A plan-review session
-
-The missing third oracle. **Nothing independent audits a gate.** The review
-session audits tests and structurally cannot audit gates — the gate is the ruler
-it measures with, and `loop-review` opens by telling it the gate is settled.
-What looks at a verify command today is: the planner's own self-check, two narrow
-mechanical checks in `.loop/run.sh` (a gate must exist; one specific bad shape is
-refused), an advisory in `.loop/amend.sh`, and a human reading `plan.md`.
-
-Both of the loop's real gate incidents were gate-quality problems:
-
-- **url-shortener T8** — the gate asserted the re-serialised text of a parsed
-  structure contained a property name, but the correct output is a `$ref`. A
-  correct implementation could not pass. This produced the gate-shape check and
-  the whole second family of the reviewer calibration.
-- **B0006** — roughly 97 KB of verify assertions, all passing, none of them
-  wrong, several sharper than a hand-written test. The run still shipped nine
-  HTTP routes with no coverage. The gates were *strong* and were still the wrong
-  deliverable, which is the uncomfortable version: quality and sufficiency are
-  different axes and only the second one mattered.
-
-The economics are unusually good — once per run, not per iteration, against the
-artifact that sets the bar for every iteration after it. And "would this gate
-fail a non-implementation?" is a **substance** question about the gate, the class
-review sessions demonstrably handle well. `--plan-only` already carves out the
-slot; today the only thing filling it is the operator.
-
-One encouraging data point: calibration cases `07` and `07b` weaken the plan's
-acceptance criteria and its goal respectively, and the reviewer caught the defect
-anyway in both runs, taking the invariant from the code's own docstring once the
-plan stopped naming it. `.loop/tests/reviewer-calibration/RESULTS.md` concludes
-**any one source is enough**. So there is resilience to a weak plan; it is just
-not an audit of one.
+**Migrated 2026-09-24** to
+[`.loop/todo/TD20260924-1955-plan-review-session.todo.md`](../.loop/todo/TD20260924-1955-plan-review-session.todo.md),
+with the evidence it was waiting for. All three items (the `verify`-runs-only-its-own-files
+warning, making "every pending gate fails now" fatal, and the plan-review
+session) are unchanged; what is new is that the precondition — one clean run in
+the consumer repo under the durable-artifact rule and the gate-rewrite guard —
+was met fifteen runs over, and the run record says the class these items address
+is the loop's dominant failure mode rather than a refinement.
 
 ---
 

@@ -4,7 +4,7 @@ description: Four loop-mechanism defects the exploring-claude SPA-220 run surfac
 status: open
 created: 2026-09-24
 source: the `exploring-claude` consumer repo — the `## Insights` section of its run journal for `B20260919-2331-implement-spa-220` (that repo's `.loop/state/journals/`, not this one's)
-waiting-on: The `B20260924-1714-extract-loop-lessons-from-journals` architect act in exploring-claude, which mines all nine journals and decides which of these earn a loop-brief
+waiting-on: Nothing. The `B20260924-1714` architect act ran 2026-09-24 and ruled on all four — see `## Verdict` at the end. Items 2, 3 and 4's mechanism half are carried by `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`; item 1 is carried in a better form than this entry proposed; item 4's knowledge-root half belongs to the consumer repo
 ---
 # Gate scope, and what the driver does with a regression
 
@@ -93,3 +93,28 @@ Two consequences for the loop, not just for one consumer:
 - Insight capture is operator discipline, not a loop step: across nine runs of the classification
   arc, only the **last three** journals have a `## Insights` section at all. If per-run insight
   capture is worth having, it needs a prompt in the loop.
+
+---
+
+## Verdict — the `B20260924-1714` architect act, 2026-09-24
+
+The act mined all nine journals of the arc (not only the three with an
+`## Insights` section) and put these four beside everything else it found. All
+four survived. What changed is **item 1's shape** and **where item 4 splits**.
+
+| | Ruling |
+| --- | --- |
+| **1** scope guard cannot tell whose diff it is reading | **Briefed, in a better form than the three candidates here.** Candidate 2 — the driver passing the active task id to `verify` — won, and became item 3 of the brief: the driver already holds the value the consumer's runners re-derived from `state.json`, so a planner should inherit it. Candidate 1 (ship the discriminator in gate scaffolding) is then unnecessary, and candidate 3 (`amend.sh` warns on a `verify` naming another task's `files`) was replaced by two **fatal lint rules** that catch the cause rather than smell it — a gate may not diff against a ref other than `HEAD`, and may not inspect a file the task does not own. |
+| **2** `GATE REGRESSION` names the innocent task | **Briefed verbatim** as item 6. One line; `$task` is already in scope at `run.sh:888`. |
+| **3** `blocked` with a correct diagnosis accounted as pure loss | **Briefed in two halves.** Item 4 makes a blocked task's own gate run so the driver can say *"the work satisfies its gate; the block is about something else"* — this repo's own parked idea, now with two more incidents behind it. Item 7 adds the mechanizable discriminator from the arc's later run: a repeat `blocked` on unchanged inputs halts with the first diagnosis. A distinct **status** for correct refusal is deliberately *not* briefed — a session's claim about its own work stays unverified, so the attempt is still charged; what was missing was signal, not absolution. |
+| **4** journals are not a knowledge root | **Split, and the loop half is out of scope for the brief.** The consumer's `.claude/loop-knowledge.md` is the consumer's to fix and was handed to its documentation-restructuring brief. The `manual.md` guidance half is prose in the one place prose belongs and rides with that consumer-side change rather than opening a loop-brief for a paragraph. The second bullet — insight capture as operator discipline — was **decided against automating**: see `TD20260924-1955-plan-review-session.todo.md`. |
+
+**What the act added that this entry did not have.** The four items above read as
+four defects. Across fifteen runs they are better read as one: **five of the
+arc's seven premature halts were an unsatisfiable plan, correctly diagnosed,
+and none was a wrong implementation.** Two failures this entry never saw are the
+sharpest evidence for that — a `verify` that grepped a file absent from its
+task's `files`, unpassable by construction for four attempts; and a gate
+demanding a repo-wide invariant the plan had not touched, blocked twice. Both
+are plan defects with no judgement in them at all, which is why the brief leads
+with lint rather than with accounting.
