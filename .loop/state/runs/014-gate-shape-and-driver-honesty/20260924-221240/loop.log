@@ -16,3 +16,11 @@
 [36m[loop][0m planning from docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md using opus
 [36m[loop][0m cost=$3.3252197999999997 turns=25 dur=1047s error=false
 [36m[loop][0m planned: B20260924-1947-gate-shape-and-driver-honesty — 9 tasks
+[36m[loop][0m committed the plan
+[36m[loop][0m ── iteration 1 (1/30 this run) · T1 · 0/9 done ──
+[36m[loop][0m    Gate-shape lint rule 3: reject a gate that inspects a HEAD file its task does not own
+[36m[loop][0m cost=$3.6979044000000014 turns=105 dur=1041s error=false
+[33m[loop][0m     1 permission denial(s) — the fence may be in the wrong place
+[36m[loop][0m cost=$0.7231396000000001 turns=28 dur=234s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T1 done

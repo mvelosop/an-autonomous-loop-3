@@ -69,6 +69,22 @@ The same applies to **source text**: a gate that greps a file under `src/` for a
 literal is checking how the code is written rather than what it does, and is
 rejected too.
 
+**A third shape is rejected for a different reason — not style, mechanics.**
+The driver's own revert rule (`gate_files_moved()`) restores any file that
+exists in `HEAD`, is named by a task's verify, and is absent from that task's
+`files` — and it does so *before every gate run*. So a verify command that
+reads the bytes of such a file (`grep`, `cat`, `test -f`, a language-level read
+like Python's `open(...).read()`) can never see anything but the file's
+pre-task content, whatever the session does: that shape is unpassable by any
+implementation, and the driver refuses the plan rather than let it burn
+attempts finding out. **Handing the same path to a runner is unaffected** —
+`uv run pytest -q tests/test_thing.py`, `bash tests/check.sh` — because
+running a file is not reading it, and a task that ships tests under `files`
+must be able to name them. Two escape hatches, both correct outcomes: put the
+file in that task's `files` if the task is meant to own it, or move the claim
+to the acceptance criteria, where the review session can read provenance
+directly instead of the gate re-asserting a file it doesn't control.
+
 Known trap: `uv run pytest` exits **5**, not 0, when it collects zero tests. A
 scaffolding task whose verify command is a bare test run can therefore never
 pass. Author around it — assert on the thing the task actually produces

@@ -303,6 +303,26 @@ gate_files_moved() {
   done < <(git diff --name-only HEAD 2>/dev/null)
 }
 
+# Paths a verify command reads the BYTES of, as opposed to merely handing to a
+# runner. Used by the plan-time gate-shape lint (rule 3) to find, one phase
+# early, exactly the files gate_files_moved() above would revert at runtime --
+# grep, cat, test -f and a Python-level open(...) are inspecting; `uv run
+# pytest -q path` and `bash path` are executing and stay unflagged. Not a full
+# shell parse, on purpose: the four forms below are what the loop's own
+# scenarios and the arc's five stalled runs actually wrote.
+gate_inspected_paths() {
+  local cmd="$1"
+  { grep -oE 'grep[[:space:]]+(-[[:alnum:]]+[[:space:]]+)*[^[:space:]&|;-][^[:space:]&|;]*[[:space:]]+[^[:space:]&|;()"'"'"']+' <<<"$cmd" \
+      | awk '{print $NF}'
+    grep -oE 'cat[[:space:]]+[^[:space:]&|;]+' <<<"$cmd" | awk '{print $NF}'
+    grep -oE 'test[[:space:]]+-f[[:space:]]+[^[:space:]&|;)]+' <<<"$cmd" | awk '{print $NF}'
+    # \* rather than \?: this cmd may have come through jq's @tsv, which
+    # doubles a literal backslash, so a quote escaped once in the source
+    # (\") can arrive here escaped twice (\\").
+    grep -oE 'open\(\\*["'"'"'][^"'"'"']+\\*["'"'"']\)' <<<"$cmd" | sed -E 's/^open\(\\*.//; s/\\*.\)$//'
+  } | sort -u
+}
+
 
 # Re-run the verify command of every task named. This is the whole point of the
 # external gate: "done" has to survive a command the session neither runs nor can
@@ -714,6 +734,35 @@ $bad_gate
   A substring over re-serialised JSON passes on a hand-written duplicate and
   fails on the idiomatic form -- exactly backwards. Matching on text that was
   never parsed (an HTML page, a log line) is fine and is not flagged."
+
+  # Gate-shape lint, rule 3. Not a heuristic: the condition is
+  # gate_files_moved() (above) evaluated one phase early. That function
+  # reverts any HEAD-existing file the current task's verify names and its
+  # files does not, and the revert runs before the gate does -- so a task in
+  # that shape is unpassable by construction, for any implementation, forever.
+  # Rule 2 already draws the inspect-vs-execute line for src/; this extends it
+  # to any HEAD-tracked file, task-relative rather than path-prefix-relative.
+  bad_gate3=""
+  while IFS=$'\t' read -r id cmd; do
+    [[ -n "$id" ]] || continue
+    while IFS= read -r f; do
+      [[ -n "$f" ]] || continue
+      git cat-file -e "HEAD:$f" 2>/dev/null || continue
+      jq -e --arg f "$f" --arg t "$id" '
+          (.tasks[] | select(.id == $t)) as $cur
+          | (($cur.files // []) | index($f)) == null
+        ' "$STATE" >/dev/null 2>&1 &&
+        bad_gate3+="    $id  inspects $f, which it does not own; the driver reverts that file before the gate runs, so no implementation can pass"$'\n'
+    done < <(gate_inspected_paths "$cmd")
+  done < <(state_get '.tasks[] | [.id, .verify] | @tsv')
+  [[ -z "$bad_gate3" ]] || die "gate shape rejected -- fix the plan:
+
+$bad_gate3
+  Two escape hatches, both correct outcomes: add the file to that task's
+  files, or move the claim to acceptance, where the review session can read
+  provenance instead of the gate re-asserting it. Handing the path to a
+  runner (uv run pytest -q path, bash path) rather than reading it is fine
+  and is not flagged."
 
   # The driver stamps both, rather than trusting the plan session to record
   # them: which branch and which brief a plan belongs to are facts the driver

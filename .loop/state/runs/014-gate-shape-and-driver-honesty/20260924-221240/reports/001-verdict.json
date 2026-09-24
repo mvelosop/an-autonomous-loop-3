@@ -1,0 +1,53 @@
+{
+  "task": "T1",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "A plan is rejected by the existing gate-shape lint in .loop/run.sh — die, exit 1, before any iteration — when a task's verify names, in an inspecting position, a path that exists in HEAD and is absent from that task's files array. Inspecting covers at least grep, cat, test -f and a language-level file read such as Python open(...).read().",
+      "met": true,
+      "evidence": ".loop/run.sh:313-324 (gate_inspected_paths) and :738-758 (rule 3 block) implement exactly this; T1's own verify plants and rejects grep, cat|grep, test -f && bash, and python3 -c open(...).read() forms, all of which pass when re-run (bash .loop/tests/scenarios/35-gate-unowned-file.sh and the full verify both exit 0)."
+    },
+    {
+      "criterion": "The rejection line names the task id and then the offending path on the same line, in the existing '    <id>  <reason>' shape, and says why it is unpassable.",
+      "met": true,
+      "evidence": ".loop/run.sh:750 — \"    $id  inspects $f, which it does not own; the driver reverts that file before the gate runs, so no implementation can pass\"; scenario 35 asserts assert_log 'T1 .*docs/todo.md'."
+    },
+    {
+      "criterion": "Accepted with nothing printed about gate shape: owned inspecting verify; verify that hands a HEAD file to a runner; verify reading a file absent from HEAD (durable artifact); git diff --name-only HEAD -- docs.",
+      "met": true,
+      "evidence": "gate_inspected_paths only recognizes grep/cat/test -f/open(...) forms, not git diff, so the pathspec case is never flagged; the HEAD-existence guard at .loop/run.sh:744 (git cat-file -e) skips paths absent from HEAD; scenario 35's third case and T1's own verify's 'acc' cases (owned, runner-only, absent-from-HEAD, docs pathspec) all pass."
+    },
+    {
+      "criterion": "The rule is computed from the verify string and git's HEAD, not a filename list, and adds no per-gate/per-iteration cost — runs once in the plan phase beside the two existing rules.",
+      "met": true,
+      "evidence": "The new block sits inside '--- plan phase (once) ---' (.loop/run.sh:616) right after rule 2's bad_gate check, iterating state_get and git cat-file only at plan time; no change to gate_ids() or the per-iteration sweep."
+    },
+    {
+      "criterion": "Scenario 33-gate-rewrite.sh is changed to dodge rule 3 while still exercising the runtime GATE REWRITE guard and all three shapes, not deleted or weakened.",
+      "met": true,
+      "evidence": "33-gate-rewrite.sh:61-63 swapped the first case's verify from 'grep -q ORIGINAL probe.txt' to 'bash probe.txt' (execute, not inspect) and probe.txt's content to a tiny script; all three shapes (rewrite, create, extend-owned) and their original assertions (GATE REWRITE, restore-from-HEAD, gate_fail/blocked/3-attempts, and the two accepted cases) are unchanged in substance."
+    },
+    {
+      "criterion": "New scenario 35-gate-unowned-file.sh plants the rejected case and at least the owned and executing accepted cases, asserting exit codes and messages.",
+      "met": true,
+      "evidence": ".loop/tests/scenarios/35-gate-unowned-file.sh: rejected (exit 1, 'gate shape rejected', task+path log, 0 iterations), owned-accept (exit 0, no gate-shape log), runner-only-accept (exit 0, no gate-shape log). Verified passing directly."
+    },
+    {
+      "criterion": "SKILL.md gains a paragraph in the gate-shape section stating rule 3 and its two escape hatches.",
+      "met": true,
+      "evidence": ".claude/skills/loop-plan/SKILL.md:72-86, placed immediately after the existing two gate-shape rules; states the unpassable-by-construction reasoning, the runner exception, and both escape hatches (add to files, or move to acceptance)."
+    },
+    {
+      "criterion": "Doc counts (README.md, .loop/README.md, .loop/manual.md, B008, this run's brief) updated to hold check-docs.sh green; check-docs.sh itself untouched.",
+      "met": true,
+      "evidence": "All five docs updated 37->38 checks / 34->35 scenarios; .loop/tests/check-docs.sh has no diff; 'check-docs' step in the full suite run passed ('docs ok — every path resolves, no retired layout described')."
+    },
+    {
+      "criterion": "The whole offline suite and uv run pytest -q stay green, with nothing deleted or loosened.",
+      "met": true,
+      "evidence": "Ran bash .loop/tests/run-all.sh directly: '38 passed'. Ran uv run pytest -q directly: '40 passed'. No scenario file was deleted; 33 and 21 kept their original assertions with only fixture-shape adjustments forced by the new rule."
+    }
+  ],
+  "findings": [],
+  "notes": "21-foreign-state.sh was also touched (not in T1's files, but under the '.loop/tests/scenarios/' directory entry that is in files) for the same reason as 33: PLAN_TWO's shared verify ('test -f T1.out'/'T2.out') now trips rule 3 on the scenario's second fixture_run once the first run's artifacts are committed to HEAD. The fix swaps in a scenario-local plan with verify:'true' for that one step, leaving the reset-vs-resume assertions this scenario exists to test untouched. This is a legitimate consequence of rule 3 landing correctly, not scope creep — lib.sh (out of scope) was correctly left alone. gate_inspected_paths() adds one git cat-file -e per candidate path at plan time only, consistent with the brief's 'runs once per plan' constraint."
+}

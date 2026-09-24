@@ -4,13 +4,13 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is .loop/state/state.json. -->
 
-**Status:** running · **0/9 done** · iteration 0
+**Status:** running · **1/9 done** · iteration 1
 
-**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T21:26:56Z
+**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T21:52:58Z
 
 ## Progress
 
-- [ ] **T1** — Gate-shape lint rule 3: reject a gate that inspects a HEAD file its task does not own
+- [x] **T1** — Gate-shape lint rule 3: reject a gate that inspects a HEAD file its task does not own
 - [ ] **T2** — Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD
 - [ ] **T3** — Export the active task id and the gated task id to every gate in the sweep
 - [ ] **T4** — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables
@@ -24,7 +24,7 @@
 
 ### T1 — Gate-shape lint rule 3: reject a gate that inspects a HEAD file its task does not own
 
-`pending` · depends on: none
+`done` · depends on: none
 
 **Files:** `.loop/run.sh`, `.claude/skills/loop-plan/SKILL.md`, `.loop/tests/scenarios/`, `.loop/tests/scenarios/33-gate-rewrite.sh`, `README.md`, `.loop/README.md`, `.loop/manual.md`, `docs/briefs/B008-driver-in-python.md`, `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`
 

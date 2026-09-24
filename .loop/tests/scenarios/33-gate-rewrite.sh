@@ -49,13 +49,21 @@ plan_one() {           # <files json> <verify>
 }
 
 note "-- modified, pre-existing, not assigned: the goalpost moved --"
+# A gate that GREPS a HEAD file it doesn't own is rule 3 of the plan-time
+# gate-shape lint (added alongside this scenario) and would be refused before
+# any iteration ran -- so this plants the same unowned-file rewrite through a
+# gate that EXECUTES probe.txt instead, which stays outside the lint by
+# design (handing a path to a runner is normal) while still tripping the
+# runtime guard this scenario exists to test: gate_files_moved() reverts any
+# HEAD file the verify names and the task's files does not, whether the verify
+# reads it or runs it.
 fixture_new
-commit_gate_file probe.txt ORIGINAL
-plan_one '["thing.txt"]' 'grep -q ORIGINAL probe.txt'
-stub_with 'touch thing.txt; echo REWRITTEN > probe.txt'
+commit_gate_file probe.txt 'exit 0'
+plan_one '["thing.txt"]' 'bash probe.txt'
+stub_with 'touch thing.txt; echo "exit 1" > probe.txt'
 fixture_run docs/briefs/0003-runstat-cli.md
 assert_log "GATE REWRITE"
-[[ "$(cat "$FX/repo/probe.txt")" == "ORIGINAL" ]] \
+[[ "$(cat "$FX/repo/probe.txt")" == "exit 0" ]] \
   && ok "the gate file was restored from HEAD" \
   || bad "probe.txt reads $(cat "$FX/repo/probe.txt") -- a weakened gate survived the iteration"
 # Decided without a review, like state tampering: work is not reviewable when
