@@ -1,0 +1,48 @@
+{
+  "task": "T2",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "A plan is rejected (die, exit 1, before any iteration) when a task's verify runs git diff, git log or git rev-list against a named commit, tag, branch, relative ref or merge-base — including 4c911d7, HEAD~1, v1.0..HEAD, origin/main..HEAD and $(git merge-base HEAD main). A range that merely ends in HEAD is still a fixed baseline and is rejected.",
+      "met": true,
+      "evidence": "gate_diff_refs() in .loop/run.sh:334-360 extracts the ref, resolves a quoted $(...) command substitution back to its full text, and for a `left..right` range prints the left side even when the range ends in HEAD (v1.0..HEAD -> 'v1.0', origin/main..HEAD -> 'origin/main'). Wired into the plan-phase lint at .loop/run.sh:810-820 (rule 4), which dies before any iteration runs. Scenario 36-gate-decaying-baseline.sh and the task's own verify command both plant all five rejection cases and pass (confirmed by running .loop/tests/run-all.sh: 39 passed)."
+    },
+    {
+      "criterion": "The rejection line names the task id and then the ref it diffs against on the same line where the ref is a literal, and says the baseline decays on the next commit.",
+      "met": true,
+      "evidence": ".loop/run.sh:815 — `bad_gate4+=\"    $id  diffs against $ref rather than HEAD; a gate re-runs for the life of the plan and that baseline decays on the next commit\"` — id and ref on one line, decay language present."
+    },
+    {
+      "criterion": "A verify that diffs against HEAD itself is accepted with nothing printed about gate shape.",
+      "met": true,
+      "evidence": ".loop/run.sh:349 — `[[ -n \"$ref\" && \"$ref\" != \"HEAD\" ]] || return 0` short-circuits before anything is appended to bad_gate4. Scenario 36's two `acc` cases (`git diff --name-only HEAD -- docs`, `git diff --quiet HEAD -- docs`) assert exit 0 and no 'gate shape rejected' log; both pass."
+    },
+    {
+      "criterion": "Rule 3 from T1 and the two original rules still behave exactly as before; this rule is added beside them in the same plan-phase lint and adds no per-iteration cost.",
+      "met": true,
+      "evidence": "git diff de386ae..538b91a -- .loop/run.sh shows rule 4 (gate_diff_refs + the bad_gate4 block at lines 782-820... region) added purely additively after the existing bad_gate/bad_gate3 blocks, which are byte-identical to T1's version. All three rules live inside the one-time `plan` phase block (the same function that runs run_session plan), not in the per-iteration gate path."
+    },
+    {
+      "criterion": "A new scenario .loop/tests/scenarios/36-gate-decaying-baseline.sh plants at least the named-commit rejection and the HEAD acceptance and asserts both.",
+      "met": true,
+      "evidence": "File exists with 5 `rej` cases (4c911d7, HEAD~1, v1.0..HEAD, origin/main..HEAD, merge-base) and 2 `acc` cases (HEAD via --name-only and --quiet), each asserting exit code and log content."
+    },
+    {
+      "criterion": ".claude/skills/loop-plan/SKILL.md gains a paragraph in the gate-shape section stating rule 4 and why a HEAD diff is the one that stays sound.",
+      "met": true,
+      "evidence": "SKILL.md:88-99, 'A fourth shape decays rather than starting broken.' — states the rule, lists example baselines, explains why a range ending in HEAD still decays, and explains why HEAD itself stays sound (work session cannot commit)."
+    },
+    {
+      "criterion": "The new scenario file is added under .loop/tests/scenarios/ with no registration edit needed, and every document check-docs.sh holds to the suite size (README.md, .loop/README.md, .loop/manual.md, B008-driver-in-python.md, this run's brief) is updated so check-docs.sh stays green; check-docs.sh itself is not weakened, exempted or edited.",
+      "met": true,
+      "evidence": "All five documents updated from 38/35 to 39/36 (git diff de386ae..538b91a). check-docs.sh is untouched (git diff shows no change to that file) and `bash .loop/tests/check-docs.sh` prints 'docs ok'. Actual scenario count on disk is 36 (`ls .loop/tests/scenarios/*.sh | wc -l`)."
+    },
+    {
+      "criterion": "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened.",
+      "met": true,
+      "evidence": "Ran both directly: `.loop/tests/run-all.sh` -> '39 passed'; `uv run pytest -q` -> '40 passed in 1.04s'. No scenario file other than the new 36- was touched in the de386ae..538b91a diff."
+    }
+  ],
+  "findings": [],
+  "notes": "The code for this task (gate_diff_refs, rule-4 wiring, scenario 36, doc counts) was already committed as part of 538b91a ('T2: gate_fail') before this iteration's work session started — that iteration was forced to gate_fail purely because a prior session tampered with .loop/state/state.json directly (unrelated to this task's actual implementation, which the driver's revert left intact). This work session made no code changes and only re-verified what was already there; I independently re-ran the diff-refs edge cases, the new scenario, the full offline suite and pytest myself rather than trust either session's claim, and everything is green with no scope creep (diff matches the task's files list exactly plus driver-owned state.json/plan.md) and no absolute paths."
+}

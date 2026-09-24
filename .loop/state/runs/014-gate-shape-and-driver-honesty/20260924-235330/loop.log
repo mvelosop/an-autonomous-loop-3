@@ -17,3 +17,19 @@
 [36m[loop][0m cost=$1.1885723999999998 turns=1 dur=3s error=false
 [33m[loop][0m    GATE REWRITE T2 — .loop/state/state.json restored from HEAD; a gate is not a session's to rewrite
 [33m[loop][0m    T2 failed on state tampering — the work is reverted whatever the gate said
+[36m[loop][0m    committed 538b91a
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            1
+[36m[loop][0m   tasks closed:          1/9
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         1
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       1
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $1.19 (estimate, not a bill)
+[36m[loop][0m ── iteration 3 (2/30 this run) · T2 · 1/9 done ──
+[36m[loop][0m    Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD
+[36m[loop][0m cost=$0.6346880000000003 turns=23 dur=233s error=false
+[36m[loop][0m cost=$0.5507930000000001 turns=25 dur=258s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T2 done

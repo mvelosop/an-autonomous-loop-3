@@ -4,14 +4,14 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is .loop/state/state.json. -->
 
-**Status:** running · **1/9 done** · iteration 2
+**Status:** running · **2/9 done** · iteration 3
 
-**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T23:10:31Z
+**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T23:21:56Z
 
 ## Progress
 
 - [x] **T1** — Gate-shape lint rule 3: reject a gate that inspects a HEAD file its task does not own
-- [ ] **T2** — Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD · 1 attempt(s)
+- [x] **T2** — Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD · 1 attempt(s)
 - [ ] **T3** — Export the active task id and the gated task id to every gate in the sweep
 - [ ] **T4** — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables
 - [ ] **T5** — Run a blocked task's own gate and report when it passes
@@ -52,7 +52,7 @@ Three of the five stalled production runs had a verify command that read a file 
 
 ### T2 — Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD
 
-`pending` · 1 attempt(s) · depends on: T1
+`done` · 1 attempt(s) · depends on: T1
 
 **Files:** `.loop/run.sh`, `.claude/skills/loop-plan/SKILL.md`, `.loop/tests/scenarios/`, `README.md`, `.loop/README.md`, `.loop/manual.md`, `docs/briefs/B008-driver-in-python.md`, `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`
 
@@ -68,8 +68,6 @@ Failure E in the brief: a scope guard written as git diff <plan-commit> became u
 - .claude/skills/loop-plan/SKILL.md gains a paragraph in the gate-shape section stating rule 4 and why a HEAD diff is the one that stays sound.
 - The new scenario file is added under .loop/tests/scenarios/ (run-all.sh globs that directory, so no registration edit is needed), and every document check-docs.sh holds to the suite size — README.md, .loop/README.md, .loop/manual.md, docs/briefs/B008-driver-in-python.md and this run's own brief — is updated in the same change so check-docs.sh stays green; check-docs.sh itself is not weakened, exempted or edited.
 - The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change.
-
-**From the last attempt:** work session modified .loop/state/state.json — a file a verify command runs, which this task neither created nor was assigned; restored by the driver
 
 <details><summary>verify command</summary>
 

@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 161202,
+  "stop_reason": "end_turn",
+  "session_id": "71562615-b35d-4998-92ba-4ae3fe778fb3",
+  "total_cost_usd": 0.5507930000000001,
+  "usage": {
+    "input_tokens": 50,
+    "cache_creation_input_tokens": 44213,
+    "cache_read_input_tokens": 1263405,
+    "output_tokens": 12116,
+    "output_tokens_details": {
+      "thinking_tokens": 6451
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 44213,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 187,
+        "cache_read_input_tokens": 65890,
+        "cache_creation_input_tokens": 2326,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2326
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 50,
+      "outputTokens": 12116,
+      "cacheReadInputTokens": 1263405,
+      "cacheCreationInputTokens": 44213,
+      "webSearchRequests": 0,
+      "costUSD": 0.5507930000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 6451,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 25,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**PASS** — T2's gate-shape rule 4 (reject `git diff`/`log`/`rev-list` against any ref but HEAD) is correctly implemented, scenario 36 and all doc counts (39 checks/36 scenarios) are in place, and the full offline suite plus pytest are green. The code was actually committed in the prior iteration (538b91a, logged as `gate_fail` only because of an unrelated state.json tampering incident that the driver reverted); this iteration's work session made no changes and just re-verified, which I independently confirmed. No findings.",
+  "ttft_ms": 2899,
+  "type": "result",
+  "duration_ms": 257917,
+  "uuid": "c72a3ec6-184e-4ec6-b691-f22c46729300",
+  "ttft_stream_ms": 2291,
+  "time_to_request_ms": 32,
+  "first_content_frame_ms": 2292,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "review",
+  "iteration": 3
+}
