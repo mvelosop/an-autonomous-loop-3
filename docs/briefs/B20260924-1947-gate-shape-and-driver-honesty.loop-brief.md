@@ -406,6 +406,20 @@ shell value did not word-split under the author's shell.
   usernames.
 - Repo-relative paths everywhere. No absolute paths in any file or commit
   message.
+- **Every task here adds a scenario, and that moves a number five documents
+  claim.** `.loop/tests/check-docs.sh` computes the suite size as
+  `scenarios + 3` and fails if any document states a different count — so the
+  first task to land a scenario turns the broad gate red on a claim it did not
+  touch, in `README.md` (twice), `.loop/README.md` and `.loop/manual.md`
+  (twice), plus the two briefs that name the scenario count. At the time of
+  writing the correct values are **37 checks** and **34 scenarios**; a task that
+  adds one scenario makes them 38 and 35.
+
+  Named here because it is precisely this brief's own subject: a gate failing
+  for something the task did not cause. It is not a defect — the count check
+  exists because four documents once drifted to three different numbers in two
+  days — so do not weaken or exempt it. Update the claims in the same commit as
+  the scenario, and expect to do it in every task.
 
 ## Shape
 
