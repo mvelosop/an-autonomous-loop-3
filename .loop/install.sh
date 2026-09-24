@@ -13,11 +13,13 @@
 #
 # Three classes of file, handled differently:
 #
-#   loop-owned    .loop/* except state/ and tmp/, .claude/skills/loop-*
+#   loop-owned    .loop/* except the two lists below, .claude/skills/loop-*
 #                 replaced wholesale — these ARE the loop
 #   yours         .loop/state/, .loop/tmp/, CLAUDE.md, .claude/loop-knowledge.md
 #                 state/ and tmp/ are never written here; CLAUDE.md is MERGED;
 #                 loop-knowledge.md is seeded once and then left alone
+#   not shipped   .loop/todo/ — the loop's own bookkeeping, neither the loop's
+#                 to install nor the consumer's to own. See NOT_SHIPPED below.
 #
 # What this installer does NOT do any more: touch your .claude/settings.json.
 # The loop's permission fence ships as .loop/settings.json and run.sh hands it
@@ -59,10 +61,36 @@ mkdir -p "$TARGET/.loop" "$TARGET/.claude/skills"
 # two the consumer owns.
 CONSUMER_OWNED=(state tmp)
 
+# A third class, and it needs its own list because the reason differs. state/
+# and tmp/ are skipped because the CONSUMER OWNS THEM. .loop/todo/ is skipped
+# because it is not theirs at all: it holds parked decisions about the loop,
+# taken while working on the loop, in a repo that is worked on in bursts. A
+# consumer receiving it gets a directory of somebody else's open questions,
+# indexed as open work, which they cannot close and should not read as theirs.
+#
+# It shipped for one day before anyone noticed, precisely because the glob above
+# is deliberately inverted — which is the right default and has no way to tell
+# "new mechanism" from "new bookkeeping". So the exception is spelled out, and
+# the list is short on purpose: anything genuinely load-bearing belongs in the
+# glob, and a second entry here is worth arguing about before it is added.
+NOT_SHIPPED=(todo)
+
 for item in "$SRC"/.loop/*; do
   name="$(basename "$item")"
   for keep in "${CONSUMER_OWNED[@]}"; do
     [[ "$name" == "$keep" ]] && continue 2
+  done
+  for internal in "${NOT_SHIPPED[@]}"; do
+    if [[ "$name" == "$internal" ]]; then
+      # Reported, never removed. An install before this change left a copy
+      # behind, and by then the consumer may have written entries of their own
+      # in it — the installer cannot tell those from the ones it shipped, and
+      # deleting a directory it cannot read is not a repair. So it says so once
+      # and leaves the decision where it belongs.
+      [[ -e "$TARGET/.loop/$name" ]] && warn \
+        ".loop/$name is in the target from an earlier install. It is the loop's own bookkeeping and is no longer shipped — delete it if you did not write it."
+      continue 2
+    fi
   done
   rm -rf "$TARGET/.loop/$name"
   cp -R "$item" "$TARGET/.loop/$name"

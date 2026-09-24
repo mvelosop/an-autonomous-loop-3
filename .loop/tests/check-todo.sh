@@ -32,12 +32,17 @@ cd "${1:-$(dirname "${BASH_SOURCE[0]}")/../..}" || exit 1
 fail=0
 
 # `.loop/todo/` is the loop's own bookkeeping — parked decisions about the loop,
-# taken while working on it. The installer copies everything under .loop/ except
-# state and tmp (a leave-alone list, so a new mechanism file cannot be silently
-# missed), so a consumer receives this directory without owning it. Checking it
-# there would police entries the consumer did not write and cannot close. Same
-# marker and same reasoning as check-docs.sh: .loop/.installed is written BY the
-# installer, so its presence positively identifies a vendored copy.
+# taken while working on it — and as of 2026-09-24 the installer does not ship it
+# (install.sh, NOT_SHIPPED). So in a current consumer the directory is absent and
+# the next check exits first.
+#
+# This one covers the copies already out there. The directory shipped for a day
+# before anyone noticed, and install.sh reports such a copy rather than deleting
+# it, because by now the consumer may have written entries of their own in it. So
+# a vendored tree can still have one, and policing it would flag entries nobody
+# in that repo can close. Same marker and same reasoning as check-docs.sh:
+# .loop/.installed is written BY the installer, so its presence positively
+# identifies a vendored copy.
 if [[ -f .loop/.installed ]]; then
   echo "todo check skipped — this is an installed copy (.loop/.installed present)"
   exit 0

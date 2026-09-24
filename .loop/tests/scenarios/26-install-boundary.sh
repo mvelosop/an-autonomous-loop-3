@@ -125,6 +125,34 @@ grep -q '^node_modules$' "$TGT/.gitignore" \
 # exists only in the loop's own repo — so every real install failed its own
 # proof, and running the suite here could not see it because here that path
 # does exist. Chain explicitly, from the one place the difference is visible.
+note "── the loop's own bookkeeping is not shipped ──"
+
+# .loop/todo/ holds parked decisions ABOUT the loop. It reached consumers for one
+# day because the copy manifest is deliberately inverted — a list of what to
+# LEAVE ALONE, so a new mechanism file is never silently missed, which is the
+# right default and cannot tell bookkeeping from mechanism. This is the control
+# on the exception: the source repo HAS the directory, and a fresh install must
+# not produce one.
+[[ -d "$REPO_ROOT/.loop/todo" ]] \
+  && ok "the source repo has .loop/todo/ (so this asserts something)" \
+  || bad "no .loop/todo/ in the source — this assertion proves nothing"
+[[ ! -e "$TGT/.loop/todo" ]] && ok ".loop/todo/ was not installed" \
+  || bad ".loop/todo/ was shipped into the target"
+
+# ...and a target carrying one from an earlier install keeps it, with a word
+# about it. Never deleted: by now the consumer may have written entries of their
+# own there, and the installer cannot tell those from the ones it shipped.
+mkdir -p "$TGT/.loop/todo"
+printf 'mine, written after the bad install\n' >"$TGT/.loop/todo/TODO.md"
+"$REPO_ROOT/.loop/install.sh" --no-proof "$TGT" >"$TGT/install2.log" 2>&1
+[[ -f "$TGT/.loop/todo/TODO.md" ]] \
+  && [[ "$(cat "$TGT/.loop/todo/TODO.md")" == 'mine, written after the bad install' ]] \
+  && ok "a pre-existing .loop/todo/ is left byte-for-byte alone" \
+  || bad "the installer wrote or deleted a pre-existing .loop/todo/"
+grep -q 'no longer shipped' "$TGT/install2.log" \
+  && ok "and the install says so once" || bad "the install said nothing about it"
+rm -rf "$TGT/.loop/todo"
+
 note "── an installed copy installs onward ──"
 TGT2="$(mktemp -d "${TMPDIR:-/tmp}/loopinst2.XXXXXX")"
 TGT2="$(cd "$TGT2" && pwd -P)"
