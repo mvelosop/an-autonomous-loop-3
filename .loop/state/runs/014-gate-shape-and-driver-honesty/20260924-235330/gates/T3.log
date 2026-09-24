@@ -1,52 +1,24 @@
-    ---- reject: grep -q TIMEOUT docs/todo.md && uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: cat docs/todo.md | grep -q TIMEOUT
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: test -f docs/todo.md && bash tests/check.sh
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: python3 -c "import sys; sys.exit(0 if \"TIMEOUT\" in open(\"docs/todo.md\").read() else 1)"
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- accept: grep -q TIMEOUT docs/todo.md && uv run pytest -q tests/test_thing.py
     [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: bash tests/check.sh && test -f made.txt
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: grep -q OK made.txt
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    ---- recorded: work unset unset|T1 T1|review unset unset|work unset unset|T2 T1|T2 T2|review unset unset|
+    [32mok[0m   a gate saw active/gate = T1 T1
+    [32mok[0m   a gate saw active/gate = T2 T1
+    [32mok[0m   a gate saw active/gate = T2 T2
+    [32mok[0m   work sessions see neither variable
+    [32mok[0m   review sessions see neither variable
   [32mPASS[0m bash
-    ---- -- rejected: inspects docs/todo.md, which the task does not own --
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- -- accepted: the same inspecting verify, with the path owned --
     [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- -- accepted: the path is handed to a runner, not read --
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    ---- recorded: work unset unset|T1 T1|review unset unset|work unset unset|T2 T1|T2 T2|review unset unset|
+    [32mok[0m   a gate saw active/gate = T1 T1
+    [32mok[0m   a gate saw active/gate = T2 T1
+    [32mok[0m   a gate saw active/gate = T2 T2
+    [32mok[0m   work sessions see neither variable
+    [32mok[0m   review sessions see neither variable
     [32mok[0m   no tool errors leaked into the run
-  [32mPASS[0m 35-gate-unowned-file
+  [32mPASS[0m 37-gate-task-env
 
 [1m01-happy-path[0m
     [32mok[0m   exit 0

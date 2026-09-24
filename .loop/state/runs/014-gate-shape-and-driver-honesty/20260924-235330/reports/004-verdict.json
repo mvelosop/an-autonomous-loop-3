@@ -1,0 +1,43 @@
+{
+  "task": "T3",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "While the driver runs a task's verify, the verify's environment carries LOOP_ACTIVE_TASK set to the id of the task this iteration is working and LOOP_GATE_TASK set to the id of the task whose verify is running; they differ exactly when the gate is running as a regression check of another task.",
+      "met": true,
+      "evidence": ".loop/run.sh gate_ids() now takes `active` as its first arg and runs `LOOP_ACTIVE_TASK=\"$active\" LOOP_GATE_TASK=\"$id\" bash -c \"$cmd\"`; call site is `gate_ids \"$task\" \"${gate_targets[@]}\"` (run.sh:999). Scenario 37 asserts recordings T1 T1, T2 T1, T2 T2 — equal on own gate, differing on regression check."
+    },
+    {
+      "criterion": "Outside the gate sweep both variables are absent, not set to an empty string: work and review sessions do not see them, and a value inherited from the driver's own environment does not leak into any session.",
+      "met": true,
+      "evidence": "run.sh:88 `unset LOOP_ACTIVE_TASK LOOP_GATE_TASK` near the top of the script, before any session or gate runs. Scenario 37 exports `LOOP_ACTIVE_TASK=stale LOOP_GATE_TASK=stale` onto fixture_run itself and asserts 'work unset unset' and 'review unset unset' exactly twice each — ran and passed."
+    },
+    {
+      "criterion": "The export adds no git invocation and no per-gate cost beyond setting two variables.",
+      "met": true,
+      "evidence": "Diff only prefixes the existing `bash -c \"$cmd\"` call with two VAR=val assignments; no new subprocess or git call added."
+    },
+    {
+      "criterion": "A new scenario .loop/tests/scenarios/37-gate-task-env.sh asserts both values in a regression-check gate and in the current task's own gate, and their absence in a session.",
+      "met": true,
+      "evidence": "File present and asserts 'T1 T1' (own gate on first run), 'T2 T1' (T1's gate re-run as regression check while T2 is active), 'T2 T2' (T2's own gate), plus 'work unset unset' and 'review unset unset' twice each."
+    },
+    {
+      "criterion": "The two variables are documented where the loop documents verify commands for planners (SKILL.md) and for operators (manual.md or README.md), including that a scope guard reading git diff HEAD should consult them.",
+      "met": true,
+      "evidence": "loop-plan/SKILL.md adds a paragraph on the git-diff-HEAD misfire and the LOOP_ACTIVE_TASK/LOOP_GATE_TASK fix; .loop/manual.md adds an equivalent paragraph in the verify-commands section."
+    },
+    {
+      "criterion": "The new scenario file is added under .loop/tests/scenarios/, and every document check-docs.sh holds to the suite size is updated in the same change so check-docs.sh stays green; check-docs.sh itself is not weakened, exempted or edited.",
+      "met": true,
+      "evidence": "37-gate-task-env.sh added (no run-all.sh registration edit needed, confirmed by glob). Counts bumped to 39->40 checks / 36->37 scenarios in README.md, .loop/README.md, .loop/manual.md, B008-driver-in-python.md and this run's own brief. check-docs.sh untouched (git diff --name-only has no lib.sh/run-all.sh/check-docs.sh entries); ran directly and it reports 'docs ok'."
+    },
+    {
+      "criterion": "The whole offline suite and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened.",
+      "met": true,
+      "evidence": "Independently re-ran `.loop/tests/run-all.sh` (40 passed, including check-docs and check-todo) and `uv run pytest -q` (40 passed) against the current tree, not just the stored log."
+    }
+  ],
+  "findings": [],
+  "notes": "gate_ids() is the only call site (grep confirms). Neither .loop/tests/lib.sh nor .loop/tests/run-all.sh was touched, as the task required. The scenario table in .loop/README.md already stopped at 33-gate-rewrite before this task (pre-existing gap from T1/T2, not introduced here) and check-docs.sh only enforces the numeric counts, not table completeness — verified by inspection, not a T3 regression."
+}

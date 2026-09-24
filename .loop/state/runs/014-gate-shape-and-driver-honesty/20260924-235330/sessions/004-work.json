@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 312664,
+  "stop_reason": "end_turn",
+  "session_id": "460a6dc9-2326-488d-a2fb-3062c8375e07",
+  "total_cost_usd": 2.0749017999999997,
+  "usage": {
+    "input_tokens": 110,
+    "cache_creation_input_tokens": 126426,
+    "cache_read_input_tokens": 6193489,
+    "output_tokens": 33028,
+    "output_tokens_details": {
+      "thinking_tokens": 19215
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 126426,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 122,
+        "cache_read_input_tokens": 149252,
+        "cache_creation_input_tokens": 1177,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1177
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 110,
+      "outputTokens": 33028,
+      "cacheReadInputTokens": 6193489,
+      "cacheCreationInputTokens": 126426,
+      "webSearchRequests": 0,
+      "costUSD": 2.0749017999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 19215,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 56,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T3 is done: `.loop/run.sh` now exports `LOOP_ACTIVE_TASK`/`LOOP_GATE_TASK` per gate invocation only, docs and a new scenario (37) were added, and the full suite (40 offline checks + 40 pytest tests) is green. Proposal written to `.loop/tmp/proposal.json`.",
+  "ttft_ms": 1489,
+  "type": "result",
+  "duration_ms": 594670,
+  "uuid": "6dc5a5bb-e618-4d59-a388-690df434f69a",
+  "ttft_stream_ms": 828,
+  "time_to_request_ms": 31,
+  "first_content_frame_ms": 829,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "work",
+  "iteration": 4
+}

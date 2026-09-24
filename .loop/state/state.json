@@ -2,9 +2,9 @@
   "run_id": "B20260924-1947-gate-shape-and-driver-honesty",
   "brief": "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md",
   "status": "running",
-  "iteration": 3,
+  "iteration": 4,
   "created": "2026-09-24T21:26:56Z",
-  "updated": "2026-09-24T23:21:56Z",
+  "updated": "2026-09-24T23:39:06Z",
   "tasks": [
     {
       "id": "T1",
@@ -98,7 +98,7 @@
         "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change."
       ],
       "verify": "( . .loop/tests/lib.sh; unset LOOP_ACTIVE_TASK LOOP_GATE_TASK; fixture_new; export FXP=\"$FX/plan.json\" FXE=\"$FX/env.log\"; jq -nc --arg v 'test -f \"$TASK_OUT\" && printf \"%s %s\\n\" \"${LOOP_ACTIVE_TASK-unset}\" \"${LOOP_GATE_TASK-unset}\" >> \"$FXE\"' '{run_id:\"fx\",brief:\"docs/briefs/0003-runstat-cli.md\",status:\"running\",iteration:0,created:\"2026-08-15T00:00:00Z\",updated:\"2026-08-15T00:00:00Z\",tasks:[{id:\"T1\",title:\"a\",goal:\"g\",files:[],depends_on:[],acceptance:[\"a\"],verify:($v|sub(\"\\\\$TASK_OUT\";\"T1.out\")),status:\"pending\",attempts:0,notes:\"\"},{id:\"T2\",title:\"b\",goal:\"g\",files:[],depends_on:[\"T1\"],acceptance:[\"a\"],verify:($v|sub(\"\\\\$TASK_OUT\";\"T2.out\")),status:\"pending\",attempts:0,notes:\"\"}]}' > \"$FXP\"; printf '%s\\n' 'case \"$PHASE\" in plan) cp \"$FXP\" .loop/state/state.json ;; work) printf \"work %s %s\\n\" \"${LOOP_ACTIVE_TASK-unset}\" \"${LOOP_GATE_TASK-unset}\" >> \"$FXE\"; touch \"$TASK.out\"; jq -nc --arg t \"$TASK\" \"{task:\\$t,outcome:\\\"done\\\",summary:\\\"s\\\",files:[],verified:\\\"ok\\\",notes:\\\"none\\\"}\" > .loop/tmp/proposal.json ;; review) printf \"review %s %s\\n\" \"${LOOP_ACTIVE_TASK-unset}\" \"${LOOP_GATE_TASK-unset}\" >> \"$FXE\"; jq -nc --arg t \"$TASK\" \"{task:\\$t,verdict:\\\"PASS\\\",criteria:[],findings:[],notes:\\\"none\\\"}\" > .loop/tmp/verdict.json ;; esac' | fixture_stub; LOOP_ACTIVE_TASK=stale LOOP_GATE_TASK=stale fixture_run docs/briefs/0003-runstat-cli.md; assert_exit 0; assert_status T1 done; assert_status T2 done; note \"recorded: $(tr '\\n' '|' < \"$FXE\")\"; for l in 'T1 T1' 'T2 T1' 'T2 T2'; do grep -qx \"$l\" \"$FXE\" && ok \"a gate saw active/gate = $l\" || bad \"no gate saw active/gate = $l\"; done; [ \"$(grep -cx 'work unset unset' \"$FXE\")\" = 2 ] && ok 'work sessions see neither variable' || bad 'a work session saw a gate variable'; [ \"$(grep -cx 'review unset unset' \"$FXE\")\" = 2 ] && ok 'review sessions see neither variable' || bad 'a review session saw a gate variable'; finish ) && bash .loop/tests/scenarios/37-gate-task-env.sh && .loop/tests/run-all.sh && uv run pytest -q",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

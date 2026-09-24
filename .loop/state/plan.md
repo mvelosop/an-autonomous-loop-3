@@ -4,15 +4,15 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is .loop/state/state.json. -->
 
-**Status:** running · **2/9 done** · iteration 3
+**Status:** running · **3/9 done** · iteration 4
 
-**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T23:21:56Z
+**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T23:39:06Z
 
 ## Progress
 
 - [x] **T1** — Gate-shape lint rule 3: reject a gate that inspects a HEAD file its task does not own
 - [x] **T2** — Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD · 1 attempt(s)
-- [ ] **T3** — Export the active task id and the gated task id to every gate in the sweep
+- [x] **T3** — Export the active task id and the gated task id to every gate in the sweep
 - [ ] **T4** — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables
 - [ ] **T5** — Run a blocked task's own gate and report when it passes
 - [ ] **T6** — Report the working tree when a work session leaves no proposal
@@ -79,7 +79,7 @@ Failure E in the brief: a scope guard written as git diff <plan-commit> became u
 
 ### T3 — Export the active task id and the gated task id to every gate in the sweep
 
-`pending` · depends on: none
+`done` · depends on: none
 
 **Files:** `.loop/run.sh`, `.claude/skills/loop-plan/SKILL.md`, `.loop/tests/scenarios/`, `README.md`, `.loop/README.md`, `.loop/manual.md`, `docs/briefs/B008-driver-in-python.md`, `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`
 

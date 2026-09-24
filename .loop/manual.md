@@ -55,7 +55,7 @@ physically cannot inherit the implementer's rationalisation. Isolation is a
 property of the operating system, not of prompt discipline.
 
 **The orchestrator is deterministic.** Task selection, gates, attempt counting,
-stop conditions and halting are bash. That is why there are 39 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
+stop conditions and halting are bash. That is why there are 40 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
 attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
 stub the Task tool.** Every mechanical bug found in this loop was found by those
 tests, not by a run.
@@ -149,7 +149,7 @@ push is a bad first day.
 It stamps `.loop/.installed` with the release it came from and the commit that
 built it — propagated intact through a chained install, not re-derived from
 whatever repo the copy was taken from — and finishes by **running
-the loop's own suite in the target** — 39 checks, free and offline, no model.
+the loop's own suite in the target** — 40 checks, free and offline, no model.
 (You will see one fewer until you have briefs of your own: the brief checker
 sits out when `docs/briefs/` is empty.)
 That is the install test: a copied artefact that can prove it works where it
@@ -452,6 +452,15 @@ with no coverage, because the `verify` command that proved it is scaffolding and
 goes away with the plan. And whether any gate is broad enough to catch a
 regression the others do not name — the driver re-runs every done task's
 `verify` and nothing else, so that list is the whole regression net.
+
+Because every done task's `verify` re-runs on every later iteration, a `verify`
+command can read `LOOP_ACTIVE_TASK` (the task this iteration is working) and
+`LOOP_GATE_TASK` (the task whose `verify` is currently running) as ordinary
+environment variables. They are equal for a task's own gate and differ when
+the gate is running as a regression check of some other, already-done task —
+which is the case a `git diff HEAD` scope guard needs to consult before
+treating everything uncommitted in the tree as its own. Neither variable is
+set outside a gate run, so a work or review session never sees them.
 
 ### Amending the plan
 

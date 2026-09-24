@@ -98,6 +98,22 @@ session cannot commit, so `HEAD` still separates that session's edits from
 everything committed before it, which is exactly what the driver's own
 gate-rewrite guard relies on.
 
+**A `git diff HEAD` guard can still misfire, for a reason rule four does not
+catch.** A gate re-runs for the life of the plan, so a finished task's own
+`verify` runs again on every later iteration as a regression check — and at
+that moment the only uncommitted work in the tree belongs to whichever task
+the driver is working *now*, not to the task whose gate is running. A `git
+diff HEAD` scope guard that does not account for that reads another task's
+in-progress edits as its own regression. The driver exports two environment
+variables for the duration of each verify command: `LOOP_ACTIVE_TASK`, the id
+of the task this iteration is working, and `LOOP_GATE_TASK`, the id of the
+task whose `verify` is currently running. They are equal when a task's own
+gate runs and differ exactly when a gate is running as a regression check of
+some other, already-done task. A `git diff HEAD` guard should compare them —
+skip or narrow the check when `"$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK"` —
+rather than assume every uncommitted change in the tree is its own. Neither
+variable is set outside a gate run: a work or review session never sees them.
+
 Known trap: `uv run pytest` exits **5**, not 0, when it collects zero tests. A
 scaffolding task whose verify command is a bare test run can therefore never
 pass. Author around it — assert on the thing the task actually produces

@@ -370,7 +370,7 @@
     [32mok[0m   mechanism reached the second target
     [32mok[0m   example briefs chained — they live in examples/ once installed
     ---- ── provenance is propagated, not re-derived ──
-    [32mok[0m   the first install names a version (1.0.0-rc.1-12-g538b91a-dirty)
+    [32mok[0m   the first install names a version (1.0.0-rc.1-13-g60df74b-dirty)
     [32mok[0m   the chained install carries the same version and commit
     [32mok[0m   the stamp does not name the intermediate repo's commit
   [32mPASS[0m 26-install-boundary
@@ -584,6 +584,19 @@
     [32mok[0m   no tool errors leaked into the run
   [32mPASS[0m 36-gate-decaying-baseline
 
+[1m37-gate-task-env[0m
+    [32mok[0m   exit 0
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    ---- recorded: work unset unset|T1 T1|review unset unset|work unset unset|T2 T1|T2 T2|review unset unset|
+    [32mok[0m   a gate saw active/gate = T1 T1
+    [32mok[0m   a gate saw active/gate = T2 T1
+    [32mok[0m   a gate saw active/gate = T2 T2
+    [32mok[0m   work sessions see neither variable
+    [32mok[0m   review sessions see neither variable
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 37-gate-task-env
+
 [1mcheck-brief[0m
 
 [1mcheck-docs[0m
@@ -593,7 +606,7 @@ docs ok — every path resolves, no retired layout described
 todo ok — every entry matches its section, every row quotes its source
 
 ────────────────────────
-[32m39 passed[0m
+[32m40 passed[0m
 
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh

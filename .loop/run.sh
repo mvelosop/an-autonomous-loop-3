@@ -82,6 +82,14 @@ CONVERGENCE_MIN="${LOOP_CONVERGENCE_MIN:-6}"
 PLAN_MODEL="${LOOP_PLAN_MODEL:-opus}"
 WORK_MODEL="${LOOP_WORK_MODEL:-sonnet}"
 
+# LOOP_ACTIVE_TASK and LOOP_GATE_TASK are the driver's own, set only for the
+# duration of each verify command inside gate_ids() below. Unset here so a
+# value inherited from whatever invoked this script — including, as happens
+# when run-all.sh runs inside another gate, a stale one left by an outer
+# driver — never reaches a work or review session, which read the plain
+# environment via `claude -p`.
+unset LOOP_ACTIVE_TASK LOOP_GATE_TASK
+
 PLAN_ONLY=0
 CHECK_ONLY=0
 BRIEF=""
@@ -364,14 +372,25 @@ gate_diff_refs() {
 # Re-run the verify command of every task named. This is the whole point of the
 # external gate: "done" has to survive a command the session neither runs nor can
 # edit. Echoes the ids that failed.
+#
+# Each verify command runs with LOOP_ACTIVE_TASK (the task this iteration is
+# working, passed in as $1) and LOOP_GATE_TASK (the id currently being gated)
+# in its environment — set only on the `bash -c` that runs that one command,
+# never exported into this script's own environment, so nothing outside this
+# loop body can see them and a work or review session never does. The two
+# differ exactly when a gate is re-running as a regression check of a task
+# other than the one being worked — the case that used to have no session
+# whose scope it could speak to (brief B20260924-1947, failure E).
 gate_ids() {
+  local active="$1"; shift
   local id cmd rc failed=()
   mkdir -p "$RUN_DIR/gates"
   for id in "$@"; do
     cmd="$(state_get --arg id "$id" '.tasks[]|select(.id==$id)|.verify')"
     [[ -n "$cmd" && "$cmd" != "null" ]] || continue
     rc=0
-    bash -c "$cmd" >"$RUN_DIR/gates/$id.log.raw" 2>&1 || rc=$?
+    LOOP_ACTIVE_TASK="$active" LOOP_GATE_TASK="$id" \
+      bash -c "$cmd" >"$RUN_DIR/gates/$id.log.raw" 2>&1 || rc=$?
     mask <"$RUN_DIR/gates/$id.log.raw" >"$RUN_DIR/gates/$id.log"
     rm -f "$RUN_DIR/gates/$id.log.raw"
     [[ $rc -ne 0 ]] && failed+=("$id")
@@ -977,7 +996,7 @@ while true; do
   gate_failed=()
   if [[ ${#gate_targets[@]} -gt 0 ]]; then
     while read -r id; do [[ -n "$id" ]] && gate_failed+=("$id"); done \
-      < <(gate_ids "${gate_targets[@]}")
+      < <(gate_ids "$task" "${gate_targets[@]}")
   fi
 
   # Gate logs are keyed by task id and overwritten every iteration, so a failing

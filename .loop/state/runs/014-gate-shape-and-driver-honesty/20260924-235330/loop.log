@@ -33,3 +33,19 @@
 [36m[loop][0m cost=$0.5507930000000001 turns=25 dur=258s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T2 done
+[36m[loop][0m    committed 60df74b
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            2
+[36m[loop][0m   tasks closed:          2/9
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         1
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       1
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $2.37 (estimate, not a bill)
+[36m[loop][0m ── iteration 4 (3/30 this run) · T3 · 2/9 done ──
+[36m[loop][0m    Export the active task id and the gated task id to every gate in the sweep
+[36m[loop][0m cost=$2.0749017999999997 turns=56 dur=595s error=false
+[36m[loop][0m cost=$0.269023 turns=15 dur=144s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T3 done
