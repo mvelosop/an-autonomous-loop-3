@@ -1,10 +1,10 @@
 ---
 name: TD20260924-1725-windows-git-bash-support
 description: The loop on Windows/Git Bash — the interim bash fix is briefed and ready to plan; what stays open is the residue that brief deliberately excludes, and one finding that is not about Windows at all
-status: briefed — interim fix ready to plan; residue open
+status: briefed — interim fix ready to plan, held for the next final version; residue open
 created: 2026-09-24
 source: Visum (Windows machine), 2026-09-23 install
-waiting-on: Nothing for the interim fix. The residue waits on the `B008-driver-in-python` brief.
+waiting-on: The next final version. The interim bash fix is briefed and plannable today, but it ships in the release that carries the `TD20260924-1720` work (`docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`) rather than on its own — operator decision, 2026-09-24. The residue waits on the `B008-driver-in-python` brief.
 ---
 # Windows / Git Bash
 
@@ -18,7 +18,21 @@ mere presence of `jq`; widen `mask()` to every `$HOME` spelling a Windows toolch
 document the `PATH`/allow-rule interaction for tools that sit outside `PATH` by default.
 
 Run it with `.loop/run.sh --plan-only` against that brief on that branch. **Nothing in this TODO
-blocks it.**
+blocks planning it.**
+
+**But it does not ship alone.** Operator decision, 2026-09-24: Windows support goes into the **next
+final version**, which is the release carrying the work discharged from
+[`TD20260924-1720`](TD20260924-1720-gate-scope-and-regression-accounting.todo.md) —
+`docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`. So this entry now waits on
+that release rather than on nothing.
+
+Note the dependency points at a **closed** entry, which is not the contradiction it looks like:
+`1720` is discharged as a *decision* — its four items were ruled on and three were written into
+`B20260924-1947` — while what is being waited for is that brief being **implemented and released**.
+A closed TODO and an unshipped brief are different states, and this is the seam between them. The
+practical consequence is that `B20260924-1640` should not be planned and merged off
+`using-at-visum` in isolation; it joins the same release, so one version says it supports Windows
+and the checks behind that claim are all present in it.
 
 ## The finding worth carrying beyond Windows
 

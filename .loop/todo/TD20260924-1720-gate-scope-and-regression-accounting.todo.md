@@ -1,10 +1,12 @@
 ---
 name: TD20260924-1720-gate-scope-and-regression-accounting
 description: Four loop-mechanism defects the exploring-claude SPA-220 run surfaced — a scope guard that cannot tell whose diff it is reading, a regression message that names the innocent task, `blocked` accounted as pure loss, and journals nothing downstream reads
-status: open
+status: closed
 created: 2026-09-24
+closed: 2026-09-24
+closed-by: The `B20260924-1714` architect act, which ruled on all four items — see `## Verdict` at the end. Items 1, 2 and 3 and item 4's mechanism half are carried by `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` (item 1 in a better form than any of the three candidates here); item 4's knowledge-root half belongs to the consumer repo, and its insight-capture bullet was decided in `TD20260924-1955-plan-review-session.todo.md`
+depended-on-by: `TD20260924-1725-windows-git-bash-support` — Windows support ships in the same final version as the brief this entry produced, so that entry waits on this one's brief being released (operator decision, 2026-09-24)
 source: the `exploring-claude` consumer repo — the `## Insights` section of its run journal for `B20260919-2331-implement-spa-220` (that repo's `.loop/state/journals/`, not this one's)
-waiting-on: Nothing. The `B20260924-1714` architect act ran 2026-09-24 and ruled on all four — see `## Verdict` at the end. Items 2, 3 and 4's mechanism half are carried by `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`; item 1 is carried in a better form than this entry proposed; item 4's knowledge-root half belongs to the consumer repo
 ---
 # Gate scope, and what the driver does with a regression
 
