@@ -49,3 +49,19 @@
 [36m[loop][0m cost=$0.269023 turns=15 dur=144s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T3 done
+[36m[loop][0m    committed 5fd1170
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            3
+[36m[loop][0m   tasks closed:          3/9
+[36m[loop][0m   iterations per closed: 1.00
+[36m[loop][0m   gate failures:         1
+[36m[loop][0m   review rejections:     0
+[36m[loop][0m   attempts burned:       1
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $4.72 (estimate, not a bill)
+[36m[loop][0m ── iteration 5 (4/30 this run) · T4 · 3/9 done ──
+[36m[loop][0m    amend.sh check: advise on a gate that diffs against HEAD without reading the task variables
+[36m[loop][0m cost=$1.7425026 turns=57 dur=318s error=false
+[36m[loop][0m cost=$0.5296772000000001 turns=20 dur=216s error=false
+[33m[loop][0m     3 permission denial(s) — the fence may be in the wrong place
+[36m[loop][0m    review: FAIL

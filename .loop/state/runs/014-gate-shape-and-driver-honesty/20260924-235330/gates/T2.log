@@ -370,7 +370,7 @@
     [32mok[0m   mechanism reached the second target
     [32mok[0m   example briefs chained — they live in examples/ once installed
     ---- ── provenance is propagated, not re-derived ──
-    [32mok[0m   the first install names a version (1.0.0-rc.1-13-g60df74b-dirty)
+    [32mok[0m   the first install names a version (1.0.0-rc.1-14-g5fd1170-dirty)
     [32mok[0m   the chained install carries the same version and commit
     [32mok[0m   the stamp does not name the intermediate repo's commit
   [32mPASS[0m 26-install-boundary
@@ -597,6 +597,24 @@
     [32mok[0m   no tool errors leaked into the run
   [32mPASS[0m 37-gate-task-env
 
+[1m38-head-diff-advisory[0m
+    ---- -- advised: diffs against HEAD, reads neither variable --
+    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
+    [32mok[0m   advised about T2: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
+    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
+    [32mok[0m   advised about T2: test -f .never && git diff --quiet HEAD -- docs
+    ---- -- quiet: diffs against HEAD, but reads one of the two variables --
+    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
+    [32mok[0m   no advisory: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
+    ---- -- quiet: no HEAD diff at all --
+    [32mok[0m   check exits 0: test -f .never
+    [32mok[0m   no advisory: test -f .never
+  [32mPASS[0m 38-head-diff-advisory
+
 [1mcheck-brief[0m
 
 [1mcheck-docs[0m
@@ -606,7 +624,7 @@ docs ok — every path resolves, no retired layout described
 todo ok — every entry matches its section, every row quotes its source
 
 ────────────────────────
-[32m40 passed[0m
+[32m41 passed[0m
 
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh

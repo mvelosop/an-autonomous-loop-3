@@ -1,52 +1,32 @@
-    ---- reject: grep -q TIMEOUT docs/todo.md && uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: cat docs/todo.md | grep -q TIMEOUT
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: test -f docs/todo.md && bash tests/check.sh
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: python3 -c "import sys; sys.exit(0 if \"TIMEOUT\" in open(\"docs/todo.md\").read() else 1)"
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- accept: grep -q TIMEOUT docs/todo.md && uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: bash tests/check.sh && test -f made.txt
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: grep -q OK made.txt
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
+    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
+    [32mok[0m   advised about T2
+    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
+    [32mok[0m   advised about T2
+    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
+    [32mok[0m   no advisory
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory
+    [32mok[0m   check exits 0: test -f .never
+    [32mok[0m   no advisory
   [32mPASS[0m bash
-    ---- -- rejected: inspects docs/todo.md, which the task does not own --
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- -- accepted: the same inspecting verify, with the path owned --
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- -- accepted: the path is handed to a runner, not read --
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    [32mok[0m   no tool errors leaked into the run
-  [32mPASS[0m 35-gate-unowned-file
+    ---- -- advised: diffs against HEAD, reads neither variable --
+    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
+    [32mok[0m   advised about T2: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
+    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
+    [32mok[0m   advised about T2: test -f .never && git diff --quiet HEAD -- docs
+    ---- -- quiet: diffs against HEAD, but reads one of the two variables --
+    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
+    [32mok[0m   no advisory: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
+    ---- -- quiet: no HEAD diff at all --
+    [32mok[0m   check exits 0: test -f .never
+    [32mok[0m   no advisory: test -f .never
+  [32mPASS[0m 38-head-diff-advisory
 
 [1m01-happy-path[0m
     [32mok[0m   exit 0

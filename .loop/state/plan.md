@@ -4,16 +4,16 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is .loop/state/state.json. -->
 
-**Status:** running · **3/9 done** · iteration 4
+**Status:** running · **3/9 done** · iteration 5
 
-**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T23:39:06Z
+**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-24T23:54:20Z
 
 ## Progress
 
 - [x] **T1** — Gate-shape lint rule 3: reject a gate that inspects a HEAD file its task does not own
 - [x] **T2** — Gate-shape lint rule 4: reject a gate that diffs against any ref other than HEAD · 1 attempt(s)
 - [x] **T3** — Export the active task id and the gated task id to every gate in the sweep
-- [ ] **T4** — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables
+- [ ] **T4** — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables · 1 attempt(s)
 - [ ] **T5** — Run a blocked task's own gate and report when it passes
 - [ ] **T6** — Report the working tree when a work session leaves no proposal
 - [ ] **T7** — Name the task being worked on every GATE REGRESSION line
@@ -105,7 +105,7 @@ When a finished task's gate re-runs as a regression check, the only uncommitted 
 
 ### T4 — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables
 
-`pending` · depends on: T2, T3
+`pending` · 1 attempt(s) · depends on: T2, T3
 
 **Files:** `.loop/amend.sh`, `.claude/skills/loop-plan/SKILL.md`, `.loop/tests/scenarios/`, `README.md`, `.loop/README.md`, `.loop/manual.md`, `docs/briefs/B008-driver-in-python.md`, `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`
 
@@ -120,6 +120,8 @@ Rule 4 permits git diff HEAD because it is sound against committed history, but 
 - .claude/skills/loop-plan/SKILL.md gains the paragraph for this advisory beside rules 3 and 4, saying how a HEAD-diff scope guard should use the two variables.
 - The new scenario file is added under .loop/tests/scenarios/ (run-all.sh globs that directory, so no registration edit is needed), and every document check-docs.sh holds to the suite size — README.md, .loop/README.md, .loop/manual.md, docs/briefs/B008-driver-in-python.md and this run's own brief — is updated in the same change so check-docs.sh stays green; check-docs.sh itself is not weakened, exempted or edited.
 - The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change.
+
+**From the last attempt:** SKILL.md's new paragraph claims the advisory fires on a verify that diffs against HEAD via `git diff`/`log`/`rev-list`, but amend.sh's regex only matches `git diff ... HEAD` — a `git log HEAD` or `git rev-list HEAD` scope guard missing the two task-identity variables gets no advisory at all, silently reproducing the exact false-reversion failure mode this task exists to warn plan authors about. Either narrow the doc to 'git diff' or broaden the regex to match diff|log|rev-list as rule 4's own gate_diff_refs()/grep pattern in run.sh does.
 
 <details><summary>verify command</summary>
 

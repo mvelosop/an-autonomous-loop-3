@@ -114,6 +114,13 @@ skip or narrow the check when `"$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK"` —
 rather than assume every uncommitted change in the tree is its own. Neither
 variable is set outside a gate run: a work or review session never sees them.
 
+`.loop/amend.sh check` advises — does not reject, since the driver cannot fully
+judge this shape mechanically — on exactly the gap above: any task whose
+`verify` diffs against `HEAD` (`git diff`/`log`/`rev-list`) without mentioning
+either `LOOP_ACTIVE_TASK` or `LOOP_GATE_TASK` anywhere in the command. Naming
+one of the two variables is enough to clear the advisory; using it correctly is
+still on you.
+
 Known trap: `uv run pytest` exits **5**, not 0, when it collects zero tests. A
 scaffolding task whose verify command is a bare test run can therefore never
 pass. Author around it — assert on the thing the task actually produces
