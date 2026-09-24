@@ -118,9 +118,24 @@ check_one() {
   # Same class as the absolute-path check above -- a reference that does not
   # resolve where it is consumed -- and it is the one rule that is checkable
   # rather than a matter of judgement, so it is checked.
+  # A brief numbered by creation time -- BYYYYMMDD-HHMM, the convention a repo
+  # adopts once two people drafting on different branches would otherwise
+  # collide on the next counter value -- has exactly the shape of a tracker
+  # key. So a brief that names itself, in its own frontmatter or its title,
+  # warned about itself, on every brief, forever. Match the date-time SHAPE
+  # rather than adding a letter to the list above: the prefix is the repo's
+  # choice and B is only the one seen first.
+  #
+  # And the prefix is not one character. This matched the shape with `[A-Z]`
+  # and was then wrong for the first id that used two -- `.loop/todo/`'s
+  # `TDYYYYMMDD-HHMM`, a convention that landed after this check -- so every
+  # brief citing a parked TODO warned about a file sitting in this repo. Same
+  # bug as the one the paragraph above describes, one layer in: the SHAPE is a
+  # date-time, the prefix in front of it is free.
   local keys
   keys="$(grep -oE '\b[A-Z][A-Z0-9]{1,9}-[0-9]+\b' <<<"$body" \
     | grep -vE '^(UTF|SHA|ISO|RFC|HTTP|MD|AES|RSA|SPDX|ASCII|CVE|ES|EC|PEP|ADR|UC|SPA)-' \
+    | grep -vE '^[A-Z]{1,3}[0-9]{8}-[0-9]{4}$' \
     | sort -u | tr '\n' ' ')"
   if [[ -n "${keys// /}" ]]; then
     warn "names issue(s) no session can open: ${keys}-- carry what they say, not the key"
