@@ -293,7 +293,25 @@ archive_transcript() {
 #                            durable-artifact rule working as intended, so
 #                            creation is always allowed
 #   existed at HEAD          which makes the author an earlier session or the
-#                            planner, never this one
+#                            planner, never this one -- UNLESS that HEAD
+#                            content is itself this task's own, from an
+#                            earlier attempt: the driver commits every
+#                            iteration whatever its outcome, so a task whose
+#                            first attempt fails review still lands its new
+#                            file in HEAD, and a retry that keeps editing that
+#                            same file is still this task's own work, not a
+#                            rewrite of someone else's gate. The driver's own
+#                            commit subjects are "[loop] $task: $outcome"
+#                            (below), so the last commit to touch the file
+#                            says who actually wrote the HEAD version -- a
+#                            narrower test than "does `files` own it", which a
+#                            directory-style files entry (".loop/tests/
+#                            scenarios/", used throughout this plan) can never
+#                            satisfy by exact match, and which must stay
+#                            narrow: owning everything under a directory would
+#                            also excuse rewriting a FILE SOME OTHER TASK put
+#                            there, which is exactly the rewrite below still
+#                            has to catch
 #   named by THIS task's     the session rewrote the gate it is judged by. A
 #     verify                 file some OTHER task's gate names is deliberately
 #                            not this check's business: 03-gate-regression has
@@ -307,8 +325,16 @@ archive_transcript() {
 # the planner's. Three review sessions saw it and none objected; one cited the
 # rewritten test as evidence the criteria were met. The reviewer is built to
 # rule on substance and this is a question about process, so it belongs here.
+#
+# The retry carve-out is itself measured: B20260924-1947's own T9 hit this on
+# its second attempt. Its first attempt created a new scenario file (allowed,
+# per "modified, not created" above), but review failed it -- and the driver
+# commits every iteration regardless of outcome, so that file was in HEAD by
+# the second attempt. T9's `files` names the directory, not that exact path,
+# so the second attempt's legitimate fix to its own file was reverted as a
+# goalpost rewrite, and the task burned its last attempt on a false positive.
 gate_files_moved() {
-  local f
+  local f owner
   while IFS= read -r f; do
     [[ -n "$f" ]] || continue
     git cat-file -e "HEAD:$f" 2>/dev/null || continue
@@ -316,7 +342,12 @@ gate_files_moved() {
         (.tasks[] | select(.id == $t)) as $cur
         | (($cur.verify // "") | contains($f))
           and ((($cur.files // []) | index($f)) == null)
-      ' "$STATE" >/dev/null 2>&1 && printf '%s\n' "$f"
+      ' "$STATE" >/dev/null 2>&1 || continue
+    owner="$(git log -1 --format=%s -- "$f" 2>/dev/null)"
+    case "$owner" in
+      "[loop] $task:"*) continue ;;
+    esac
+    printf '%s\n' "$f"
   done < <(git diff --name-only HEAD 2>/dev/null)
 }
 

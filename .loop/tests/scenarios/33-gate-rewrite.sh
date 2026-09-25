@@ -94,4 +94,39 @@ fixture_run docs/briefs/0003-runstat-cli.md
 assert_no_log "GATE REWRITE"
 assert_status T1 done
 
+# Not in `files` at all -- a directory entry (".loop/tests/scenarios/", used
+# throughout the real plans this loop runs) can never satisfy files' exact
+# match. Attempt 1 creates the file (allowed: creation, not modification) but
+# fails review, and the driver commits it into HEAD anyway. Attempt 2 keeps
+# editing that same file, which is still this task's own work, not someone
+# else's gate -- the file's content (not an iteration counter the stub cannot
+# see) is what tells the stub which attempt it is in.
+note "-- pre-existing only because THIS task's own failed attempt committed it: a retry, not a rewrite --"
+fixture_new
+plan_one '["other.txt"]' 'grep -q RETRY owned_by_me.txt'
+fixture_stub <<STUB
+case "\$PHASE" in
+  plan)   cat > .loop/state/state.json <<'PLANJSON'
+$FX_PLAN
+PLANJSON
+    ;;
+  work)
+    if [ -f owned_by_me.txt ]; then echo RETRY > owned_by_me.txt
+    else echo FIRST > owned_by_me.txt
+    fi
+    jq -nc --arg t "\$TASK" '{task:\$t,outcome:"done",summary:"s",files:[],verified:"ok",notes:"none"}' > .loop/tmp/proposal.json ;;
+  review)
+    if grep -q RETRY owned_by_me.txt 2>/dev/null
+    then jq -nc --arg t "\$TASK" '{task:\$t,verdict:"PASS",criteria:[],findings:[],notes:"none"}' > .loop/tmp/verdict.json
+    else jq -nc --arg t "\$TASK" '{task:\$t,verdict:"FAIL",criteria:[],findings:["not yet"],notes:"none"}' > .loop/tmp/verdict.json
+    fi ;;
+esac
+STUB
+fixture_run docs/briefs/0003-runstat-cli.md
+assert_no_log "GATE REWRITE"
+assert_status T1 done
+[[ "$(cat "$FX/repo/owned_by_me.txt" 2>/dev/null)" == "RETRY" ]] \
+  && ok "the second attempt's own edit survived" \
+  || bad "owned_by_me.txt reads $(cat "$FX/repo/owned_by_me.txt" 2>/dev/null) -- the retry was falsely reverted"
+
 finish
