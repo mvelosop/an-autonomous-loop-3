@@ -334,7 +334,7 @@
     [32mok[0m   mechanism reached the second target
     [32mok[0m   example briefs chained — they live in examples/ once installed
     ---- ── provenance is propagated, not re-derived ──
-    [32mok[0m   the first install names a version (1.0.0-rc.1-15-g3944e04-dirty)
+    [32mok[0m   the first install names a version (1.0.0-rc.1-16-g6194380-dirty)
     [32mok[0m   the chained install carries the same version and commit
     [32mok[0m   the stamp does not name the intermediate repo's commit
   [32mPASS[0m 26-install-boundary
@@ -579,6 +579,25 @@
     [32mok[0m   no advisory: test -f .never
   [32mPASS[0m 38-head-diff-advisory
 
+[1m39-blocked-gate-passes[0m
+    ---- -- blocked, and the deliverable satisfies the gate --
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: review: PASS
+    [32mok[0m   notes say the gate passes: T1 GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else. Read the proposal. stub summary
+    [32mok[0m   the iteration warning says it
+    [32mok[0m   the run-end report says it
+    ---- -- blocked, and the gate fails: nothing to report --
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: GATE REGRESSION
+    [32mok[0m   log clean of: GATE FAIL
+    [32mok[0m   notes make no gate claim
+    [32mok[0m   the log makes no gate claim
+  [32mPASS[0m 39-blocked-gate-passes
+
 [1mcheck-brief[0m
 
 [1mcheck-docs[0m
@@ -588,7 +607,7 @@ docs ok — every path resolves, no retired layout described
 todo ok — every entry matches its section, every row quotes its source
 
 ────────────────────────
-[32m41 passed[0m
+[32m42 passed[0m
 
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh

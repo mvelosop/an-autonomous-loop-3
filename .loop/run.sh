@@ -899,6 +899,7 @@ run_iters=0
 stalls=0
 status="max_iterations"
 exit_code=4
+blocked_gate_pass_tasks=()
 
 while true; do
   pending="$(state_get '[.tasks[]|select(.status=="pending")]|length')"
@@ -987,11 +988,14 @@ while true; do
     warn "   GATE REWRITE $task — ${moved[*]} restored from HEAD; a gate is not a session's to rewrite"
   fi
 
-  # 2. gate — every done task, plus this one if it claims to be done
+  # 2. gate — every done task, plus this one if it claims to be done or
+  # reports blocked: a blocked outcome with a passing gate is a defect in the
+  # plan or the block itself, not in the work, and the only way to tell that
+  # from a genuine block is to run the gate rather than skip it.
   gate_targets=()
   while read -r id; do [[ -n "$id" ]] && gate_targets+=("$id"); done \
     < <(state_get '.tasks[]|select(.status=="done")|.id')
-  [[ "$outcome" == "done" ]] && gate_targets+=("$task")
+  [[ "$outcome" == "done" || "$outcome" == "blocked" ]] && gate_targets+=("$task")
 
   gate_failed=()
   if [[ ${#gate_targets[@]} -gt 0 ]]; then
@@ -1019,12 +1023,23 @@ while true; do
   candidate_failed=0
   for id in "${gate_failed[@]:-}"; do [[ "$id" == "$task" ]] && candidate_failed=1; done
 
+  # A blocked task whose own gate passes on this re-run is a signal, not a
+  # verdict: the work satisfies the gate, so whatever the session could not do
+  # is about something else. This never changes the status transition below.
+  blocked_gate_passed=0
+  gate_pass_line="$task GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else. Read the proposal."
+  [[ "$outcome" == "blocked" && $candidate_failed -eq 0 ]] && blocked_gate_passed=1
+
   verdict="skipped"
   if [[ -n "$tampered" ]]; then
     outcome="gate_fail"
     warn "   $task failed on state tampering — the work is reverted whatever the gate said"
   elif [[ "$outcome" == "blocked" ]]; then
     say "   work session reported blocked"
+    if [[ $blocked_gate_passed -eq 1 ]]; then
+      warn "   $gate_pass_line"
+      blocked_gate_pass_tasks+=("$task")
+    fi
   elif [[ $candidate_failed -eq 1 ]]; then
     outcome="gate_fail"
     warn "   GATE FAIL $task — review skipped, work that fails its own gate is not reviewable"
@@ -1062,7 +1077,9 @@ while true; do
       state_edit --arg id "$task" --arg n "$reason" \
         '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)' ;;
     blocked)
-      state_edit --arg id "$task" --arg n "$summary" \
+      blocked_note="$summary"
+      [[ $blocked_gate_passed -eq 1 ]] && blocked_note="$gate_pass_line $summary"
+      state_edit --arg id "$task" --arg n "$blocked_note" \
         '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)' ;;
   esac
 
@@ -1134,6 +1151,12 @@ for p in plan work review; do
   jq -s --arg p "$p" '[.[]|select(.phase==$p)] | "  \($p): \(length) session(s), $\([.[].total_cost_usd//0]|add//0|.*100|round/100), \([.[].num_turns//0]|add//0) turns"' \
     "$SESSIONS"/*.json 2>/dev/null | tr -d '"' | while read -r l; do say "$l"; done
 done
+if [[ ${#blocked_gate_pass_tasks[@]} -gt 0 ]]; then
+  say ""
+  for id in "${blocked_gate_pass_tasks[@]}"; do
+    say "$id GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else."
+  done
+fi
 say ""
 case "$status" in
   complete)       say "plan complete. journal: ${JOURNAL#$REPO/}" ;;

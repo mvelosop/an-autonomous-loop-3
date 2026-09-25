@@ -1,24 +1,37 @@
-    [32mok[0m   exit 0
-    [32mok[0m   T1 status=done
-    [32mok[0m   T2 status=done
-    ---- recorded: work unset unset|T1 T1|review unset unset|work unset unset|T2 T1|T2 T2|review unset unset|
-    [32mok[0m   a gate saw active/gate = T1 T1
-    [32mok[0m   a gate saw active/gate = T2 T1
-    [32mok[0m   a gate saw active/gate = T2 T2
-    [32mok[0m   work sessions see neither variable
-    [32mok[0m   review sessions see neither variable
+    ---- blocked, and the work satisfies the gate
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: review: PASS
+    [32mok[0m   notes say the gate passes: T1 GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else. Read the proposal. stub summary
+    [32mok[0m   the iteration warning says it
+    [32mok[0m   the run-end summary says it
+    ---- blocked, and the gate fails: nothing to report
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: GATE REGRESSION
+    [32mok[0m   log clean of: GATE FAIL
+    [32mok[0m   notes make no gate claim
+    [32mok[0m   the log makes no gate claim
   [32mPASS[0m bash
-    [32mok[0m   exit 0
-    [32mok[0m   T1 status=done
-    [32mok[0m   T2 status=done
-    ---- recorded: work unset unset|T1 T1|review unset unset|work unset unset|T2 T1|T2 T2|review unset unset|
-    [32mok[0m   a gate saw active/gate = T1 T1
-    [32mok[0m   a gate saw active/gate = T2 T1
-    [32mok[0m   a gate saw active/gate = T2 T2
-    [32mok[0m   work sessions see neither variable
-    [32mok[0m   review sessions see neither variable
-    [32mok[0m   no tool errors leaked into the run
-  [32mPASS[0m 37-gate-task-env
+    ---- -- blocked, and the deliverable satisfies the gate --
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: review: PASS
+    [32mok[0m   notes say the gate passes: T1 GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else. Read the proposal. stub summary
+    [32mok[0m   the iteration warning says it
+    [32mok[0m   the run-end report says it
+    ---- -- blocked, and the gate fails: nothing to report --
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: GATE REGRESSION
+    [32mok[0m   log clean of: GATE FAIL
+    [32mok[0m   notes make no gate claim
+    [32mok[0m   the log makes no gate claim
+  [32mPASS[0m 39-blocked-gate-passes
 
 [1m01-happy-path[0m
     [32mok[0m   exit 0
@@ -604,4 +617,4 @@ todo ok — every entry matches its section, every row quotes its source
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh
 ........................................                                 [100%]
-40 passed in 1.00s
+40 passed in 1.01s

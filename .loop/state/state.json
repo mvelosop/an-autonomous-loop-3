@@ -2,9 +2,9 @@
   "run_id": "B20260924-1947-gate-shape-and-driver-honesty",
   "brief": "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md",
   "status": "running",
-  "iteration": 6,
+  "iteration": 7,
   "created": "2026-09-24T21:26:56Z",
-  "updated": "2026-09-25T00:05:59Z",
+  "updated": "2026-09-25T00:23:25Z",
   "tasks": [
     {
       "id": "T1",
@@ -165,7 +165,7 @@
         "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change."
       ],
       "verify": "( . .loop/tests/lib.sh; unset LOOP_ACTIVE_TASK LOOP_GATE_TASK; pj(){ jq -nc --argjson f \"$1\" --arg v \"$2\" '{run_id:\"fx\",brief:\"docs/briefs/0003-runstat-cli.md\",status:\"running\",iteration:0,created:\"2026-08-15T00:00:00Z\",updated:\"2026-08-15T00:00:00Z\",tasks:[{id:\"T1\",title:\"t\",goal:\"g\",files:$f,depends_on:[],acceptance:[\"a\"],verify:$v,status:\"pending\",attempts:0,notes:\"\"}]}' > \"$FXP\"; }; blk(){ fixture_cleanup; fixture_new; export FXP=\"$FX/plan.json\" SUMMARY='stub summary' MAKE=\"$1\"; pj '[\"T1.out\"]' 'test -f T1.out'; printf '%s\\n' 'case \"$PHASE\" in plan) cp \"$FXP\" .loop/state/state.json ;; work) [ \"$MAKE\" = 1 ] && touch T1.out; jq -nc --arg t \"$TASK\" --arg s \"$SUMMARY\" \"{task:\\$t,outcome:\\\"blocked\\\",summary:\\$s,files:[],verified:\\\"none\\\",notes:\\$s}\" > .loop/tmp/proposal.json ;; review) jq -nc --arg t \"$TASK\" \"{task:\\$t,verdict:\\\"PASS\\\",criteria:[],findings:[],notes:\\\"none\\\"}\" > .loop/tmp/verdict.json ;; esac' | fixture_stub; LOOP_MAX_ITERATIONS=1 fixture_run docs/briefs/0003-runstat-cli.md; N=\"$(fx_state '.tasks[0].notes')\"; E=\"$(sed -n '/═══/,$p' \"$FX/out.log\")\"; W=\"$(sed -n '/── iteration/,/═══/p' \"$FX/out.log\")\"; }; says(){ grep -iE 'gate.*pass|pass.*gate' | grep -q T1; }; note 'blocked, and the work satisfies the gate'; blk 1; assert_iter_outcome 1 blocked; assert_status T1 pending; assert_attempts T1 1; assert_no_log 'review: PASS'; printf '%s' \"T1 $N\" | says && ok \"notes say the gate passes: $N\" || bad \"notes do not say the gate passes: $N\"; printf '%s\\n' \"$W\" | says && ok 'the iteration warning says it' || bad 'no iteration warning names T1 and its passing gate'; printf '%s\\n' \"$E\" | says && ok 'the run-end summary says it' || bad 'the run-end summary does not name T1 and its passing gate'; note 'blocked, and the gate fails: nothing to report'; blk 0; assert_iter_outcome 1 blocked; assert_status T1 pending; assert_attempts T1 1; assert_no_log 'GATE REGRESSION'; assert_no_log 'GATE FAIL'; printf '%s' \"T1 $N\" | says && bad \"notes claim a passing gate: $N\" || ok 'notes make no gate claim'; sed -n '/── iteration/,$p' \"$FX/out.log\" | says && bad 'the log claims a passing gate' || ok 'the log makes no gate claim'; finish ) && bash .loop/tests/scenarios/39-blocked-gate-passes.sh && .loop/tests/run-all.sh && uv run pytest -q",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

@@ -81,3 +81,19 @@
 [36m[loop][0m cost=$0.2252674 turns=15 dur=141s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T4 done
+[36m[loop][0m    committed 6194380
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            5
+[36m[loop][0m   tasks closed:          4/9
+[36m[loop][0m   iterations per closed: 1.25
+[36m[loop][0m   gate failures:         1
+[36m[loop][0m   review rejections:     1
+[36m[loop][0m   attempts burned:       2
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $7.72 (estimate, not a bill)
+[36m[loop][0m ── iteration 7 (6/30 this run) · T5 · 4/9 done ──
+[36m[loop][0m    Run a blocked task's own gate and report when it passes
+[36m[loop][0m cost=$2.2576283999999998 turns=62 dur=456s error=false
+[36m[loop][0m cost=$0.43859299999999996 turns=25 dur=98s error=false
+[36m[loop][0m    review: PASS
+[36m[loop][0m    T5 done

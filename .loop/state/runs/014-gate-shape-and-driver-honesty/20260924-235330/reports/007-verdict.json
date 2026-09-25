@@ -1,0 +1,43 @@
+{
+  "task": "T5",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "When the work session's outcome is blocked, the current task's own verify runs in that iteration's gate sweep alongside every done task's.",
+      "met": true,
+      "evidence": ".loop/run.sh:997 changes `[[ \"$outcome\" == \"done\" ]]` to `[[ \"$outcome\" == \"done\" || \"$outcome\" == \"blocked\" ]]` before appending `$task` to `gate_targets`; scenario 39's first case (MAKE=1) shows the gate running and passing on a blocked outcome."
+    },
+    {
+      "criterion": "When that gate passes, the driver says so in three places, each naming the task and stating in words that its gate passes: the iteration's warning line, the task's notes, and the run-end report. The session's own summary is still carried in the notes.",
+      "met": true,
+      "evidence": ".loop/run.sh:1036-1039 (warn with $gate_pass_line inside the blocked branch), :1078-1081 (blocked_note prefixes $gate_pass_line then appends $summary verbatim), :1153-1158 (run-end block iterating blocked_gate_pass_tasks, printed after the status banner). Scenario 39 asserts all three via `says()` on notes, iteration log, and run-end log."
+    },
+    {
+      "criterion": "When that gate fails, nothing claims it passed, and it is not treated as a regression or a gate_fail: the iteration outcome stays blocked.",
+      "met": true,
+      "evidence": ".loop/run.sh:1030 gates blocked_gate_passed on candidate_failed==0; the regression loop at :1013-1017 excludes id==task; the elif-chain checks outcome==\"blocked\" (:1036) before candidate_failed (:1041), so outcome is never reassigned to gate_fail. Scenario 39's second case (MAKE=0) asserts outcome stays blocked, no GATE REGRESSION/GATE FAIL, and no gate-pass claim anywhere."
+    },
+    {
+      "criterion": "The status transition is unchanged: blocked still returns the task to pending with one attempt charged, review is still not run, and iterations.jsonl keeps outcome blocked — no new outcome value.",
+      "met": true,
+      "evidence": "The `blocked)` case at .loop/run.sh:1078-1082 still sets status=pending, attempts+1; the elif branch at :1036 that handles blocked never runs the review session block (:1046-1059); the jsonl record at :1092 writes `$outcome` which was never reassigned. Confirmed against docs/runstat.md's outcome enum (done/gate_fail/review_fail/blocked), unchanged."
+    },
+    {
+      "criterion": "A new scenario .loop/tests/scenarios/39-blocked-gate-passes.sh asserts both the passing and the failing case.",
+      "met": true,
+      "evidence": "File present, uses existing lib.sh helpers (fixture_plan, PLAN_ONE) without editing lib.sh; both cases (blk 1, blk 0) run and pass per gates/T5.log."
+    },
+    {
+      "criterion": "The new scenario file is added under .loop/tests/scenarios/ (no registration edit needed), and every doc check-docs.sh holds to is updated in the same change.",
+      "met": true,
+      "evidence": "README.md, .loop/README.md, .loop/manual.md, docs/briefs/B008-driver-in-python.md and the run's own brief all bumped 41→42 checks / 38→39 scenarios consistently; gates/T5.log shows check-docs passing and 42 total checks."
+    },
+    {
+      "criterion": "The whole offline suite and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, none deleted or loosened.",
+      "met": true,
+      "evidence": "gates/T5.log tail: '42 passed' (bash suite) and '40 passed in 1.01s' (pytest). Scenario 17-stale-handoff, whose blocked task's file happens to now pass its own gate, still asserts PASS since it only checks specific log substrings, not gate-pass absence — verified directly in the log."
+    }
+  ],
+  "findings": [],
+  "notes": "Matches brief item 4 (docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md lines 196-206) closely, including its exact example wording for the gate-pass message. No absolute paths in the diff. Files touched match the task's declared files list exactly, no scope creep."
+}
