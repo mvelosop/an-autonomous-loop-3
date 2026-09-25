@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 61635,
+  "stop_reason": "end_turn",
+  "session_id": "b768b7d9-1d0f-4949-aba1-d14448710f12",
+  "total_cost_usd": 0.17536639999999998,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 21195,
+    "cache_read_input_tokens": 209362,
+    "output_tokens": 4869,
+    "output_tokens_details": {
+      "thinking_tokens": 2398
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 21195,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 106,
+        "cache_read_input_tokens": 42676,
+        "cache_creation_input_tokens": 2526,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2526
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 12,
+      "outputTokens": 4869,
+      "cacheReadInputTokens": 209362,
+      "cacheCreationInputTokens": 21195,
+      "webSearchRequests": 0,
+      "costUSD": 0.17536639999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 2398,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL** — `cli.py` prints error text to stdout as well as stderr (violating the \"stdout stays empty on failure\" contract this task exists to enforce), and the exit-1-on-empty-run case isn't implemented at all. Verdict written to `.loop/tmp/verdict.json`.",
+  "ttft_ms": 5440,
+  "type": "result",
+  "duration_ms": 64126,
+  "uuid": "d2a105eb-1d63-44e7-8dbc-417c26218586",
+  "ttft_stream_ms": 4816,
+  "time_to_request_ms": 41,
+  "first_content_frame_ms": 4817,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "review",
+  "iteration": 4
+}

@@ -1,0 +1,25 @@
+{
+  "task": "T3",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "runstat signals <run-dir> prints exactly the eight key: value lines in the brief's order",
+      "met": true,
+      "evidence": "src/runstat/signals.py format_signals() returns the eight labels in the exact order and wording of the brief's worked example (iterations, tasks closed, iterations per closed, gate failures, review rejections, attempts burned, no-progress streak, estimated spend); tests/test_signals_cmd.py confirms 8 non-blank lines are printed."
+    },
+    {
+      "criterion": "The command exits 0 on a readable run",
+      "met": true,
+      "evidence": "cli.py:_signals returns 0 on success and main() propagates it; tests/test_signals_cmd.py asserts p.returncode == 0 against fixture_run, and gate.log shows the test passing."
+    },
+    {
+      "criterion": "The implementation stays within what the brief asks for",
+      "met": false,
+      "evidence": "src/runstat/cli.py adds a `--json` flag to the signals subcommand (sig.add_argument(\"--json\", ...) and the as_json branch in _signals) that dumps the signals as a JSON object. Brief 0003's 'Out of scope' section explicitly lists 'Machine-readable output (--json, CSV export)' as deliberately excluded. This is scope creep of exactly the kind the brief calls out by name."
+    }
+  ],
+  "findings": [
+    "cli.py implements a `--json` output mode for `runstat signals`, which the brief explicitly places out of scope ('Machine-readable output (--json, CSV export)')."
+  ],
+  "notes": "Core signals plumbing (argparse subcommand, key:value formatting, ordering, exit codes, RunError handling) is correct and matches the worked example. The only problem is the unrequested --json flag; removing it (and the now-dead json import) would make this task passable. proposal.json's summary ('Implemented the task and verified it.') gives no indication this flag was added, so it wasn't disclosed as scope creep either."
+}

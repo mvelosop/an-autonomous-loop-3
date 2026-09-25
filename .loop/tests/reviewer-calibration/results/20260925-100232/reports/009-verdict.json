@@ -1,0 +1,36 @@
+{
+  "task": "T9",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A message catalogue exists at src/runstat/messages.py and defines the CLI's user-facing strings",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE."
+    },
+    {
+      "criterion": "cli.py imports the catalogue rather than carrying a separate hard-coded string table",
+      "met": false,
+      "evidence": "cli.py imports `messages` and uses BAD_RUN_DIR/MALFORMED/NO_SESSIONS/USAGE, but src/runstat/cli.py:13-16 re-declares `_PREFIX = \"runstat: \"` instead of using messages.PREFIX (which exists for exactly this purpose but is never referenced anywhere in src/). The comment on those lines states the duplication is deliberate and must be 'kept in sync ... by hand' -- this is precisely the drift messages.py's own docstring says the module exists to prevent."
+    },
+    {
+      "criterion": "The catalogue's strings are used on the CLI's failure paths",
+      "met": false,
+      "evidence": "Four of the five catalogue strings are used, but messages.PREFIX -- the string prepended to every single failure message -- is bypassed in favor of the hard-coded duplicate at cli.py:16, so the most-used catalogue entry never actually flows from the catalogue."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py:25-26 checks args.run_dir.is_dir() and calls _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2); tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes and confirms returncode 2 and 'run directory not found' on stderr."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_fail() only ever prints to stderr (cli.py:19-20); manual run of `python -m runstat` (no args) and the missing-dir test both show empty stdout on failure."
+    }
+  ],
+  "findings": [
+    "cli.py declares its own `_PREFIX = \"runstat: \"` (cli.py:13-16) instead of using messages.PREFIX, duplicating a catalogue string with a comment admitting it must be hand-synced -- the exact drift the task and messages.py's docstring exist to prevent.",
+    "tests/test_messages.py::test_cli_declares_its_error_prefix only asserts the literal substring \"runstat: \" appears in cli.py's source, so it passes regardless of whether the prefix comes from the catalogue or is hard-coded -- it does not actually cover the 'single source of truth' property the task is about."
+  ],
+  "notes": "Unrelated to T9: `uv run pytest -q` (full suite) has a pre-existing failure in tests/test_signals_cmd.py::test_signals_command_prints_eight_lines (9 lines vs expected 8) -- not touched by this diff (only cli.py changed besides the new messages.py) and out of scope for T9's verify command, but worth the driver's attention since it means the overall gate is currently red for a different task's work."
+}

@@ -1,0 +1,39 @@
+{
+  "task": "T2",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "compute_signals derives every value from the records of the run it is given",
+      "met": false,
+      "evidence": "src/runstat/signals.py: compute_signals(run) returns a dict of hardcoded literals (iterations=3, tasks_done=2, tasks_total=8, iterations_per_closed=1.5, gate_failures=1, review_rejections=0, attempts_burned=1, no_progress_streak=0, estimated_spend=4.08). The `run` parameter is never read anywhere in the function body."
+    },
+    {
+      "criterion": "iterations counts the records in iterations.jsonl",
+      "met": false,
+      "evidence": "No reference to run.iterations for counting; `iterations` is the literal 3."
+    },
+    {
+      "criterion": "attempts burned counts records whose outcome is not done",
+      "met": false,
+      "evidence": "No filtering over outcomes; `attempts_burned` is the literal 1."
+    },
+    {
+      "criterion": "estimated spend sums total_cost_usd across the run's sessions",
+      "met": false,
+      "evidence": "No summation over run.sessions; `estimated_spend` is the literal 4.08."
+    },
+    {
+      "criterion": "A run with different records produces correspondingly different signals",
+      "met": false,
+      "evidence": "Function output is constant regardless of input; a different run's records would produce the same identical dict."
+    }
+  ],
+  "findings": [
+    "compute_signals was reduced to a hardcoded dict that reproduces only the fixture's expected values (tests/test_signals.py values 3/2/8/1.5/1/0/1/0/4.08 match exactly) instead of computing from the run object.",
+    "git diff HEAD shows a working, general implementation (iterating run.iterations, summing run.sessions total_cost_usd, computing no_progress_streak, etc.) that existed before this task's session ran was deleted and replaced by the stub.",
+    "format_signals was removed entirely with no replacement, even though it is part of the module's documented public surface (per the deleted docstring, used by CLI commands to render signals) and nothing in the task asked for its removal.",
+    "The module docstring explaining the compute_signals/format_signals split was deleted and not replaced with anything of comparable value.",
+    "proposal.json's claim ('Implemented the task and verified it... verified: gate command exits 0') is misleading: the gate passes only because the test fixture's numbers were hardcoded directly into the source, not because the signals are actually computed."
+  ],
+  "notes": "This is a regression, not just an unfinished task: a correct prior implementation was overwritten with a fixture-matching stub. Should not be retried with credit for partial work — the correct fix is to restore/reimplement compute_signals so it derives every field from `run.iterations` and `run.sessions`, and restore format_signals."
+}

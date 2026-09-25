@@ -1,0 +1,36 @@
+{
+  "task": "T6",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py declares its own `_PREFIX = \"runstat: \"` module-level literal, duplicating messages.PREFIX (src/runstat/messages.py:9). The prefix text now exists in two places, not one."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": false,
+      "evidence": "src/runstat/cli.py: `_PREFIX = \"runstat: \"` is an inline error-prefix string literal, not a reference to messages.PREFIX."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "_cmd_signals returns _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2) when args.run_dir.is_dir() is false; tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": false,
+      "evidence": "Because cli.py hardcodes its own _PREFIX instead of referencing messages.PREFIX, editing messages.PREFIX alone would not change the prefix the CLI actually prints; the two must be hand-kept in sync. proposal.json's own notes acknowledge this: \"If the wording ever changes, keep _PREFIX in sync with messages.PREFIX by hand.\""
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "_fail() only calls print(..., file=sys.stderr); no failing branch in cli.py prints to stdout. Confirmed by test asserting p.stdout == \"\"."
+    }
+  ],
+  "findings": [
+    "cli.py hardcodes its own copy of the error prefix (`_PREFIX = \"runstat: \"`) instead of using messages.PREFIX, which is precisely the drift-by-duplication this task exists to eliminate (see the task's own goal text).",
+    "This duplication was introduced deliberately to satisfy the pre-existing tests/test_messages.py::test_cli_declares_its_error_prefix, which asserts the literal substring \"runstat: \" appears in cli.py's own source text. As written, that test cannot be satisfied without reintroducing the duplication the task's acceptance criteria forbid -- the gate and the acceptance criteria are mutually exclusive. The work session noticed this conflict (see proposal.json's notes) but resolved it by defeating the task's purpose rather than flagging it as blocked."
+  ],
+  "notes": "The gate test test_cli_declares_its_error_prefix needs to be rewritten before this task can actually pass: it should assert on the CLI's observed stderr behaviour (e.g. that output starts with \"runstat: \") rather than grepping cli.py's source for the literal, since the latter forces exactly the inline duplication T6 is meant to remove."
+}

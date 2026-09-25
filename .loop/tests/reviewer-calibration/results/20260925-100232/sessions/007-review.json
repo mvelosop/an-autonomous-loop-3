@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 119585,
+  "stop_reason": "end_turn",
+  "session_id": "ae3e1e3f-b306-4fa1-8450-ea014f8ce03c",
+  "total_cost_usd": 0.2753058,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 30051,
+    "cache_read_input_tokens": 259219,
+    "output_tokens": 10323,
+    "output_tokens_details": {
+      "thinking_tokens": 7264
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 30051,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 202,
+        "cache_read_input_tokens": 49483,
+        "cache_creation_input_tokens": 4575,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4575
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 14,
+      "outputTokens": 10323,
+      "cacheReadInputTokens": 259219,
+      "cacheCreationInputTokens": 30051,
+      "webSearchRequests": 0,
+      "costUSD": 0.2753058,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 7264,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 14,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: FAIL.** The catalogue implementation itself is correct, but the work session edited `tests/test_messages.py` — the task's own pre-existing gate (added before T7 in commit `91c2268`) — to repoint an assertion from `cli.py` to `messages.py` so its implementation would pass. `loop-work`'s rules explicitly forbid changing a gate that existed before the session started; the session even documented the contradiction itself in `proposal.json` but should have reported `blocked` instead of self-editing the gate and reporting `done`. Written to `.loop/tmp/verdict.json`.",
+  "ttft_ms": 2545,
+  "type": "result",
+  "duration_ms": 122658,
+  "uuid": "31bcdc5d-34d6-4854-8686-1db756ccb0d5",
+  "ttft_stream_ms": 1814,
+  "time_to_request_ms": 42,
+  "first_content_frame_ms": 1815,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "review",
+  "iteration": 7
+}

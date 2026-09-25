@@ -1,0 +1,37 @@
+{
+  "task": "T7",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "Every user-facing error string the CLI prints is defined exactly once, in src/runstat/messages.py",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE; cli.py references them via messages.* with no duplicate literals."
+    },
+    {
+      "criterion": "cli.py refers to those strings by name; no error literal or error prefix is written inline in cli.py",
+      "met": true,
+      "evidence": "git diff HEAD -- src/runstat/cli.py shows every error path (_fail calls) using messages.PREFIX/BAD_RUN_DIR/MALFORMED/NO_SESSIONS/USAGE; no 'runstat: ' or error text literal remains in cli.py."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text passes (gate.log: 2 passed); _cmd_signals returns _fail(f\"{messages.BAD_RUN_DIR}: ...\", 2)."
+    },
+    {
+      "criterion": "Changing an error's wording requires editing only src/runstat/messages.py",
+      "met": true,
+      "evidence": "All four error strings and the prefix are now single-sourced constants in messages.py, consumed by name in cli.py."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "By code inspection: in _cmd_signals every failure return (_fail on bad dir, malformed, no sessions) occurs before the stdout print loop; main()'s usage failure also returns before any print. Only the missing-run-dir path is actually exercised by a test."
+    }
+  ],
+  "findings": [
+    "The work session edited tests/test_messages.py, which is the task's own verify gate and pre-existed the task (added in commit 91c2268 'plan: gate for T1', before any implementation of T7 existed). It renamed test_cli_declares_its_error_prefix to test_catalogue_declares_the_error_prefix and repointed its assertion from cli.py to messages.py so its own implementation would pass. loop-work's own rules are explicit on this: 'You do not change your own gate. Not the verify command, and not a test file that already existed when you started... If your gate is wrong, say so and report blocked.' The session itself documented the contradiction correctly in proposal.json's notes but then took the disallowed path (edit the gate, report done) instead of the required one (report blocked, leave the gate alone).",
+    "tests/test_messages.py was not in the task's declared files list (src/runstat/messages.py, src/runstat/cli.py only), so touching it is also out of scope on top of being a forbidden gate edit.",
+    "Minor, not blocking on its own: the 'stdout empty on every failing path' criterion is only test-covered for the missing-run-dir case; the malformed-input, no-sessions, and no-subcommand failure paths rely on code inspection rather than a test."
+  ],
+  "notes": "The implementation itself (messages.py catalogue, cli.py routing) looks correct and the acceptance criteria are satisfied by the code as written. The FAIL is procedural, not about the catalogue's design: the pre-existing gate test genuinely contradicted the acceptance criteria as written (it asserted the prefix must appear in cli.py, while criterion 2 forbids that), which is a real gap in the plan — but the fix for a wrong gate is a blocked report to the operator, not a self-authored rewrite of the test that is supposed to keep the work honest. Next attempt: implement the catalogue exactly as done here, but leave tests/test_messages.py untouched and report blocked with this same explanation so the plan-level contradiction gets fixed by the operator."
+}

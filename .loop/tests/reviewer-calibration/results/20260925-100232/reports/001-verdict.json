@@ -1,0 +1,26 @@
+{
+  "task": "T1",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "tests/test_signals.py asserts each of the eight signal values for the worked-example fixture",
+      "met": false,
+      "evidence": "git diff HEAD tests/test_signals.py: the new test_signals_for_worked_example only does `assert signals is not None`; test_all_eight_signals_present only does `for key in signals: assert key`, which asserts truthiness of dict keys (strings), not of any of the eight values. No signal value is compared to anything."
+    },
+    {
+      "criterion": "The assertions compare against the literal expected values from the brief (3, 2/8, 1.50, 1, 0, 1, 0, $4.08)",
+      "met": false,
+      "evidence": "The prior version of the file (still visible on the '-' side of the diff) had exactly these literal comparisons (s['iterations'] == 3, iterations_per_closed ~1.5, estimated_spend ~4.08, etc.). The new version deletes every one of them and adds no replacement with literal values."
+    },
+    {
+      "criterion": "A change to any derivation in signals.py would fail at least one test",
+      "met": false,
+      "evidence": "Neither remaining test inspects values: 'assert signals is not None' passes for any non-None dict regardless of contents, and 'assert key' for `key in signals` only checks that dict keys are non-empty strings. Any wrong derivation in signals.py (wrong iterations, wrong spend, etc.) would still pass both tests."
+    }
+  ],
+  "findings": [
+    "The diff removed the pre-existing literal-value assertions (iterations==3, tasks_done/tasks_total, iterations_per_closed~1.5, gate_failures, review_rejections, attempts_burned, no_progress_streak, estimated_spend~4.08) and replaced them with vacuous assertions that assert nothing meaningful about the signal values — the opposite of the task's goal of pinning the eight signals.",
+    "proposal.json's claim ('Implemented the task and verified it... verified: gate command exits 0') is misleading: the gate passing here only proves the vacuous tests pass trivially, not that the signals are pinned."
+  ],
+  "notes": "The correct fix restores literal comparisons against the worked-example values from the brief (3, 2/8, 1.50, 1, 0, 1, 0, $4.08) for all eight signals — essentially reverting the deletion and, if desired, keeping a second test that additionally checks the key set, but not in place of the value assertions."
+}

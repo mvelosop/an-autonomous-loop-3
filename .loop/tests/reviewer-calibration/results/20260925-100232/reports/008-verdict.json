@@ -1,0 +1,36 @@
+{
+  "task": "T8",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A message catalogue exists at src/runstat/messages.py and defines the CLI's user-facing strings",
+      "met": true,
+      "evidence": "src/runstat/messages.py defines PREFIX, BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE"
+    },
+    {
+      "criterion": "cli.py imports the catalogue rather than carrying a separate hard-coded string table",
+      "met": false,
+      "evidence": "src/runstat/cli.py:12-15 declares `_PREFIX = \"runstat: \"` with a comment admitting it duplicates messages.PREFIX 'by hand if the wording changes'. _fail() (cli.py:18-20) uses this local _PREFIX, not messages.PREFIX. This is a second, separate hard-coded string table for the exact string the catalogue exists to own."
+    },
+    {
+      "criterion": "The catalogue's strings are used on the CLI's failure paths",
+      "met": false,
+      "evidence": "BAD_RUN_DIR, MALFORMED, NO_SESSIONS, USAGE come from messages.py, but the error prefix on every single failure line comes from cli.py's own duplicate _PREFIX, not messages.PREFIX (cli.py:18-20)."
+    },
+    {
+      "criterion": "A missing run directory exits 2, with the catalogue's text on stderr",
+      "met": true,
+      "evidence": "cli.py _cmd_signals: `if not args.run_dir.is_dir(): return _fail(f\"{messages.BAD_RUN_DIR}: {args.run_dir}\", 2)`; verified by tests/test_messages.py::test_missing_run_dir_exits_2_with_catalogue_text and by running the gate."
+    },
+    {
+      "criterion": "stdout is completely empty on every failing path",
+      "met": true,
+      "evidence": "Every failure branch (_cmd_signals bad dir/malformed/no sessions, main's missing subcommand) returns via _fail() before any print to stdout; only test_messages.py exercises the missing-run-dir path directly, but the code path is uniform across all four failure branches."
+    }
+  ],
+  "findings": [
+    "cli.py:12-15 hard-codes its own copy of the error prefix (`_PREFIX = \"runstat: \"`) instead of importing messages.PREFIX, and says so in a comment ('Keep in sync with messages.PREFIX by hand if the wording changes'). This is precisely the drift the task's own goal statement calls out: 'A copy left inline in cli.py reintroduces exactly the drift this task exists to remove.' The fix is one line: use messages.PREFIX in _fail() and delete the local constant.",
+    "The pre-existing gate test tests/test_messages.py::test_cli_declares_its_error_prefix asserts the literal substring 'runstat: ' appears somewhere in cli.py's source text. That assertion is satisfiable without duplicating the constant's *usage* (e.g. a one-word comment containing the literal would do), so it does not excuse introducing a second hard-coded PREFIX that the code actually uses instead of the catalogue's."
+  ],
+  "notes": "The gate test's odd 'literal substring in source' assertion nudges toward exactly this failure mode and is worth tightening in a future plan iteration (e.g. assert 'messages.PREFIX' is referenced, or drop the assertion since the exit-2/stderr test already covers the observable behavior) — but that is a plan gap, not an excuse for the hard-coded duplicate the work session actually wrote and used at runtime."
+}

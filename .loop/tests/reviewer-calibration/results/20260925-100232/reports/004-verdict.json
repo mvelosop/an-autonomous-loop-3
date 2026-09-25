@@ -1,0 +1,37 @@
+{
+  "task": "T4",
+  "verdict": "FAIL",
+  "criteria": [
+    {
+      "criterion": "A missing or malformed run directory exits 2",
+      "met": true,
+      "evidence": "src/runstat/cli.py: RunError from load_run() (missing dir, malformed JSON) is caught in main() and returns 2; tests/test_errors.py::test_missing_run_dir_exits_2 exercises the missing-dir case."
+    },
+    {
+      "criterion": "A readable but empty run exits 1",
+      "met": false,
+      "evidence": "No code path checks for an empty run. _signals() in cli.py calls load_run() then compute_signals()/format_signals() and always returns 0 on success, regardless of whether run.sessions/run.iterations are empty. The brief (docs/briefs/0003-runstat-cli.md, 'Exit codes') requires exit 1 here; nothing implements it."
+    },
+    {
+      "criterion": "On every failing path stdout is completely empty",
+      "met": false,
+      "evidence": "src/runstat/cli.py main(): `print(f\"runstat: {exc}\")` runs before the stderr print in the RunError handler, writing the error text to stdout on every failure. The accompanying comment ('Print where the user will see it, whichever stream they are watching') acknowledges this is deliberate. Directly contradicts the brief: 'stdout stays empty on failure.'"
+    },
+    {
+      "criterion": "On every failing path the explanation goes to stderr",
+      "met": true,
+      "evidence": "cli.py also prints the same message to sys.stderr, so the explanation does reach stderr (in addition to incorrectly reaching stdout too)."
+    },
+    {
+      "criterion": "No traceback reaches the user",
+      "met": true,
+      "evidence": "The only path exercised by the run/verify command (missing directory) is caught as RunError and handled cleanly; argparse handles a missing subcommand itself with a usage message, not a traceback."
+    }
+  ],
+  "findings": [
+    "stdout is not empty on failure: main() prints the error message to both stdout and stderr, violating the core contract this task exists to enforce (a script piping stdout would receive the error text mixed into its data).",
+    "Exit code 1 for a readable-but-empty run is not implemented at all -- such a run would currently exit 0.",
+    "tests/test_errors.py (the verify command) only covers one of the five acceptance criteria (missing dir -> exit 2); it never asserts stdout is empty, never exercises the empty-run or malformed-input cases, so a green gate here is very weak evidence."
+  ],
+  "notes": "Send back to a work session. It needs to: (1) remove the stdout print in the RunError handler entirely, (2) add an empty-run check (no sessions and no iterations) that exits 1, and (3) the plan/task should also have specified verify coverage for the empty-run, malformed-input, and stdout-emptiness cases, not just the missing-dir case -- worth tightening in state.json if this task is retried."
+}
