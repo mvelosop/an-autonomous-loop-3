@@ -55,7 +55,7 @@ physically cannot inherit the implementer's rationalisation. Isolation is a
 property of the operating system, not of prompt discipline.
 
 **The orchestrator is deterministic.** Task selection, gates, attempt counting,
-stop conditions and halting are bash. That is why there are 44 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
+stop conditions and halting are bash. That is why there are 45 checks that run free and offline with a stubbed `claude` on `PATH` — including ones for the
 attempt ceiling, the convergence halt and the stale-handoff guard. **You cannot
 stub the Task tool.** Every mechanical bug found in this loop was found by those
 tests, not by a run.
@@ -149,7 +149,7 @@ push is a bad first day.
 It stamps `.loop/.installed` with the release it came from and the commit that
 built it — propagated intact through a chained install, not re-derived from
 whatever repo the copy was taken from — and finishes by **running
-the loop's own suite in the target** — 44 checks, free and offline, no model.
+the loop's own suite in the target** — 45 checks, free and offline, no model.
 (You will see one fewer until you have briefs of your own: the brief checker
 sits out when `docs/briefs/` is empty.)
 That is the install test: a copied artefact that can prove it works where it
@@ -567,9 +567,10 @@ against the point of the run.
 | not converging | 5 | **stop and look** — the run is going nowhere |
 | cost ceiling | 6 | raise `LOOP_COST_CEILING`, re-run |
 | session error | 7 | a `claude` session died; see the run dir |
+| repeat blocked | 8 | a task blocked twice with nothing changed between attempts; read the first diagnosis in its `notes` |
 
 Complete, max-iterations, stalled and cost-ceiling resume by just re-running.
-Blocked, not-converging and session-error want a human first.
+Blocked, not-converging, session-error and repeat-blocked want a human first.
 
 ## 9. Reading what happened
 

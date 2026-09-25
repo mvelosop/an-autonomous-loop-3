@@ -47,9 +47,10 @@ same one-commit-per-iteration, same fence handed to every session with
 **2. Exit codes are the contract, unchanged:** `0` complete, `1` refused before
 anything ran (preflight failed, or the plan has a task with no verify command),
 `2` blocked, `3` stalled, `4` max iterations, `5` not converging, `6` cost
-ceiling, `7` session error.
+ceiling, `7` session error, `8` repeat blocked (two identical `blocked`
+outcomes on the same task with nothing changed between them).
 
-**3. The existing 41 scenarios are the acceptance suite.** They pass
+**3. The existing 42 scenarios are the acceptance suite.** They pass
 *unmodified*, except for the single place in `.loop/tests/lib.sh` that invokes
 the driver. A scenario whose assertions have to change is a behaviour change:
 it gets named in the task's report and reviewed as such, never edited quietly

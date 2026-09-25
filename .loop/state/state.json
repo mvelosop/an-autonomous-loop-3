@@ -2,9 +2,9 @@
   "run_id": "B20260924-1947-gate-shape-and-driver-honesty",
   "brief": "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md",
   "status": "running",
-  "iteration": 9,
+  "iteration": 10,
   "created": "2026-09-24T21:26:56Z",
-  "updated": "2026-09-25T01:04:24Z",
+  "updated": "2026-09-25T01:42:33Z",
   "tasks": [
     {
       "id": "T1",
@@ -263,7 +263,7 @@
         "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change."
       ],
       "verify": "( . .loop/tests/lib.sh; unset LOOP_ACTIVE_TASK LOOP_GATE_TASK; pj(){ jq -nc --argjson f \"$1\" --arg v \"$2\" '{run_id:\"fx\",brief:\"docs/briefs/0003-runstat-cli.md\",status:\"running\",iteration:0,created:\"2026-08-15T00:00:00Z\",updated:\"2026-08-15T00:00:00Z\",tasks:[{id:\"T1\",title:\"t\",goal:\"g\",files:$f,depends_on:[],acceptance:[\"a\"],verify:$v,status:\"pending\",attempts:0,notes:\"\"}]}' > \"$FXP\"; }; rb(){ fixture_cleanup; fixture_new; export FXP=\"$FX/plan.json\" FXN=\"$FX/n\" CHG=\"$1\"; pj '[\"thing.txt\"]' 'test -f T1.out'; printf '%s\\n' 'case \"$PHASE\" in plan) cp \"$FXP\" .loop/state/state.json ;; work) n=$(( $(cat \"$FXN\" 2>/dev/null || echo 0) + 1 )); echo $n > \"$FXN\"; [ \"$CHG\" = 1 ] && [ $n = 1 ] && echo changed > thing.txt; SUMMARY=\"diagnosis $n\"; jq -nc --arg t \"$TASK\" --arg s \"$SUMMARY\" \"{task:\\$t,outcome:\\\"blocked\\\",summary:\\$s,files:[],verified:\\\"none\\\",notes:\\$s}\" > .loop/tmp/proposal.json ;; review) jq -nc --arg t \"$TASK\" \"{task:\\$t,verdict:\\\"PASS\\\",criteria:[],findings:[],notes:\\\"none\\\"}\" > .loop/tmp/verdict.json ;; esac' | fixture_stub; LOOP_STALL_LIMIT=9 LOOP_MAX_ATTEMPTS=5 LOOP_CONVERGENCE_MIN=99 fixture_run docs/briefs/0003-runstat-cli.md; E=\"$(sed -n '/═══/,$p' \"$FX/out.log\")\"; }; note 'blocked twice on identical inputs'; rb 0; assert_iterations 2; assert_status T1 pending; assert_attempts T1 2; case \"$E\" in *'diagnosis 1'*) ok 'the halt surfaces the first diagnosis';; *) bad 'the halt does not surface diagnosis 1';; esac; [ \"$EXIT\" != 0 ] && ok \"halted non-zero ($EXIT)\" || bad 'exited 0 with a task unfinished'; note 'blocked, something changed, blocked again, then nothing changed'; rb 1; assert_iterations 3; assert_status T1 pending; assert_attempts T1 3; case \"$E\" in *'diagnosis 2'*) ok 'the halt surfaces the first diagnosis of the unchanged pair';; *) bad 'the halt does not surface diagnosis 2';; esac; finish ) && bash .loop/tests/scenarios/42-repeat-blocked-halts.sh && .loop/tests/run-all.sh && uv run pytest -q",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

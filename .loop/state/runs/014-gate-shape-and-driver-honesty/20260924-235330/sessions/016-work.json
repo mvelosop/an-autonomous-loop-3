@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 710426,
+  "stop_reason": "end_turn",
+  "session_id": "08158d83-3106-44ef-81ce-5383f40cc4e5",
+  "total_cost_usd": 3.3490192000000008,
+  "usage": {
+    "input_tokens": 132,
+    "cache_creation_input_tokens": 183973,
+    "cache_read_input_tokens": 10113466,
+    "output_tokens": 59017,
+    "output_tokens_details": {
+      "thinking_tokens": 43282
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 183973,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 195,
+        "cache_read_input_tokens": 207804,
+        "cache_creation_input_tokens": 172,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 172
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 132,
+      "outputTokens": 59017,
+      "cacheReadInputTokens": 10113466,
+      "cacheCreationInputTokens": 183973,
+      "webSearchRequests": 0,
+      "costUSD": 3.3490192000000008,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 43282,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 66,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T8 is complete: the driver now halts a run when a task blocks twice consecutively with nothing (outside `.loop/state/`) changed between attempts, surfacing the first diagnosis rather than the second. Implementation, new scenario 42, the required fix to scenario 11, doc updates (scenario/check counts + new exit code 8 across README.md, `.loop/README.md`, `.loop/manual.md`, and B008), and the full offline suite plus `uv run pytest -q` all verified green. Proposal written to `.loop/tmp/proposal.json` with outcome `done`.",
+  "ttft_ms": 2265,
+  "type": "result",
+  "duration_ms": 1051172,
+  "uuid": "1aa73dfb-e9d2-48c7-b44b-805722d5c6b0",
+  "ttft_stream_ms": 1746,
+  "time_to_request_ms": 41,
+  "first_content_frame_ms": 1747,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "work",
+  "iteration": 10
+}

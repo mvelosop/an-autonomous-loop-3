@@ -334,7 +334,7 @@
     [32mok[0m   mechanism reached the second target
     [32mok[0m   example briefs chained — they live in examples/ once installed
     ---- ── provenance is propagated, not re-derived ──
-    [32mok[0m   the first install names a version (1.0.0-rc.1-18-gb85b89f-dirty)
+    [32mok[0m   the first install names a version (1.0.0-rc.1-19-g144a455-dirty)
     [32mok[0m   the chained install carries the same version and commit
     [32mok[0m   the stamp does not name the intermediate repo's commit
   [32mPASS[0m 26-install-boundary
@@ -627,6 +627,21 @@
     [32mok[0m   it names T2, the task being worked
   [32mPASS[0m 41-regression-names-both
 
+[1m42-repeat-blocked-halts[0m
+    ---- -- blocked twice on identical inputs: halts after the second, first diagnosis --
+    [32mok[0m   2 iteration(s)
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=2
+    [32mok[0m   halted non-zero (8)
+    [32mok[0m   the halt surfaces the first diagnosis
+    [32mok[0m   the second diagnosis is not what gets surfaced
+    ---- -- first attempt changes something: retry is allowed, re-evaluated on the next pair --
+    [32mok[0m   3 iteration(s)
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=3
+    [32mok[0m   the halt surfaces the first diagnosis of the unchanged pair (iteration 2)
+  [32mPASS[0m 42-repeat-blocked-halts
+
 [1mcheck-brief[0m
 
 [1mcheck-docs[0m
@@ -636,7 +651,7 @@ docs ok — every path resolves, no retired layout described
 todo ok — every entry matches its section, every row quotes its source
 
 ────────────────────────
-[32m44 passed[0m
+[32m45 passed[0m
 
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh

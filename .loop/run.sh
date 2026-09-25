@@ -21,6 +21,7 @@
 #   1  preflight / usage        5  not converging  (needs a human)
 #   2  blocked (needs a human)  6  cost ceiling    (resumable)
 #   3  stalled                  7  session error   (needs a human)
+#   8  repeat blocked, nothing changed since the first diagnosis (needs a human)
 #
 # Env
 #   LOOP_MAX_ITERATIONS   iterations this run may use          (default 30)
@@ -1113,6 +1114,35 @@ while true; do
         '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)' ;;
   esac
 
+  # Item 7: a second consecutive `blocked` outcome for the SAME task, with
+  # nothing outside the driver's own bookkeeping under .loop/state/ changed in
+  # the repo since the first, cannot carry new information -- a memoryless
+  # session given identical inputs reaches an identical conclusion. Kept on the
+  # task itself (not "the previous iteration of the run") so it still applies
+  # correctly when a different ready task was worked in between, and it
+  # survives a resumed run because state.json does. blocked_head is HEAD the
+  # last time this task ended blocked, captured before that iteration's own
+  # commit; HEAD now is still pre-commit too, so the diff between them is
+  # exactly what changed between the start of those two sessions.
+  repeat_blocked_halt=0
+  if [[ "$outcome" == "blocked" ]]; then
+    head_now="$(git rev-parse HEAD 2>/dev/null)"
+    prev_head="$(state_get --arg id "$task" '.tasks[]|select(.id==$id)|.blocked_head // empty')"
+    if [[ -n "$prev_head" ]]; then
+      changed="$(git diff --name-only "$prev_head" "$head_now" 2>/dev/null | grep -v '^\.loop/state/' || true)"
+      if [[ -z "$changed" ]]; then
+        prev_summary="$(state_get --arg id "$task" '.tasks[]|select(.id==$id)|.blocked_summary // empty')"
+        repeat_blocked_halt=1
+        repeat_blocked_msg="$task blocked twice with nothing changed since the first attempt — halting rather than spending a third identical session. First diagnosis: ${prev_summary:-none}"
+      fi
+    fi
+    state_edit --arg id "$task" --arg h "$head_now" --arg s "$summary" \
+      '(.tasks[]|select(.id==$id)) |= (.blocked_head=$h | .blocked_summary=$s)'
+  else
+    state_edit --arg id "$task" \
+      '(.tasks[]|select(.id==$id)) |= (del(.blocked_head) | del(.blocked_summary))'
+  fi
+
   # A task that has burned its attempts is blocked, not retried forever.
   n_new="$(state_get --argjson m "$MAX_ATTEMPTS" '[.tasks[]|select(.status=="pending" and .attempts>=$m)]|length')"
   if [[ "$n_new" -gt 0 ]]; then
@@ -1154,6 +1184,12 @@ while true; do
   fi
 
   print_signals
+
+  if [[ $repeat_blocked_halt -eq 1 ]]; then
+    warn "   $repeat_blocked_msg"
+    status="repeat_blocked"; exit_code=8
+    break
+  fi
 
   # Stall detection: an iteration that closed nothing and burned no attempt has
   # made no recorded progress at all.
@@ -1202,6 +1238,7 @@ case "$status" in
   cost_ceiling)   say "cost ceiling reached. resumable: raise LOOP_COST_CEILING and re-run" ;;
   not_converging) say "iterations-per-closed-task exceeded $CONVERGENCE_MAX — the run is not converging." ;;
   session_error)  say "a claude session failed. see .loop/state/runs/$RUN_PATH/" ;;
+  repeat_blocked) say "$repeat_blocked_msg" ;;
 esac
 render_plan
 

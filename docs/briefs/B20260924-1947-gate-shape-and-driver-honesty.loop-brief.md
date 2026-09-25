@@ -412,8 +412,8 @@ shell value did not word-split under the author's shell.
   first task to land a scenario turns the broad gate red on a claim it did not
   touch, in `README.md` (twice), `.loop/README.md` and `.loop/manual.md`
   (twice), plus the two briefs that name the scenario count. At the time of
-  writing the correct values are **44 checks** and **41 scenarios**, T1, T2,
-  T3, T4, T5, T6 and T7 having already landed the first seven of the nine;
+  writing the correct values are **45 checks** and **42 scenarios**, T1, T2,
+  T3, T4, T5, T6, T7 and T8 having already landed the first eight of the nine;
   each task after it adds one more of each.
 
   Named here because it is precisely this brief's own subject: a gate failing
@@ -450,6 +450,6 @@ slower path to the same fact.
 One task must carry a gate broad enough to notice a regression no other names:
 the existing suite (`.loop/tests/run-all.sh` plus `uv run pytest -q`) is that
 gate, and it is cheap enough to end every gate with. Three of these changes
-touch code paths the existing 41 scenarios already exercise — a plan whose
+touch code paths the existing 42 scenarios already exercise — a plan whose
 gates only run its own new scenarios would let this brief break the driver's
 existing behaviour and close green.

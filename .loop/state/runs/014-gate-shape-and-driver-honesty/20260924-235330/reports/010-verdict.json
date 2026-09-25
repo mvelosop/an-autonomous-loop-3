@@ -1,0 +1,48 @@
+{
+  "task": "T8",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "When an iteration ends blocked, the previous iteration worked the same task and also ended blocked, and nothing outside the driver's own bookkeeping under .loop/state/ changed in the repo between the start of those two sessions — in particular no path in the task's files — the run halts after that second iteration without starting a third session.",
+      "met": true,
+      "evidence": ".loop/run.sh:1128-1148 diffs the stored blocked_head against pre-commit HEAD, filters .loop/state/, and sets repeat_blocked_halt=1 which breaks the loop at .loop/run.sh:1187-1191; traced by hand through 42-repeat-blocked-halts.sh's 'rb 0' case and confirmed by running it (halts after iteration 2, exit 8)"
+    },
+    {
+      "criterion": "The halt message and the run-end report surface the first of the two blocked diagnoses (the earlier iteration's summary), not only the second, and name the task.",
+      "met": true,
+      "evidence": ".loop/run.sh:1136 reads prev_summary before the state is overwritten, and repeat_blocked_msg (used both in the mid-loop warn at line 1188 and the run-end case arm at line 1241) embeds \"$task\" and \"${prev_summary}\"; verified in the scenario's 'diagnosis 1' / not-'diagnosis 2' assertions, which pass"
+    },
+    {
+      "criterion": "When the earlier blocked session did change something, the retry is allowed and the rule is re-evaluated on the following pair; a run in which the first blocked session edited a file and the next two did not halts after the third iteration, surfacing the second iteration's diagnosis.",
+      "met": true,
+      "evidence": "42-repeat-blocked-halts.sh 'rb 1' case: 3 iterations, halts on the third, surfaces 'diagnosis 2' — matches the git-history trace (diff between iter1-commit and iter2-commit is non-empty because iter1 touched thing.txt, so iter2 is allowed; diff between iter2-commit and iter3-commit is empty, so iter3 halts)"
+    },
+    {
+      "criterion": "The halt decides nothing about the task: status stays as the normal blocked transition left it (pending, attempts charged as today); only the run stops, non-zero exit, no new iterations.jsonl outcome value.",
+      "met": true,
+      "evidence": "the case-block status transition (.loop/run.sh ~1113) runs before the new item-7 block and is untouched by it; assert_status/assert_attempts in both scenarios confirm pending/attempts as expected; iterations.jsonl record at ~1163 still uses the unmodified $outcome (\"blocked\"), and 15-telemetry-contract's 'every outcome is one of the four contract values' still passes"
+    },
+    {
+      "criterion": "Scenario 11-stall.sh still exercises the stall halt with a stub change so its two blocked iterations don't trip this new rule; not deleted.",
+      "met": true,
+      "evidence": "diff adds a per-attempt marker file (attempt-$n.marker) in .loop/tests/scenarios/11-stall.sh so each iteration's commit differs, keeping the repeat-blocked diff non-empty; ran run-all.sh, 11-stall still asserts exit 3 / stalled / 'no recorded progress' and passes"
+    },
+    {
+      "criterion": "A new scenario .loop/tests/scenarios/42-repeat-blocked-halts.sh asserts the unchanged and changed cases.",
+      "met": true,
+      "evidence": ".loop/tests/scenarios/42-repeat-blocked-halts.sh exists, covers both cases, ran standalone and passes"
+    },
+    {
+      "criterion": "check-docs.sh's suite-size mentions (README.md, .loop/README.md, .loop/manual.md, B008-driver-in-python.md, this run's brief) are all updated (44→45, 41→42), check-docs.sh itself untouched.",
+      "met": true,
+      "evidence": "git diff shows count bumps in all five named documents; check-docs.sh is not in the diff; run-all.sh's check-docs step reports 'docs ok'"
+    },
+    {
+      "criterion": "The whole offline suite and uv run pytest -q stay green, nothing deleted or loosened.",
+      "met": true,
+      "evidence": "ran .loop/tests/run-all.sh (45 passed) and uv run pytest -q (40 passed) directly; also ran the exact verify string from state.json, exit 0"
+    }
+  ],
+  "findings": [],
+  "notes": "Traced the blocked_head/blocked_summary chain by hand across both scenario branches against the actual commit sequence the driver produces (state_edit for blocked_head happens before that iteration's own commit, so head_now is always pre-commit-of-this-iteration / post-commit-of-previous-iteration) — the diff window is exactly 'between the start of the two blocked sessions' as the acceptance text requires, not off by one commit either direction. No absolute paths in the diff. docs/runstat.md reference is respected: no new iterations.jsonl outcome value was introduced, so runstat's four-value assumption still holds (confirmed nothing in src/ hardcodes run-status strings)."
+}
