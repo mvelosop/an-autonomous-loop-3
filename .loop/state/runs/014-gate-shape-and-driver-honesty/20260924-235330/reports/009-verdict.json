@@ -1,0 +1,13 @@
+{
+  "task": "T7",
+  "verdict": "PASS",
+  "criteria": [
+    {"criterion": "Every GATE REGRESSION warning keeps its existing leading form (GATE REGRESSION <reverted id>) and also names, on the same line, the task whose iteration the regression was detected in.", "met": true, "evidence": ".loop/run.sh: warn line changed from 'GATE REGRESSION $id — reverting to pending' to 'GATE REGRESSION $id — reverting to pending; detected during $task's iteration'; scenario output shows 'GATE REGRESSION T1 — reverting to pending; detected during T2's iteration'."},
+    {"criterion": "What reverts and what is charged is unchanged: the regressed task still returns to pending with one attempt charged, and its notes still point at its gate log.", "met": true, "evidence": "The state_edit call immediately below the warn line (status=pending, attempts+1, notes citing .../gates/$id.log) is untouched in the diff; scenario asserts T1 attempts=1 and status=done after recovery."},
+    {"criterion": "A new scenario .loop/tests/scenarios/41-regression-names-both.sh asserts both ids on the line.", "met": true, "evidence": "New file greps for 'GATE REGRESSION T1' then strips that prefix and greps the remainder for T2; ran it directly, exit 0, all six ok lines pass."},
+    {"criterion": "The new scenario file is added under .loop/tests/scenarios/ with no registration edit, and check-docs.sh's suite-size counts across README.md, .loop/README.md, .loop/manual.md, B008-driver-in-python.md and this run's own brief are all updated; check-docs.sh itself untouched.", "met": true, "evidence": "All five docs bumped 43->44 checks / 40->41 scenarios consistently (verified via git diff on each). git diff on .loop/tests/check-docs.sh, lib.sh, run-all.sh shows no changes. .loop/tests/run-all.sh output: 'check-docs docs ok' and '44 passed'."},
+    {"criterion": "The whole offline suite and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, none deleted or loosened.", "met": true, "evidence": "Ran .loop/tests/run-all.sh: 44 passed (was 43 + this new one). Ran uv run pytest -q: 40 passed. git diff shows no other scenario file was touched."}
+  ],
+  "findings": [],
+  "notes": "Message change is minimal and localized (single warn line), state_edit/attempt-charging logic untouched, no absolute paths introduced. Verified all counts by re-running the suite myself rather than trusting proposal.json."
+}

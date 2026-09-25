@@ -1,32 +1,17 @@
-    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   advised about T2
-    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
-    [32mok[0m   advised about T2
-    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
-    [32mok[0m   no advisory
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory
-    [32mok[0m   check exits 0: test -f .never
-    [32mok[0m   no advisory
+    [32mok[0m   exit 0
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    [32mok[0m   regression line: [33m[loop][0m    GATE REGRESSION T1 — reverting to pending; detected during T2's iteration
+    [32mok[0m   it names T2, the task being worked
   [32mPASS[0m bash
-    ---- -- advised: diffs against HEAD, reads neither variable --
-    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   advised about T2: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
-    [32mok[0m   advised about T2: test -f .never && git diff --quiet HEAD -- docs
-    ---- -- quiet: diffs against HEAD, but reads one of the two variables --
-    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
-    [32mok[0m   no advisory: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
-    ---- -- quiet: no HEAD diff at all --
-    [32mok[0m   check exits 0: test -f .never
-    [32mok[0m   no advisory: test -f .never
-  [32mPASS[0m 38-head-diff-advisory
+    [32mok[0m   exit 0
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    [32mok[0m   regression line: [33m[loop][0m    GATE REGRESSION T1 — reverting to pending; detected during T2's iteration
+    [32mok[0m   it names T2, the task being worked
+  [32mPASS[0m 41-regression-names-both
 
 [1m01-happy-path[0m
     [32mok[0m   exit 0

@@ -2,9 +2,9 @@
   "run_id": "B20260924-1947-gate-shape-and-driver-honesty",
   "brief": "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md",
   "status": "running",
-  "iteration": 8,
+  "iteration": 9,
   "created": "2026-09-24T21:26:56Z",
-  "updated": "2026-09-25T00:45:12Z",
+  "updated": "2026-09-25T01:04:24Z",
   "tasks": [
     {
       "id": "T1",
@@ -227,7 +227,7 @@
         "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change."
       ],
       "verify": "( . .loop/tests/lib.sh; unset LOOP_ACTIVE_TASK LOOP_GATE_TASK; fixture_new; export FXP=\"$FX/plan.json\"; jq -nc '{run_id:\"fx\",brief:\"docs/briefs/0003-runstat-cli.md\",status:\"running\",iteration:0,created:\"2026-08-15T00:00:00Z\",updated:\"2026-08-15T00:00:00Z\",tasks:[{id:\"T1\",title:\"a\",goal:\"g\",files:[],depends_on:[],acceptance:[\"a\"],verify:\"test -f T1.out\",status:\"pending\",attempts:0,notes:\"\"},{id:\"T2\",title:\"b\",goal:\"g\",files:[],depends_on:[\"T1\"],acceptance:[\"a\"],verify:\"test -f T2.out\",status:\"pending\",attempts:0,notes:\"\"}]}' > \"$FXP\"; printf '%s\\n' 'case \"$PHASE\" in plan) cp \"$FXP\" .loop/state/state.json ;; work) touch \"$TASK.out\"; if [ \"$TASK\" = T2 ] && [ ! -f .broke ]; then rm -f T1.out; touch .broke; fi; jq -nc --arg t \"$TASK\" \"{task:\\$t,outcome:\\\"done\\\",summary:\\\"s\\\",files:[],verified:\\\"ok\\\",notes:\\\"none\\\"}\" > .loop/tmp/proposal.json ;; review) jq -nc --arg t \"$TASK\" \"{task:\\$t,verdict:\\\"PASS\\\",criteria:[],findings:[],notes:\\\"none\\\"}\" > .loop/tmp/verdict.json ;; esac' | fixture_stub; fixture_run docs/briefs/0003-runstat-cli.md; assert_exit 0; assert_attempts T1 1; assert_status T1 done; assert_status T2 done; L=\"$(grep 'GATE REGRESSION T1' \"$FX/out.log\")\"; [ -n \"$L\" ] && ok \"regression line: $L\" || bad 'no GATE REGRESSION T1 line'; printf '%s' \"$L\" | sed 's/GATE REGRESSION T1//' | grep -q T2 && ok 'it names T2, the task being worked' || bad 'the regression line does not name T2'; finish ) && bash .loop/tests/scenarios/41-regression-names-both.sh && .loop/tests/run-all.sh && uv run pytest -q",
-      "status": "pending",
+      "status": "done",
       "attempts": 0,
       "notes": ""
     },

@@ -1045,7 +1045,7 @@ while true; do
   # charge it an attempt. This is the check that per-task gates alone cannot do.
   for id in "${gate_failed[@]:-}"; do
     [[ -n "$id" && "$id" != "$task" ]] || continue
-    warn "   GATE REGRESSION $id — reverting to pending"
+    warn "   GATE REGRESSION $id — reverting to pending; detected during $task's iteration"
     state_edit --arg id "$id" --arg n "regressed: verify failed during $task — see .loop/state/runs/$RUN_PATH/gates/$id.log" \
       '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)'
   done

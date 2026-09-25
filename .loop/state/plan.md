@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is .loop/state/state.json. -->
 
-**Status:** running · **6/9 done** · iteration 8
+**Status:** running · **7/9 done** · iteration 9
 
-**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-25T00:45:12Z
+**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-25T01:04:24Z
 
 ## Progress
 
@@ -16,7 +16,7 @@
 - [x] **T4** — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables · 1 attempt(s)
 - [x] **T5** — Run a blocked task's own gate and report when it passes
 - [x] **T6** — Report the working tree when a work session leaves no proposal
-- [ ] **T7** — Name the task being worked on every GATE REGRESSION line
+- [x] **T7** — Name the task being worked on every GATE REGRESSION line
 - [ ] **T8** — Halt on a second blocked iteration of a task whose inputs have not changed
 - [ ] **T9** — Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists
 
@@ -184,7 +184,7 @@ When a work session dies before writing its proposal, the driver records a fixed
 
 ### T7 — Name the task being worked on every GATE REGRESSION line
 
-`pending` · depends on: none
+`done` · depends on: none
 
 **Files:** `.loop/run.sh`, `.loop/tests/scenarios/`, `README.md`, `.loop/README.md`, `.loop/manual.md`, `docs/briefs/B008-driver-in-python.md`, `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`
 
