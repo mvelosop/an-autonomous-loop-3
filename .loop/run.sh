@@ -311,6 +311,26 @@ gate_files_moved() {
   done < <(git diff --name-only HEAD 2>/dev/null)
 }
 
+# What a work session left in the tree when it died before writing a proposal --
+# the only account of "did it do anything" left once its own report is gone.
+# `git status --porcelain` (not `git diff HEAD`) because a session that died
+# after only creating new files leaves nothing for `diff` to see. One git
+# invocation; everything under .loop/state/ or .loop/tmp/ is the driver's own
+# bookkeeping (telemetry the session never touched) and is filtered in-shell,
+# not with a second git call.
+session_tree_changes() {
+  local line path
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line:3}"
+    path="${path#* -> }"
+    case "$path" in
+      .loop/state/*|.loop/tmp/*) continue ;;
+    esac
+    printf '%s\n' "$path"
+  done < <(git status --porcelain 2>/dev/null)
+}
+
 # Paths a verify command reads the BYTES of, as opposed to merely handing to a
 # runner. Used by the plan-time gate-shape lint (rule 3) to find, one phase
 # early, exactly the files gate_files_moved() above would revert at runtime --
@@ -900,6 +920,7 @@ stalls=0
 status="max_iterations"
 exit_code=4
 blocked_gate_pass_tasks=()
+no_proposal_tasks=()
 
 while true; do
   pending="$(state_get '[.tasks[]|select(.status=="pending")]|length')"
@@ -960,7 +981,16 @@ while true; do
 
   if [[ ! -f "$PROPOSAL" ]] || ! jq -e . "$PROPOSAL" >/dev/null 2>&1; then
     warn "work session left no valid proposal"
-    outcome="blocked"; summary="work session produced no proposal"; notes="none"
+    changed=()
+    while IFS= read -r f; do [[ -n "$f" ]] && changed+=("$f"); done < <(session_tree_changes)
+    if [[ ${#changed[@]} -gt 0 ]]; then
+      account="work session left no valid proposal; before dying it changed $(IFS=', '; echo "${changed[*]}") — the driver committed them under this iteration"
+    else
+      account="work session left no valid proposal; the working tree is unchanged"
+    fi
+    account="$(mask <<<"$account")"
+    [[ ${#changed[@]} -gt 0 ]] && no_proposal_tasks+=("$task — $account")
+    outcome="blocked"; summary="$account"; notes="none"
   else
     outcome="$(jq -r '.outcome // "blocked"' "$PROPOSAL")"
     summary="$(jq -r '.summary // ""' "$PROPOSAL" | mask)"
@@ -1155,6 +1185,12 @@ if [[ ${#blocked_gate_pass_tasks[@]} -gt 0 ]]; then
   say ""
   for id in "${blocked_gate_pass_tasks[@]}"; do
     say "$id GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else."
+  done
+fi
+if [[ ${#no_proposal_tasks[@]} -gt 0 ]]; then
+  say ""
+  for line in "${no_proposal_tasks[@]}"; do
+    say "$line"
   done
 fi
 say ""

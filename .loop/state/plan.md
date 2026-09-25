@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is .loop/state/state.json. -->
 
-**Status:** running · **5/9 done** · iteration 7
+**Status:** running · **6/9 done** · iteration 8
 
-**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-25T00:23:25Z
+**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-25T00:45:12Z
 
 ## Progress
 
@@ -15,7 +15,7 @@
 - [x] **T3** — Export the active task id and the gated task id to every gate in the sweep
 - [x] **T4** — amend.sh check: advise on a gate that diffs against HEAD without reading the task variables · 1 attempt(s)
 - [x] **T5** — Run a blocked task's own gate and report when it passes
-- [ ] **T6** — Report the working tree when a work session leaves no proposal
+- [x] **T6** — Report the working tree when a work session leaves no proposal
 - [ ] **T7** — Name the task being worked on every GATE REGRESSION line
 - [ ] **T8** — Halt on a second blocked iteration of a task whose inputs have not changed
 - [ ] **T9** — Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists
@@ -157,7 +157,7 @@ Two of the five stalled runs read blocked while their deliverables were complete
 
 ### T6 — Report the working tree when a work session leaves no proposal
 
-`pending` · depends on: none
+`done` · depends on: none
 
 **Files:** `.loop/run.sh`, `.loop/tests/scenarios/`, `README.md`, `.loop/README.md`, `.loop/manual.md`, `docs/briefs/B008-driver-in-python.md`, `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`
 

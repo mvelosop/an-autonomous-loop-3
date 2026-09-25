@@ -1,0 +1,16 @@
+{
+  "task": "T6",
+  "outcome": "done",
+  "summary": "The no-proposal path in .loop/run.sh now runs `git status --porcelain` once, filters out .loop/state/ and .loop/tmp/, and reports every path the session changed or created (or says the tree is unchanged) in the task's notes, the journal entry, and a new run-end report block.",
+  "files": [
+    ".loop/run.sh",
+    ".loop/tests/scenarios/40-no-proposal-tree.sh",
+    "README.md",
+    ".loop/README.md",
+    ".loop/manual.md",
+    "docs/briefs/B008-driver-in-python.md",
+    "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md"
+  ],
+  "verified": "Ran the task's full verify command (embedded fixture scenario + bash .loop/tests/scenarios/40-no-proposal-tree.sh + .loop/tests/run-all.sh + uv run pytest -q) — all green: 43 checks passed, 40 pytest tests passed, exit 0.",
+  "notes": "Added session_tree_changes() beside gate_files_moved() in .loop/run.sh: one `git status --porcelain` call (not `git diff HEAD`, which misses untracked new files), filtered in-shell for .loop/state/* and .loop/tmp/* so driver telemetry/transients never get attributed to the session. Its output feeds a single `account` string used verbatim as `summary` (which the blocked-outcome apply step already copies into the task's persisted notes — no change needed there) and, only when paths exist, pushed into a new `no_proposal_tasks` array printed in the run-end report right after the existing blocked_gate_pass_tasks block. Both call sites already mask() everything that reaches notes/journal, so I mask the account string once before either use. Left `notes=\"none\"` (the per-proposal notes field, distinct from the task's state notes) unchanged since no acceptance criterion needs it. gate_files_moved()'s existing `git diff --name-only HEAD` was not reused because it only sees tracked-file changes, not new untracked files — the exact case (thing_two.txt style new file) the brief's arc hinged on."
+}

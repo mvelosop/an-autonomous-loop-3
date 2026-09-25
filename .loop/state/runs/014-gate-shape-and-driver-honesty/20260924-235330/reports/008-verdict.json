@@ -1,0 +1,48 @@
+{
+  "task": "T6",
+  "verdict": "PASS",
+  "criteria": [
+    {
+      "criterion": "When no valid .loop/tmp/proposal.json exists after the work session, the summary that becomes the task's notes names every path the session changed or created and says the driver committed them under this iteration; the same account appears in the journal entry for the iteration and in the run-end report printed after the final status banner.",
+      "met": true,
+      "evidence": ".loop/run.sh:982-993 builds `account` from session_tree_changes() naming every changed path plus 'the driver committed them under this iteration'; it is assigned to `summary`, which flows into the task's persisted notes via `blocked_note=$summary` (run.sh:1110-1113), into the journal's Summary line (run.sh:1141), and — only in the changed case — into `no_proposal_tasks` printed after the status banner (run.sh:992, 1189-1194). Scenario 40 asserts all three surfaces name thing_one.txt/thing_two.txt."
+    },
+    {
+      "criterion": "When the session changed nothing, the notes say so in words that differ from the changed case and name no paths.",
+      "met": true,
+      "evidence": "run.sh:988-989: unchanged branch sets account to 'work session left no valid proposal; the working tree is unchanged', distinct wording from the changed branch and naming no paths. Scenario 40's second case asserts `[ \"$N\" != \"$N1\" ]` and that notes contain no thing_*/.loop/* paths — both pass."
+    },
+    {
+      "criterion": "Paths the driver itself writes (telemetry, journal, state and plan under .loop/state/, transients under .loop/tmp/) are never reported as the session's work.",
+      "met": true,
+      "evidence": "session_tree_changes() (run.sh:314-331) filters `.loop/state/*` and `.loop/tmp/*` out of `git status --porcelain` before returning paths; journal lives under .loop/state/journals/ so it's covered by the same filter. Scenario 40 asserts notes contain no '.loop/*' substring."
+    },
+    {
+      "criterion": "Status handling is unchanged: the outcome is still blocked with one attempt charged, the session's files are still committed by the driver's single iteration commit, and at most one git invocation is added to the iteration.",
+      "met": true,
+      "evidence": "outcome=\"blocked\" unchanged at run.sh:993; scenario 40 asserts iteration outcome blocked, T1 attempts=1, and that thing_one.txt/thing_two.txt were committed via `git -C \"$FX_REPO\" ls-files --error-unmatch`. session_tree_changes() makes exactly one new `git status --porcelain` call (run.sh:325), called once at run.sh:985."
+    },
+    {
+      "criterion": "Every message passes through mask(); no absolute path reaches the notes, the journal or the log.",
+      "met": true,
+      "evidence": "run.sh:991: `account=\"$(mask <<<\"$account\")\"` before any use. grep for '/Users/' across all changed files in the diff returned nothing."
+    },
+    {
+      "criterion": "A new scenario .loop/tests/scenarios/40-no-proposal-tree.sh asserts the changed and unchanged cases.",
+      "met": true,
+      "evidence": "File exists, covers both the 'edited two files and died' and 'did nothing and died' cases, runs standalone and passes (verified independently, not just via cached gate log)."
+    },
+    {
+      "criterion": "The new scenario file is added under .loop/tests/scenarios/ (no registration edit needed), and every document check-docs.sh holds to the suite size is updated in the same change so check-docs.sh stays green; check-docs.sh itself is not weakened, exempted or edited.",
+      "met": true,
+      "evidence": "README.md, .loop/README.md, .loop/manual.md, docs/briefs/B008-driver-in-python.md and the run's own brief all updated 39→40 scenarios and 42→43 checks consistently. `ls .loop/tests/scenarios | wc -l` = 40, matching. check-docs.sh is untouched in the diff and reports 'docs ok' in the run."
+    },
+    {
+      "criterion": "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change.",
+      "met": true,
+      "evidence": "Independently re-ran .loop/tests/run-all.sh (43 passed) and the embedded pytest run (40 passed) after the gate log was already produced; no existing scenario file was touched in the diff (git status shows only the 6 listed files + 1 new scenario)."
+    }
+  ],
+  "findings": [],
+  "notes": "Clean, in-scope change. The account string doubles as both the task's persisted notes and the journal Summary line by reusing the existing summary→blocked_note plumbing, which is a sensible reuse rather than scope creep. Files touched match the task's declared files list exactly."
+}

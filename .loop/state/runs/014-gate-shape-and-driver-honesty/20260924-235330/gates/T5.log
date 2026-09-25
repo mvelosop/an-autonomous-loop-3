@@ -339,7 +339,7 @@
     [32mok[0m   mechanism reached the second target
     [32mok[0m   example briefs chained — they live in examples/ once installed
     ---- ── provenance is propagated, not re-derived ──
-    [32mok[0m   the first install names a version (1.0.0-rc.1-16-g6194380-dirty)
+    [32mok[0m   the first install names a version (1.0.0-rc.1-17-gf98fe0e-dirty)
     [32mok[0m   the chained install carries the same version and commit
     [32mok[0m   the stamp does not name the intermediate repo's commit
   [32mPASS[0m 26-install-boundary
@@ -603,6 +603,26 @@
     [32mok[0m   the log makes no gate claim
   [32mPASS[0m 39-blocked-gate-passes
 
+[1m40-no-proposal-tree[0m
+    ---- the session edited two files and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   notes name thing_one.txt
+    [32mok[0m   journal names thing_one.txt
+    [32mok[0m   run-end report names thing_one.txt
+    [32mok[0m   thing_one.txt was committed
+    [32mok[0m   notes name thing_two.txt
+    [32mok[0m   journal names thing_two.txt
+    [32mok[0m   run-end report names thing_two.txt
+    [32mok[0m   thing_two.txt was committed
+    [32mok[0m   notes leave out driver bookkeeping
+    ---- the session did nothing and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   the two cases read differently
+    [32mok[0m   notes: work session left no valid proposal; the working tree is unchanged
+  [32mPASS[0m 40-no-proposal-tree
+
 [1mcheck-brief[0m
 
 [1mcheck-docs[0m
@@ -612,9 +632,9 @@ docs ok — every path resolves, no retired layout described
 todo ok — every entry matches its section, every row quotes its source
 
 ────────────────────────
-[32m42 passed[0m
+[32m43 passed[0m
 
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh
 ........................................                                 [100%]
-40 passed in 1.01s
+40 passed in 1.00s

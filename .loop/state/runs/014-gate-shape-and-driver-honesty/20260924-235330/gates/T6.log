@@ -1,52 +1,39 @@
-    ---- reject: grep -q TIMEOUT docs/todo.md && uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: cat docs/todo.md | grep -q TIMEOUT
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: test -f docs/todo.md && bash tests/check.sh
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- reject: python3 -c "import sys; sys.exit(0 if \"TIMEOUT\" in open(\"docs/todo.md\").read() else 1)"
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- accept: grep -q TIMEOUT docs/todo.md && uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: uv run pytest -q tests/test_thing.py
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: bash tests/check.sh && test -f made.txt
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: grep -q OK made.txt
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- accept: test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
+    ---- the session edited two files and died
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   notes name thing_one.txt
+    [32mok[0m   journal names thing_one.txt
+    [32mok[0m   run-end report names thing_one.txt
+    [32mok[0m   thing_one.txt was committed
+    [32mok[0m   notes name thing_two.txt
+    [32mok[0m   journal names thing_two.txt
+    [32mok[0m   run-end report names thing_two.txt
+    [32mok[0m   thing_two.txt was committed
+    [32mok[0m   notes leave out driver bookkeeping
+    ---- the session did nothing and died
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   the two cases read differently
+    [32mok[0m   notes: work session left no valid proposal; the working tree is unchanged
   [32mPASS[0m bash
-    ---- -- rejected: inspects docs/todo.md, which the task does not own --
-    [32mok[0m   exit 1
-    [32mok[0m   log: gate shape rejected
-    [32mok[0m   log: T1 .*docs/todo.md
-    [32mok[0m   0 iteration(s)
-    ---- -- accepted: the same inspecting verify, with the path owned --
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    ---- -- accepted: the path is handed to a runner, not read --
-    [32mok[0m   exit 0
-    [32mok[0m   log clean of: gate shape rejected
-    [32mok[0m   no tool errors leaked into the run
-  [32mPASS[0m 35-gate-unowned-file
+    ---- the session edited two files and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   notes name thing_one.txt
+    [32mok[0m   journal names thing_one.txt
+    [32mok[0m   run-end report names thing_one.txt
+    [32mok[0m   thing_one.txt was committed
+    [32mok[0m   notes name thing_two.txt
+    [32mok[0m   journal names thing_two.txt
+    [32mok[0m   run-end report names thing_two.txt
+    [32mok[0m   thing_two.txt was committed
+    [32mok[0m   notes leave out driver bookkeeping
+    ---- the session did nothing and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   the two cases read differently
+    [32mok[0m   notes: work session left no valid proposal; the working tree is unchanged
+  [32mPASS[0m 40-no-proposal-tree
 
 [1m01-happy-path[0m
     [32mok[0m   exit 0
@@ -652,4 +639,4 @@ todo ok — every entry matches its section, every row quotes its source
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh
 ........................................                                 [100%]
-40 passed in 1.02s
+40 passed in 1.00s
