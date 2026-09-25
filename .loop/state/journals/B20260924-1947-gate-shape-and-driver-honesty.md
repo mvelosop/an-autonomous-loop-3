@@ -150,3 +150,9 @@ I've written the plan to `.loop/state/state.json`. It has 9 tasks with ids B2026
 - **Summary:** No code changes needed: check-brief.sh's already-run detection, run.sh's plan-time refusal with the --replan override and resuming_same_brief guard, scenario 43-brief-already-run.sh, and run-all.sh's check-brief step (which excludes 'already run' findings from failing the gate) are all already present and correct in the working tree.
 - **Files:** 
 - **Notes for next iteration:** Confirmed via `git status --porcelain` before and after running verify that .loop/state/state.json was untouched throughout this session -- I made zero edits to it or to any other file. The task's own notes field (from the prior attempt) recorded that a work session had modified state.json and the driver restored it from HEAD, failing that iteration as state tampering despite the session reporting 'done' with files:[]. That anomaly did not recur here: running the verify command's fixture scenarios (which build throwaway repos under $FX_REPO via lib.sh's fixture_new/fixture_run) does not touch the real repo's state.json -- verified this directly by diffing git status before/after. If GATE REWRITE fires again on this task despite files:[] and a clean git status at proposal time, the cause is not in this session's actions and may be in the driver's own handling of a zero-file-change 'done' outcome; worth the operator's attention if it repeats a third time.
+
+## Run ended — complete
+
+- **Run:** `20260925-081117` · 2 iteration(s) this run
+- **Plan:** 9/9 done, 0 blocked
+- **Signals:** 2 iterations · 0.22 per closed · 1 gate failure(s) · 0 review rejection(s) · 1 attempt(s) burned · streak 0 · ~$1.30
