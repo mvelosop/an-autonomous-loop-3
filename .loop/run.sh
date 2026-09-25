@@ -718,7 +718,16 @@ open_journal() {
 # --plan-only cannot overwrite .loop/state/state.json and re-derive work this
 # brief already produced. --replan is the deliberate override for a genuine
 # re-plan after an aborted run.
-if [[ -n "$BRIEF" && "$REPLAN" -eq 0 ]]; then
+#
+# Resuming this same plan is not "planning from" the brief again -- state.json
+# already holds the work this brief produced, so re-deriving it is exactly
+# what does NOT happen. Skip the refusal whenever the brief asked for is the
+# one state.json is already stamped with.
+resuming_same_brief=0
+if [[ -f "$STATE" && -n "$BRIEF" ]] && [[ "$(state_get '.brief // ""')" == "$BRIEF" ]]; then
+  resuming_same_brief=1
+fi
+if [[ -n "$BRIEF" && "$REPLAN" -eq 0 && "$resuming_same_brief" -eq 0 ]]; then
   brief_stem="$(basename "$BRIEF" .md)"
   brief_stem="${brief_stem%.loop-brief}"
   brief_journal="$STATE_DIR/journals/$brief_stem.md"

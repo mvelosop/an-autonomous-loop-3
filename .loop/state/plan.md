@@ -4,9 +4,9 @@
      Do NOT edit: regenerated on every state change, your edits will be lost.
      The source of truth is .loop/state/state.json. -->
 
-**Status:** running · **8/9 done** · iteration 11
+**Status:** running · **8/9 done** · iteration 12
 
-**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-25T02:17:39Z
+**Brief:** `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md` · **Updated:** 2026-09-25T02:43:43Z
 
 ## Progress
 
@@ -18,7 +18,7 @@
 - [x] **T6** — Report the working tree when a work session leaves no proposal
 - [x] **T7** — Name the task being worked on every GATE REGRESSION line
 - [x] **T8** — Halt on a second blocked iteration of a task whose inputs have not changed
-- [ ] **T9** — Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists · 1 attempt(s)
+- [ ] **T9** — Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists · 2 attempt(s)
 
 ## Tasks
 
@@ -235,7 +235,7 @@ A memoryless session given identical inputs reaches an identical conclusion, so 
 
 ### T9 — Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists
 
-`pending` · 1 attempt(s) · depends on: none
+`pending` · 2 attempt(s) · depends on: none
 
 **Files:** `.loop/run.sh`, `.loop/check-brief.sh`, `.loop/tests/run-all.sh`, `.loop/tests/scenarios/`, `README.md`, `.loop/README.md`, `.loop/manual.md`, `docs/briefs/B008-driver-in-python.md`, `docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md`
 
@@ -253,7 +253,7 @@ Nothing retires a brief, so a spent one reads plannable forever, and run.sh --pl
 - The new scenario file is added under .loop/tests/scenarios/ (run-all.sh globs that directory, so no registration edit is needed), and every document check-docs.sh holds to the suite size — README.md, .loop/README.md, .loop/manual.md, docs/briefs/B008-driver-in-python.md and this run's own brief — is updated in the same change so check-docs.sh stays green; check-docs.sh itself is not weakened, exempted or edited.
 - The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change.
 
-**From the last attempt:** run.sh incorrectly refuses to resume an already-planned run when the brief is named explicitly and its journal exists (which it normally does once planning has committed) -- 'resuming an existing plan for the same brief is not affected' is violated. Repro: plant state.json with .brief == the target brief plus its journal file, then `run.sh <that brief>` (no --plan-only) dies with 'refusing to plan' instead of resuming.; The new scenario 43-brief-already-run.sh never exercises this resume-same-brief path -- every case either uses --plan-only against a fresh/never-planned fixture or a different-brief plan, so the gate is green despite the regression.
+**From the last attempt:** work session modified .loop/tests/scenarios/43-brief-already-run.sh — a file a verify command runs, which this task neither created nor was assigned; restored by the driver
 
 <details><summary>verify command</summary>
 
