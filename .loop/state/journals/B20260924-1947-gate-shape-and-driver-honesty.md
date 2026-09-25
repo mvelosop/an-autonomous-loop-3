@@ -123,3 +123,10 @@ I've written the plan to `.loop/state/state.json`. It has 9 tasks with ids B2026
 - **Summary:** Fixed the review_fail: run.sh's already-run refusal now skips itself when the brief being asked for is the same one state.json already holds a plan for, so resuming an existing run (no --plan-only) no longer dies with 'refusing to plan'. Added a resume-case to scenario 43-brief-already-run.sh that reproduces the bug and now passes.
 - **Files:** .loop/run.sh, .loop/tests/scenarios/43-brief-already-run.sh
 - **Notes for next iteration:** The bug: the already-run check at run.sh's plan phase fired for ANY non-empty $BRIEF with REPLAN=0, before the later block that compares state.json's .brief to the asked brief to decide resume-vs-reset -- so resuming a plan by naming its own brief (state.json's .brief == $BRIEF, journal exists, which it normally does once planning committed) hit the refusal instead of the resume path. Fix: compute resuming_same_brief up front (state.json exists AND its .brief == $BRIEF) and skip the refusal when true. Wrote it as two separate [[ ]] commands joined by shell-level && rather than one [[ A && B ]] -- inside a single [[ ]], bash expands all command substitutions (including state_get's jq call) before evaluating the test, so a single compound test would still call state_get even when -f "$STATE" is false, erroring on a missing file. Two commands with shell && actually short-circuits. The original two scenario cases (refuse-fresh, refuse-before-resetting-another-brief) were unaffected since neither had state.json's own .brief matching the asked brief. No doc or scenario-count changes needed -- this only fixes existing logic and adds one case to the already-existing scenario 43, not a new file or a new rule.
+
+## T9 — Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists
+
+- **Outcome:** blocked (review: skipped)
+- **Summary:** work session produced no proposal
+- **Files:** none
+- **Notes for next iteration:** none

@@ -176,3 +176,19 @@
 [33m[loop][0m     1 permission denial(s) — the fence may be in the wrong place
 [33m[loop][0m    GATE REWRITE T9 — .loop/tests/scenarios/43-brief-already-run.sh restored from HEAD; a gate is not a session's to rewrite
 [33m[loop][0m    T9 failed on state tampering — the work is reverted whatever the gate said
+[36m[loop][0m    committed 297fb2e
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            11
+[36m[loop][0m   tasks closed:          8/9
+[36m[loop][0m   iterations per closed: 1.38
+[36m[loop][0m   gate failures:         2
+[36m[loop][0m   review rejections:     2
+[36m[loop][0m   attempts burned:       4
+[36m[loop][0m   no-progress streak:    2
+[36m[loop][0m   estimated spend:       $20.71 (estimate, not a bill)
+[36m[loop][0m ── iteration 13 (12/30 this run) · T9 · 8/9 done ──
+[36m[loop][0m    Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists
+[36m[loop][0m cost=$1.2180936000000002 turns=30 dur=373s error=false
+[33m[loop][0m work session left no valid proposal
+[36m[loop][0m    work session reported blocked
+[33m[loop][0m    1 task(s) hit the attempt ceiling — blocked
