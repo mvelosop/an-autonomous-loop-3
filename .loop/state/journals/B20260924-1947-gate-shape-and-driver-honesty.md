@@ -136,3 +136,10 @@ I've written the plan to `.loop/state/state.json`. It has 9 tasks with ids B2026
 - **Run:** `20260924-235330` · 12 iteration(s) this run
 - **Plan:** 8/9 done, 1 blocked
 - **Signals:** 12 iterations · 1.50 per closed · 2 gate failure(s) · 2 review rejection(s) · 5 attempt(s) burned · streak 3 · ~$21.92
+
+## T9 — Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists
+
+- **Outcome:** gate_fail (review: skipped)
+- **Summary:** No code changes needed: check-brief.sh's already-run detection, run.sh's plan-time refusal with the --replan override and resuming_same_brief guard, scenario 43-brief-already-run.sh, and run-all.sh's check-brief step (which excludes 'already run' findings from failing the gate) were all already correct and complete in the working tree from a prior attempt, which had been wrongly reverted by a since-fixed driver bug.
+- **Files:** 
+- **Notes for next iteration:** Confirmed via git log/diff that .loop/run.sh lines ~744-768 (resuming_same_brief computed from state.json's .brief vs $BRIEF, skipping the refusal when they match; the die block naming the journal and --replan) and .loop/check-brief.sh's journal-existence check were already present and unchanged since the operator's reset commit (08c2734), which only touched .loop/state/state.json to reset T9 to pending/attempts:0. I made zero edits. This confirms the T9 notes' account: the real defect (resume-vs-fresh-plan conflation) was correctly diagnosed and fixed in attempt 2 (commit fc5d7aa's predecessor work), and the subsequent gate_fail/blocked outcomes were purely driver-side collateral (gate_files_moved reverting T9's own scenario file across retries), now fixed separately. Nothing left to do for this task.
