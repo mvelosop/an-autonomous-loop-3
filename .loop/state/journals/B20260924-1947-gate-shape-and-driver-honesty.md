@@ -130,3 +130,9 @@ I've written the plan to `.loop/state/state.json`. It has 9 tasks with ids B2026
 - **Summary:** work session produced no proposal
 - **Files:** none
 - **Notes for next iteration:** none
+
+## Run ended — blocked
+
+- **Run:** `20260924-235330` · 12 iteration(s) this run
+- **Plan:** 8/9 done, 1 blocked
+- **Signals:** 12 iterations · 1.50 per closed · 2 gate failure(s) · 2 review rejection(s) · 5 attempt(s) burned · streak 3 · ~$21.92

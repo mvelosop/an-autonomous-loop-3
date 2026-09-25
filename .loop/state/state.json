@@ -1,10 +1,10 @@
 {
   "run_id": "B20260924-1947-gate-shape-and-driver-honesty",
   "brief": "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md",
-  "status": "running",
+  "status": "blocked",
   "iteration": 13,
   "created": "2026-09-24T21:26:56Z",
-  "updated": "2026-09-25T03:04:58Z",
+  "updated": "2026-09-25T03:04:59Z",
   "tasks": [
     {
       "id": "T1",
