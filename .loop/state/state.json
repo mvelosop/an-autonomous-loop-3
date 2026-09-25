@@ -2,9 +2,9 @@
   "run_id": "B20260924-1947-gate-shape-and-driver-honesty",
   "brief": "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md",
   "status": "blocked",
-  "iteration": 14,
+  "iteration": 15,
   "created": "2026-09-24T21:26:56Z",
-  "updated": "2026-09-25T07:31:32Z",
+  "updated": "2026-09-25T07:57:01Z",
   "tasks": [
     {
       "id": "T1",
@@ -296,9 +296,9 @@
         "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change."
       ],
       "verify": "( . .loop/tests/lib.sh; unset LOOP_ACTIVE_TASK LOOP_GATE_TASK; out=\"$(.loop/check-brief.sh docs/briefs/0003-runstat-cli.md 2>&1)\"; rc=$?; [ $rc = 1 ] && ok 'check-brief: an already-run brief exits 1' || bad \"check-brief on an already-run brief exited $rc\"; case \"$out\" in *.loop/state/journals/0003-runstat-cli.md*) ok 'it names the journal';; *) bad 'check-brief does not name the journal';; esac; .loop/check-brief.sh docs/briefs/0005-production-and-insights.md >/dev/null 2>&1 && ok 'a never-run brief still passes' || bad 'a never-run plannable brief fails check-brief'; fx(){ fixture_cleanup; fixture_new; printf '# brief\\n\\n- **Status:** ready to plan\\n' > \"$FX_REPO/docs/briefs/0003-runstat-cli.md\"; cp \"$FX_REPO/docs/briefs/0003-runstat-cli.md\" \"$FX_REPO/docs/briefs/0009-fresh.md\"; mkdir -p \"$FX_REPO/.loop/state/journals\"; echo '# Journal' > \"$FX_REPO/.loop/state/journals/0003-runstat-cli.md\"; git -C \"$FX_REPO\" add -A; git -C \"$FX_REPO\" commit -qm pre; fixture_plan \"$PLAN_ONE\"; fixture_stub_default; }; note 'refused: planning a brief whose journal exists'; fx; fixture_run --plan-only docs/briefs/0003-runstat-cli.md; assert_exit 1; assert_log '.loop/state/journals/0003-runstat-cli.md'; assert_no_state; assert_no_log 'planning from'; note 'refused before an existing plan for another brief is reset'; fx; mkdir -p \"$FX_REPO/.loop/state\"; printf '%s' \"$PLAN_ONE\" | jq '.brief=\"docs/briefs/0009-fresh.md\"' > \"$FX_REPO/.loop/state/state.json\"; git -C \"$FX_REPO\" add -A; git -C \"$FX_REPO\" commit -qm plan; S0=\"$(cksum < \"$FX_REPO/.loop/state/state.json\")\"; fixture_run --plan-only docs/briefs/0003-runstat-cli.md; assert_exit 1; [ \"$(cksum < \"$FX_REPO/.loop/state/state.json\" 2>/dev/null)\" = \"$S0\" ] && ok 'the existing plan is untouched' || bad 'the refusal destroyed or changed the existing plan'; note 'the explicit override re-plans'; fx; fixture_run --plan-only --replan docs/briefs/0003-runstat-cli.md; assert_exit 0; [ -f \"$FX_REPO/.loop/state/state.json\" ] && ok 'plan written' || bad 'no plan written under --replan'; note 'a plannable brief that was never run plans normally'; fx; fixture_run --plan-only docs/briefs/0009-fresh.md; assert_exit 0; [ -f \"$FX_REPO/.loop/state/state.json\" ] && ok 'plan written' || bad 'no plan written for a fresh brief'; finish ) && bash .loop/tests/scenarios/43-brief-already-run.sh && .loop/tests/run-all.sh && uv run pytest -q",
-      "status": "pending",
+      "status": "done",
       "attempts": 1,
-      "notes": "work session modified .loop/state/state.json — a file a verify command runs, which this task neither created nor was assigned; restored by the driver"
+      "notes": ""
     }
   ],
   "branch": "014-gate-shape-and-driver-honesty"

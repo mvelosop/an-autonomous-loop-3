@@ -354,7 +354,7 @@
     [32mok[0m   mechanism reached the second target
     [32mok[0m   example briefs chained — they live in examples/ once installed
     ---- ── provenance is propagated, not re-derived ──
-    [32mok[0m   the first install names a version (1.0.0-rc.1-26-g08c2734)
+    [32mok[0m   the first install names a version (1.0.0-rc.1-27-ge6ed579-dirty)
     [32mok[0m   the chained install carries the same version and commit
     [32mok[0m   the stamp does not name the intermediate repo's commit
   [32mPASS[0m 26-install-boundary
@@ -702,4 +702,4 @@ todo ok — every entry matches its section, every row quotes its source
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh
 ........................................                                 [100%]
-40 passed in 1.06s
+40 passed in 1.01s
