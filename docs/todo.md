@@ -283,9 +283,9 @@ Both corrupted the *work* to satisfy the gate. Neither touched the gate.
 **A session moving the goalpost itself has never been observed.** The calibration
 baseline counts 27 work/review pairs across three runs with zero rejections, and
 this repo's own runs close clean in `iterations.jsonl` — 11 iterations in
-`002-runstat`, 6 in `004-runstat-review`. Every gate rewrite the loop has seen was
-planted: case `06` by hand, `33-gate-rewrite` by a scripted session that rewrites
-on command.
+`002-runstat`, 6 in `004-runstat-review`. Every gate rewrite the loop had seen, as
+of 2026-09-14, was planted: case `06` by hand, `33-gate-rewrite` by a scripted
+session that rewrites on command. **No longer true — see the update below.**
 
 **What is measured is the reviewer's response to a planted one**, and that is the
 finding the driver check was built on: three real review sessions saw case `06`'s
@@ -293,16 +293,58 @@ rewrite, two described it accurately, none objected — PASS twice, and a FAIL f
 an unrelated reason. So the guard answers a measured reviewer-side hole, not an
 observed worker-side incident.
 
+**Update 2026-09-25, from `014-gate-shape-and-driver-honesty`.** The guard's
+first non-planted triggers. Three fired for real; none confirms the thing this
+entry was asking about.
+
+`gate_files_moved()` fired on a session's own legitimate retry, and was wrong.
+Task T9's first attempt created a new scenario file (allowed — creation, not
+modification) but failed review; the driver committed it into `HEAD` anyway, as
+it does every iteration regardless of outcome. T9's second attempt edited that
+same file — its own, and a correct fix to what review had flagged — and the
+guard reverted it as an unowned rewrite, because `files` named the directory the
+file lives in, not the file itself, and the ownership check is an exact match
+against the array. Fixed in `b9ead1f` (PR #17): the guard now also asks who
+committed the file's current `HEAD` content, and skips the revert when the
+answer is "this same task." This is not a session moving the goalpost — it is
+the *guard* moving it, against a session's correct work. First mileage on this
+half of the mechanism, and it was a false positive, not the incident it exists
+to catch.
+
+The neighbouring guard, `state_restore_if_touched()` (state.json itself, not a
+file a verify command runs), also fired twice for real, and neither reading
+supports the worker-side incident either. T2's first attempt: one turn, 36
+output tokens, immediately after the operator had killed and resumed the run
+mid-session — plausibly an artifact of that interruption rather than anything
+the model chose to do. T9's retry after the fix above: the session's own
+proposal reported `files: []` and "I made zero edits," and its notes flagged the
+anomaly itself unprompted — *"if GATE REWRITE fires again on this task despite
+files:[] and a clean git status at proposal time, the cause is not in this
+session's actions and may be in the driver's own handling of a zero-file-change
+'done' outcome."* Nothing currently explains why a session that changed nothing
+could still make `state.json` read as touched. Worth a closer look if the shape
+recurs; recorded here rather than chased down because it did not block the run
+and reproducing it deliberately is its own piece of work.
+
+So: the "never observed" and "every gate rewrite was planted" claims above are
+now false, and what replaced them doesn't resolve the original question either
+way. One real trigger was the guard's own bug, now fixed. Two more are real and
+unexplained, closer to noise the guard cannot yet distinguish from the thing it
+was built to catch than to a worker tampering with its own gate.
+
 **The decision, once the clean runs the first section waits on have
-accumulated:** is a mechanical guard with no observed trigger worth its cost? It
-is not free — `files` in `state.json` went load-bearing to support it (see
-*Releases*), the "its own gate" narrowing was found only by breaking
-`03-gate-regression`, and a false positive reverts real work and fails an
-iteration. The cheap answer is to leave it in and instrument it: if it never
-fires across the next several runs that is a result worth recording, and if it
-fires once the question is settled the other way. The telemetry to notice would
-come from the dataset below, as a `gate_rewrite` outcome beside `review_fail` and
-the regression reopens already listed there as gap 4.
+accumulated:** is a mechanical guard with no *confirmed* worker-side trigger
+worth its cost? It is not free — `files` in `state.json` went load-bearing to
+support it (see *Releases*), the "its own gate" narrowing was found only by
+breaking `03-gate-regression`, the retry narrowing above was found only by a
+real run blocking on it, and a false positive reverts real work and fails an
+iteration — which, as of this update, is no longer hypothetical: it happened,
+was diagnosed, and cost one operator intervention. The cheap answer is still to
+leave it in and instrument it: the telemetry to notice would come from the
+dataset below, as a `gate_rewrite` outcome beside `review_fail` and the
+regression reopens already listed there as gap 4. The two unexplained
+`state_restore_if_touched()` firings are the more urgent open question now —
+worth understanding before the next time one halts a run.
 
 ---
 
