@@ -487,6 +487,18 @@ actually been conflated:
   task in a fixture's plan, or the single task a calibration case plants,
   depending entirely on context.
 
+**Pushing the tag is not the release — create the GitHub release too**, from
+the tag, with the PR description as its notes. The PR's opening line is written
+for before the merge; swap it for a post-merge one, as `1.0.0-rc.1` does. Drop
+any trailing Claude session link — it points at a private session, not
+something a reader of the notes can open:
+
+```sh
+{ echo 'Squash-merged from #NN; the branch is kept, because its per-iteration commits are the evidence.'
+  gh pr view NN --json body -q .body | tail -n +2; } > notes.md   # edit out the session link
+gh release create X.Y.Z-rc.N --verify-tag --prerelease --title X.Y.Z-rc.N --notes-file notes.md
+```
+
 **The bar for `1.0.0`**: one clean run under the rules above — tasks shipping
 durable tests, the gate guard live. Then 1.0 means *"the loop completed a plan
 and the work it left behind was covered"*, rather than *"it finished"*.
