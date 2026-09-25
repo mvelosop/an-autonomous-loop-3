@@ -216,7 +216,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-.loop/tests/run-all.sh          # all 45 checks
+.loop/tests/run-all.sh          # all 46 checks
 .loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 

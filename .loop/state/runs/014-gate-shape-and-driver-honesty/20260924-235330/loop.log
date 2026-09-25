@@ -145,3 +145,18 @@
 [36m[loop][0m cost=$0.5271966 turns=21 dur=365s error=false
 [36m[loop][0m    review: PASS
 [36m[loop][0m    T8 done
+[36m[loop][0m    committed 0171db9
+[36m[loop][0m   ── signals ──
+[36m[loop][0m   iterations:            9
+[36m[loop][0m   tasks closed:          8/9
+[36m[loop][0m   iterations per closed: 1.12
+[36m[loop][0m   gate failures:         1
+[36m[loop][0m   review rejections:     1
+[36m[loop][0m   attempts burned:       2
+[36m[loop][0m   no-progress streak:    0
+[36m[loop][0m   estimated spend:       $17.18 (estimate, not a bill)
+[36m[loop][0m ── iteration 11 (10/30 this run) · T9 · 8/9 done ──
+[36m[loop][0m    Refuse to plan, and fail check-brief, for a plannable brief whose journal already exists
+[36m[loop][0m cost=$2.236558600000001 turns=57 dur=888s error=false
+[36m[loop][0m cost=$0.3943132 turns=15 dur=208s error=false
+[36m[loop][0m    review: FAIL

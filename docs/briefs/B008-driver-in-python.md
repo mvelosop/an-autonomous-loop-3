@@ -50,7 +50,7 @@ anything ran (preflight failed, or the plan has a task with no verify command),
 ceiling, `7` session error, `8` repeat blocked (two identical `blocked`
 outcomes on the same task with nothing changed between them).
 
-**3. The existing 42 scenarios are the acceptance suite.** They pass
+**3. The existing 43 scenarios are the acceptance suite.** They pass
 *unmodified*, except for the single place in `.loop/tests/lib.sh` that invokes
 the driver. A scenario whose assertions have to change is a behaviour change:
 it gets named in the task's report and reviewed as such, never edited quietly

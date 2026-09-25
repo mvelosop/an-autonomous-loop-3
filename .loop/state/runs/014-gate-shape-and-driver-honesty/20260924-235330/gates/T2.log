@@ -370,7 +370,7 @@
     [32mok[0m   mechanism reached the second target
     [32mok[0m   example briefs chained — they live in examples/ once installed
     ---- ── provenance is propagated, not re-derived ──
-    [32mok[0m   the first install names a version (1.0.0-rc.1-19-g144a455-dirty)
+    [32mok[0m   the first install names a version (1.0.0-rc.1-20-g0171db9-dirty)
     [32mok[0m   the chained install carries the same version and commit
     [32mok[0m   the stamp does not name the intermediate repo's commit
   [32mPASS[0m 26-install-boundary
@@ -678,6 +678,28 @@
     [32mok[0m   the halt surfaces the first diagnosis of the unchanged pair (iteration 2)
   [32mPASS[0m 42-repeat-blocked-halts
 
+[1m43-brief-already-run[0m
+    ---- ── check-brief.sh: an already-run brief is reported ──
+    [32mok[0m   check-brief: an already-run brief exits 1
+    [32mok[0m   it names the journal
+    ---- ── check-brief.sh: a never-run plannable brief is unaffected ──
+    [32mok[0m   a never-run brief still passes
+    ---- ── run.sh: refuses to plan a brief whose journal already exists ──
+    [32mok[0m   exit 1
+    [32mok[0m   log: .loop/state/journals/0003-runstat-cli.md
+    [32mok[0m   no state.json written
+    [32mok[0m   log clean of: planning from
+    ---- ── run.sh: refuses before an existing plan for another brief is reset ──
+    [32mok[0m   exit 1
+    [32mok[0m   the existing plan is untouched
+    ---- ── run.sh --replan: the explicit override re-plans anyway ──
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
+    ---- ── run.sh: a plannable brief that was never run plans normally ──
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
+  [32mPASS[0m 43-brief-already-run
+
 [1mcheck-brief[0m
 
 [1mcheck-docs[0m
@@ -687,9 +709,9 @@ docs ok — every path resolves, no retired layout described
 todo ok — every entry matches its section, every row quotes its source
 
 ────────────────────────
-[32m45 passed[0m
+[32m46 passed[0m
 
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh
 ........................................                                 [100%]
-40 passed in 1.00s
+40 passed in 1.03s

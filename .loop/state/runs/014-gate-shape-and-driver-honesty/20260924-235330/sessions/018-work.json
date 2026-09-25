@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 411916,
+  "stop_reason": "end_turn",
+  "session_id": "3e717171-fe75-4954-ae77-338590784ca0",
+  "total_cost_usd": 2.236558600000001,
+  "usage": {
+    "input_tokens": 114,
+    "cache_creation_input_tokens": 132532,
+    "cache_read_input_tokens": 6800813,
+    "output_tokens": 34604,
+    "output_tokens_details": {
+      "thinking_tokens": 16141
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 132532,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 218,
+        "cache_read_input_tokens": 155243,
+        "cache_creation_input_tokens": 1292,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1292
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 114,
+      "outputTokens": 34604,
+      "cacheReadInputTokens": 6800813,
+      "cacheCreationInputTokens": 132532,
+      "webSearchRequests": 0,
+      "costUSD": 2.236558600000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 16141,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 57,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T9 is done: `.loop/check-brief.sh` now flags an already-run plannable brief, `.loop/run.sh` refuses to plan from one (with a new `--replan` override), and `.loop/tests/run-all.sh` was adjusted so its own check-brief step tolerates the expected \"already run\" findings on this repo's own briefs while still catching any other problem. New scenario `43-brief-already-run.sh` passes, the whole offline suite (46 checks) and `uv run pytest -q` (40 tests) are green, and the five scenario-count documents are updated. Proposal written to `.loop/tmp/proposal.json` reporting `done`.",
+  "ttft_ms": 2041,
+  "type": "result",
+  "duration_ms": 887552,
+  "uuid": "36ea14fd-abd5-4c20-ba07-7ee19aaec622",
+  "ttft_stream_ms": 1543,
+  "time_to_request_ms": 42,
+  "first_content_frame_ms": 1544,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "work",
+  "iteration": 11
+}

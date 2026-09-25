@@ -93,11 +93,13 @@ unset LOOP_ACTIVE_TASK LOOP_GATE_TASK
 
 PLAN_ONLY=0
 CHECK_ONLY=0
+REPLAN=0
 BRIEF=""
 for a in "$@"; do
   case "$a" in
     --plan-only|--only-plan) PLAN_ONLY=1 ;;
     --check|--preflight)     CHECK_ONLY=1 ;;
+    --replan)                REPLAN=1 ;;
     *) BRIEF="$a" ;;
   esac
 done
@@ -115,12 +117,13 @@ done
 case "$BRIEF" in
   -h|--help)
     cat <<'USAGE'
-usage: .loop/run.sh [--check | --plan-only] [brief-path]
+usage: .loop/run.sh [--check | --plan-only] [--replan] [brief-path]
 
   .loop/run.sh docs/briefs/0003-runstat-cli.md   plan and run that brief
   .loop/run.sh                                   resume the plan in .loop/state/state.json
   .loop/run.sh --plan-only <brief>               plan, commit it, and stop
   .loop/run.sh --check                           run the checks and stop; spends nothing
+  .loop/run.sh --replan <brief>                  plan from a brief that has already run
 
 --check answers "is this repo ready?" — tools, workspace trust, the permission
 fence, git identity, and whether the knowledge roots you declared can actually
@@ -136,6 +139,11 @@ Related, and also free:
 stops so you can read the plan and its verify commands before committing to
 the rest. Review .loop/state/plan.md, adjust with .loop/amend.sh, then run
 .loop/run.sh with no argument to execute it.
+
+A brief's journal at .loop/state/journals/<brief-stem>.md is proof its run
+already happened; planning from it again would overwrite .loop/state/state.json
+and re-derive work already on main, so run.sh refuses unless you pass
+--replan — a deliberate re-plan after an aborted run.
 
 Naming a brief other than the one the current plan holds resets that plan and
 starts fresh. Docs: .loop/manual.md
@@ -701,6 +709,25 @@ open_journal() {
   [[ -f "$JOURNAL" ]] || printf '# Journal — %s\n\nAppend-only narrative of this plan. Rendered state lives in .loop/state/plan.md.\n' \
     "$(state_get .run_id)" >"$JOURNAL"
 }
+
+# Item 8: nothing retires a brief, so a spent one reads plannable forever.
+# A run's journal is named for the brief's own stem -- the same name
+# check-brief.sh keys off -- so its existence is the check: no stamp, no new
+# field, nothing to keep in sync. Refused here, before the plan-reset logic
+# below touches an existing state.json and before any session runs, so
+# --plan-only cannot overwrite .loop/state/state.json and re-derive work this
+# brief already produced. --replan is the deliberate override for a genuine
+# re-plan after an aborted run.
+if [[ -n "$BRIEF" && "$REPLAN" -eq 0 ]]; then
+  brief_stem="$(basename "$BRIEF" .md)"
+  brief_stem="${brief_stem%.loop-brief}"
+  brief_journal="$STATE_DIR/journals/$brief_stem.md"
+  if [[ -f "$brief_journal" ]]; then
+    die "refusing to plan: ${brief_journal#$REPO/} already exists.
+  Planning would overwrite .loop/state/state.json and re-derive work this
+  brief already produced. Re-plan deliberately with --replan."
+  fi
+fi
 
 # A branch cut from main inherits whatever state.json the last squash left
 # there — another branch's plan. It must never be resumed as if it were this

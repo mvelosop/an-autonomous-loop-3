@@ -1,0 +1,18 @@
+{
+  "task": "T9",
+  "outcome": "done",
+  "summary": "check-brief.sh now reports a plannable brief whose journal already exists as a problem (exit 1), and run.sh refuses to plan from one -- before touching state.json or spending a session -- unless the operator passes the new --replan override.",
+  "files": [
+    ".loop/run.sh",
+    ".loop/check-brief.sh",
+    ".loop/tests/run-all.sh",
+    ".loop/tests/scenarios/43-brief-already-run.sh",
+    "README.md",
+    ".loop/README.md",
+    ".loop/manual.md",
+    "docs/briefs/B008-driver-in-python.md",
+    "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md"
+  ],
+  "verified": "bash .loop/tests/scenarios/43-brief-already-run.sh && .loop/tests/run-all.sh && uv run pytest -q -- all green (46 offline checks, 40 pytest tests); ran the task's exact verify command end to end (OVERALL_EXIT=0).",
+  "notes": "check-brief.sh computes the journal path as .loop/state/journals/<stem>.md where <stem> is the brief's basename minus .md, minus a further .loop-brief suffix if present -- so both docs/briefs/0003-runstat-cli.md and *.loop-brief.md briefs resolve to the run id a planner actually writes. run.sh duplicates that same two-line stem computation (it cannot call check-brief.sh: fixture_new in lib.sh does not copy check-brief.sh into the throwaway fixture repo, and lib.sh is not this task's to edit) and refuses via die() at the top of the plan phase, before the existing 'branch cut from main' reset logic can delete an existing state.json for a DIFFERENT brief -- so refusing to plan brief A also protects an unrelated already-planned brief B from being reset first. --replan is a new top-level flag parsed like --plan-only/--check, bypassing the check entirely; it is documented in run.sh --help and in the --help body text, but not in .loop/manual.md or the loop-plan SKILL.md since T9's acceptance criteria (unlike T1-T4's) name only the five check-docs.sh-tracked documents for the scenario-count bump, not a SKILL.md paragraph -- this task adds no gate-shape rule, so there is nothing for a planner to learn there. The one non-obvious wrinkle was .loop/tests/run-all.sh's own check-brief step: this repo's own docs/briefs/0003-runstat-cli.md, 0004-runstat-review.md and this run's own brief all have journals already and will report 'already run' forever (item 8 does not stamp or retire anything), so a bare exit-code check on check-brief.sh would make run-all.sh permanently red. Fixed by having run-all.sh capture check-brief.sh's output and count '✗' lines that are NOT 'already run' -- any other problem still fails the gate, and check-brief.sh's own exit code and logic are untouched (no by-name exemption inside it)."
+}

@@ -1,32 +1,41 @@
-    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   advised about T2
-    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
-    [32mok[0m   advised about T2
-    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
-    [32mok[0m   no advisory
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory
-    [32mok[0m   check exits 0: test -f .never
-    [32mok[0m   no advisory
+    [32mok[0m   check-brief: an already-run brief exits 1
+    [32mok[0m   it names the journal
+    [32mok[0m   a never-run brief still passes
+    ---- refused: planning a brief whose journal exists
+    [32mok[0m   exit 1
+    [32mok[0m   log: .loop/state/journals/0003-runstat-cli.md
+    [32mok[0m   no state.json written
+    [32mok[0m   log clean of: planning from
+    ---- refused before an existing plan for another brief is reset
+    [32mok[0m   exit 1
+    [32mok[0m   the existing plan is untouched
+    ---- the explicit override re-plans
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
+    ---- a plannable brief that was never run plans normally
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
   [32mPASS[0m bash
-    ---- -- advised: diffs against HEAD, reads neither variable --
-    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   advised about T2: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
-    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
-    [32mok[0m   advised about T2: test -f .never && git diff --quiet HEAD -- docs
-    ---- -- quiet: diffs against HEAD, but reads one of the two variables --
-    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
-    [32mok[0m   no advisory: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
-    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
-    ---- -- quiet: no HEAD diff at all --
-    [32mok[0m   check exits 0: test -f .never
-    [32mok[0m   no advisory: test -f .never
-  [32mPASS[0m 38-head-diff-advisory
+    ---- ── check-brief.sh: an already-run brief is reported ──
+    [32mok[0m   check-brief: an already-run brief exits 1
+    [32mok[0m   it names the journal
+    ---- ── check-brief.sh: a never-run plannable brief is unaffected ──
+    [32mok[0m   a never-run brief still passes
+    ---- ── run.sh: refuses to plan a brief whose journal already exists ──
+    [32mok[0m   exit 1
+    [32mok[0m   log: .loop/state/journals/0003-runstat-cli.md
+    [32mok[0m   no state.json written
+    [32mok[0m   log clean of: planning from
+    ---- ── run.sh: refuses before an existing plan for another brief is reset ──
+    [32mok[0m   exit 1
+    [32mok[0m   the existing plan is untouched
+    ---- ── run.sh --replan: the explicit override re-plans anyway ──
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
+    ---- ── run.sh: a plannable brief that was never run plans normally ──
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
+  [32mPASS[0m 43-brief-already-run
 
 [1m01-happy-path[0m
     [32mok[0m   exit 0
@@ -678,4 +687,4 @@ todo ok — every entry matches its section, every row quotes its source
 reviewer calibration is separate and NOT run here — it calls a real
 model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh
 ........................................                                 [100%]
-40 passed in 1.06s
+40 passed in 1.01s
