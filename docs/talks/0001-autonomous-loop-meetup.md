@@ -50,126 +50,13 @@ see each other.
 
 ---
 
-## A shell script: The driver — the only thing that commits
-
-```bash
-claude -p "/loop-plan <brief>"          # once → .loop/state/state.json
-
-while task = next_ready_task(state):    # first pending whose deps are done
-    check budgets                       # max iterations · cost ceiling · convergence
-    snapshot state.json
-
-    claude -p "/loop-work $task"        # fresh session → tmp/proposal.json
-    restore state.json if touched       # the plan is not a session's to edit
-    restore any gate file it moved
-
-    for t in done_tasks + [task]:       # THE GATE — every done task, every iteration
-        run t.verify                    # a task that stops verifying → pending, attempt burned
-
-    if gate_passed and proposal.outcome == "done":
-        claude -p "/loop-review $task"  # fresh session → tmp/verdict.json
-
-    apply: done │ pending (+1 attempt) │ blocked (attempts >= 3)
-    append journal + telemetry
-    git commit -m "[loop] $task: $outcome"     # exactly one commit per iteration
-```
-
-<!--
-Bash, ~1000 lines, no framework. Every status transition belongs here. Note the
-gate runs for *every* done task, not just the current one — that is the
-regression check.
--->
-
----
-
-<!-- _class: loop minimal lead -->
-
-## Three ideas
-
-# A shell loop.<br/>Files.<br/>Hard gates.
-
-<!--
-The map for the four slides that follow. Say each idea as a sentence; the slide
-only carries the word.
--->
-
----
-
-<!-- _class: loop minimal -->
-
-## 1 · Why a shell loop
-
-# Fresh context,<br/>every task.
-
-- **Resume** is reading a file
-- **Failure** stops at one task
-
-<!--
-Tell the rest: a long session degrades as the window
-fills; the loop never asks the model to hold the whole project at once.
--->
-
----
-
-<!-- _class: loop minimal -->
-
-## 2 · Why files
-
-# A prompt you can<br/>review like code.
-
-- **Versioned · linkable · reusable**
-- Broken? **Edit the file, re-run**
-
-<!--
-Tell the rest: no chat box ever gets the prompt
-right; a brief is argued with before a token is spent, and the same references
-bind the work session and the reviewer.
--->
-
----
-
-<!-- _class: loop minimal -->
-
-## 3 · Why hard gates
-
-# A rule is read<br/>three different ways.
-
-- `exit 0` **is not**
-- Written **before** the code exists
-
-<!--
-Tell the rest: gates are authored by a session that
-cannot benefit from them, re-run on every iteration, and restored by the driver
-if a session edits one — the cheating is helpful, not malicious.
--->
-
----
-
-<!-- _class: loop minimal -->
-
-## The model
-
-# The loop is a state<br/>machine over artifacts.
-
-- It never reads **your code**
-- It asks: **did the gate pass?**
-- It is **tech agnostic**
-
-<!--
-Tell the rest: the driver runs a command and reads an exit code and a log. It has
-no model of Python, of pytest, of this program at all — that is why the core can
-be tech-agnostic. Swap the stack and the gates change; the loop does not.
--->
-
----
-
 ## Three jobs, three skills, no overlap
 
 | | `loop-plan` | `loop-work` | `loop-review` |
 | --- | --- | --- | --- |
 | **Runs** | once per run | once per iteration | once per iteration |
 | **Gets** | the brief | one task id | the same task id |
-| **Reads** | brief, `CLAUDE.md`, knowledge roots | its task, journal, references, the files | the task, **the diff**, the references |
+| **Reads** | brief, `CLAUDE.md`, knowledge roots | `plan.md`, its task, journal, references, the files | `plan.md`, the task, **the diff**, the references |
 | **Writes** | `plan.md` + `state.json` | code + `proposal.json` | `verdict.json` only |
 | **Must not** | write code | pick another task, touch the plan | edit anything but `verdict.json` |
 | **The point** | author every `verify` **before** the code exists | do one task and stop | judge what a command **cannot** check |
@@ -218,6 +105,120 @@ summary" is discipline, not a mechanism — proposal.json is still on disk.
 Real verify commands are longer — they assert on the parse, never on the text of
 the output. `notes` is how a failed attempt talks to the next session: the only
 channel between two sessions that never meet.
+-->
+
+---
+
+## A shell script: The driver — the only thing that commits
+
+```bash
+claude -p "/loop-plan <brief>"          # once → .loop/state/state.json
+
+while task = next_ready_task(state):    # first pending whose deps are done
+    check budgets                       # max iterations · cost ceiling · convergence
+    snapshot state.json
+
+    claude -p "/loop-work $task"        # fresh session → tmp/proposal.json
+    restore state.json if touched       # the plan is not a session's to edit
+    restore any gate file it moved
+
+    for t in done_tasks + [task]:       # THE GATE — every done task, every iteration
+        run t.verify                    # a task that stops verifying → pending, attempt burned
+
+    if gate_passed and proposal.outcome == "done":
+        claude -p "/loop-review $task"  # fresh session → tmp/verdict.json
+
+    apply: done │ pending (+1 attempt) │ blocked (attempts >= 3)
+    append journal + telemetry
+    git commit -m "[loop] $task: $outcome"     # exactly one commit per iteration
+```
+
+<!--
+Bash, ~1000 lines, no framework. Every status transition belongs here. Note the
+gate runs for *every* done task, not just the current one — that is the
+regression check.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## The model
+
+# The loop is a state<br/>machine over artifacts.
+
+- It never reads **your code**
+- It asks: **did the gate pass?**
+- It is **tech agnostic**
+
+<!--
+Tell the rest: the driver runs a command and reads an exit code and a log. It has
+no model of Python, of pytest, of this program at all — that is why the core can
+be tech-agnostic. Swap the stack and the gates change; the loop does not.
+-->
+
+---
+
+<!-- _class: loop minimal lead -->
+
+## Three ideas
+
+# A shell loop.<br/>Files.<br/>Hard gates.
+
+<!--
+The map for the four slides that follow. Say each idea as a sentence; the slide
+only carries the word.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## 1 · Why a shell loop
+
+# Fresh context,<br/>every task.
+
+- **Deterministic**, no judgement
+- **Resume** is reading a file
+- **Failure** stops at one task
+
+<!--
+Tell the rest: a long session degrades as the window
+fills; the loop never asks the model to hold the whole project at once.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## 2 · Why files
+
+# A prompt you can<br/>review like code.
+
+- **Versioned · linkable · reusable**
+- Broken? **Edit the file, re-run**
+
+<!--
+Tell the rest: no chat box ever gets the prompt
+right; a brief is argued with before a token is spent, and the same references
+bind the work session and the reviewer.
+-->
+
+---
+
+<!-- _class: loop minimal -->
+
+## 3 · Why hard gates
+
+# A rule is read<br/>three different ways.
+
+- `exit 0` **is not**
+- Written **before** the code exists
+
+<!--
+Tell the rest: gates are authored by a session that
+cannot benefit from them, re-run on every iteration, and restored by the driver
+if a session edits one — the cheating is helpful, not malicious.
 -->
 
 ---

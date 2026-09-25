@@ -26,72 +26,6 @@
 <footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop" data-theme="loop" lang="C" class="loop" data-marpit-pagination="3" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop;--theme:loop;" data-marpit-pagination-total="14">
-<h2 id="a-shell-script-the-driver--the-only-thing-that-commits">A shell script: The driver — the only thing that commits</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">claude -p <span class="hljs-string">&quot;/loop-plan &lt;brief&gt;&quot;</span>          <span class="hljs-comment"># once → .loop/state/state.json</span>
-
-<span class="hljs-keyword">while</span> task = next_ready_task(state):    <span class="hljs-comment"># first pending whose deps are done</span>
-    check budgets                       <span class="hljs-comment"># max iterations · cost ceiling · convergence</span>
-    snapshot state.json
-
-    claude -p <span class="hljs-string">&quot;/loop-work <span class="hljs-variable">$task</span>&quot;</span>        <span class="hljs-comment"># fresh session → tmp/proposal.json</span>
-    restore state.json <span class="hljs-keyword">if</span> touched       <span class="hljs-comment"># the plan is not a session&#x27;s to edit</span>
-    restore any gate file it moved
-
-    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> done_tasks + [task]:       <span class="hljs-comment"># THE GATE — every done task, every iteration</span>
-        run t.verify                    <span class="hljs-comment"># a task that stops verifying → pending, attempt burned</span>
-
-    <span class="hljs-keyword">if</span> gate_passed and proposal.outcome == <span class="hljs-string">&quot;done&quot;</span>:
-        claude -p <span class="hljs-string">&quot;/loop-review <span class="hljs-variable">$task</span>&quot;</span>  <span class="hljs-comment"># fresh session → tmp/verdict.json</span>
-
-    apply: <span class="hljs-keyword">done</span> │ pending (+1 attempt) │ blocked (attempts &gt;= 3)
-    append journal + telemetry
-    git commit -m <span class="hljs-string">&quot;[loop] <span class="hljs-variable">$task</span>: <span class="hljs-variable">$outcome</span>&quot;</span>     <span class="hljs-comment"># exactly one commit per iteration</span>
-</code></pre>
-<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal lead" data-theme="loop" lang="C" class="loop minimal lead" data-marpit-pagination="4" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal lead;--theme:loop;" data-marpit-pagination-total="14">
-<h2 id="three-ideas">Three ideas</h2>
-<h1 id="a-shell-loopbrfilesbrhard-gates">A shell loop.<br />Files.<br />Hard gates.</h1>
-<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="5" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
-<h2 id="1--why-a-shell-loop">1 · Why a shell loop</h2>
-<h1 id="fresh-contextbrevery-task">Fresh context,<br />every task.</h1>
-<ul>
-<li><strong>Resume</strong> is reading a file</li>
-<li><strong>Failure</strong> stops at one task</li>
-</ul>
-<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="6" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
-<h2 id="2--why-files">2 · Why files</h2>
-<h1 id="a-prompt-you-canbrreview-like-code">A prompt you can<br />review like code.</h1>
-<ul>
-<li><strong>Versioned · linkable · reusable</strong></li>
-<li>Broken? <strong>Edit the file, re-run</strong></li>
-</ul>
-<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="7" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
-<h2 id="3--why-hard-gates">3 · Why hard gates</h2>
-<h1 id="a-rule-is-readbrthree-different-ways">A rule is read<br />three different ways.</h1>
-<ul>
-<li><code>exit 0</code> <strong>is not</strong></li>
-<li>Written <strong>before</strong> the code exists</li>
-</ul>
-<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="8" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
-<h2 id="the-model">The model</h2>
-<h1 id="the-loop-is-a-statebrmachine-over-artifacts">The loop is a state<br />machine over artifacts.</h1>
-<ul>
-<li>It never reads <strong>your code</strong></li>
-<li>It asks: <strong>did the gate pass?</strong></li>
-<li>It is <strong>tech agnostic</strong></li>
-</ul>
-<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop" data-theme="loop" lang="C" class="loop" data-marpit-pagination="9" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop;--theme:loop;" data-marpit-pagination-total="14">
 <h2 id="three-jobs-three-skills-no-overlap">Three jobs, three skills, no overlap</h2>
 <table>
 <thead>
@@ -118,8 +52,8 @@
 <tr>
 <td><strong>Reads</strong></td>
 <td>brief, <code>CLAUDE.md</code>, knowledge roots</td>
-<td>its task, journal, references, the files</td>
-<td>the task, <strong>the diff</strong>, the references</td>
+<td><code>plan.md</code>, its task, journal, references, the files</td>
+<td><code>plan.md</code>, the task, <strong>the diff</strong>, the references</td>
 </tr>
 <tr>
 <td><strong>Writes</strong></td>
@@ -143,7 +77,7 @@
 </table>
 <footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop json" data-theme="loop" lang="C" class="loop json" data-marpit-pagination="10" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop json;--theme:loop;" data-marpit-pagination-total="14">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop json" data-theme="loop" lang="C" class="loop json" data-marpit-pagination="4" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop json;--theme:loop;" data-marpit-pagination-total="14">
 <h2 id="statejson--the-single-source-of-truth"><code>state.json</code> — the single source of truth</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;run_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0004-runstat-review&quot;</span><span class="hljs-punctuation">,</span>
@@ -169,6 +103,73 @@
   <span class="hljs-punctuation">]</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
+<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop" data-theme="loop" lang="C" class="loop" data-marpit-pagination="5" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop;--theme:loop;" data-marpit-pagination-total="14">
+<h2 id="a-shell-script-the-driver--the-only-thing-that-commits">A shell script: The driver — the only thing that commits</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">claude -p <span class="hljs-string">&quot;/loop-plan &lt;brief&gt;&quot;</span>          <span class="hljs-comment"># once → .loop/state/state.json</span>
+
+<span class="hljs-keyword">while</span> task = next_ready_task(state):    <span class="hljs-comment"># first pending whose deps are done</span>
+    check budgets                       <span class="hljs-comment"># max iterations · cost ceiling · convergence</span>
+    snapshot state.json
+
+    claude -p <span class="hljs-string">&quot;/loop-work <span class="hljs-variable">$task</span>&quot;</span>        <span class="hljs-comment"># fresh session → tmp/proposal.json</span>
+    restore state.json <span class="hljs-keyword">if</span> touched       <span class="hljs-comment"># the plan is not a session&#x27;s to edit</span>
+    restore any gate file it moved
+
+    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> done_tasks + [task]:       <span class="hljs-comment"># THE GATE — every done task, every iteration</span>
+        run t.verify                    <span class="hljs-comment"># a task that stops verifying → pending, attempt burned</span>
+
+    <span class="hljs-keyword">if</span> gate_passed and proposal.outcome == <span class="hljs-string">&quot;done&quot;</span>:
+        claude -p <span class="hljs-string">&quot;/loop-review <span class="hljs-variable">$task</span>&quot;</span>  <span class="hljs-comment"># fresh session → tmp/verdict.json</span>
+
+    apply: <span class="hljs-keyword">done</span> │ pending (+1 attempt) │ blocked (attempts &gt;= 3)
+    append journal + telemetry
+    git commit -m <span class="hljs-string">&quot;[loop] <span class="hljs-variable">$task</span>: <span class="hljs-variable">$outcome</span>&quot;</span>     <span class="hljs-comment"># exactly one commit per iteration</span>
+</code></pre>
+<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="6" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
+<h2 id="the-model">The model</h2>
+<h1 id="the-loop-is-a-statebrmachine-over-artifacts">The loop is a state<br />machine over artifacts.</h1>
+<ul>
+<li>It never reads <strong>your code</strong></li>
+<li>It asks: <strong>did the gate pass?</strong></li>
+<li>It is <strong>tech agnostic</strong></li>
+</ul>
+<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal lead" data-theme="loop" lang="C" class="loop minimal lead" data-marpit-pagination="7" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal lead;--theme:loop;" data-marpit-pagination-total="14">
+<h2 id="three-ideas">Three ideas</h2>
+<h1 id="a-shell-loopbrfilesbrhard-gates">A shell loop.<br />Files.<br />Hard gates.</h1>
+<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="8" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
+<h2 id="1--why-a-shell-loop">1 · Why a shell loop</h2>
+<h1 id="fresh-contextbrevery-task">Fresh context,<br />every task.</h1>
+<ul>
+<li><strong>Deterministic</strong>, no judgement</li>
+<li><strong>Resume</strong> is reading a file</li>
+<li><strong>Failure</strong> stops at one task</li>
+</ul>
+<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="9" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
+<h2 id="2--why-files">2 · Why files</h2>
+<h1 id="a-prompt-you-canbrreview-like-code">A prompt you can<br />review like code.</h1>
+<ul>
+<li><strong>Versioned · linkable · reusable</strong></li>
+<li>Broken? <strong>Edit the file, re-run</strong></li>
+</ul>
+<footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop minimal" data-theme="loop" lang="C" class="loop minimal" data-marpit-pagination="10" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop minimal;--theme:loop;" data-marpit-pagination-total="14">
+<h2 id="3--why-hard-gates">3 · Why hard gates</h2>
+<h1 id="a-rule-is-readbrthree-different-ways">A rule is read<br />three different ways.</h1>
+<ul>
+<li><code>exit 0</code> <strong>is not</strong></li>
+<li>Written <strong>before</strong> the code exists</li>
+</ul>
 <footer>2026-09-25 · <a href="https://miguelveloso.dev">https://miguelveloso.dev</a></footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-footer="2026-09-25 · https://miguelveloso.dev" data-class="loop" data-theme="loop" lang="C" class="loop" data-marpit-pagination="11" style="--paginate:true;--footer:2026-09-25 · https://miguelveloso.dev;--class:loop;--theme:loop;" data-marpit-pagination-total="14">
@@ -262,23 +263,23 @@ then they can follow along and keep the links afterwards.
 Speaker notes: the loop is the deliverable; the program it builds is just the
 proof it ran.</p></div><div class="bespoke-marp-note" data-index="1" tabindex="0"><p>A brief becomes state.json with a gate per task. Then for every task: loop-work,
 the gate, loop-review — committed only if both passed. The three sessions never
-see each other.</p></div><div class="bespoke-marp-note" data-index="2" tabindex="0"><p>Bash, ~1000 lines, no framework. Every status transition belongs here. Note the
-gate runs for *every* done task, not just the current one — that is the
-regression check.</p></div><div class="bespoke-marp-note" data-index="3" tabindex="0"><p>The map for the four slides that follow. Say each idea as a sentence; the slide
-only carries the word.</p></div><div class="bespoke-marp-note" data-index="4" tabindex="0"><p>Tell the rest: a long session degrades as the window
-fills; the loop never asks the model to hold the whole project at once.</p></div><div class="bespoke-marp-note" data-index="5" tabindex="0"><p>Tell the rest: no chat box ever gets the prompt
-right; a brief is argued with before a token is spent, and the same references
-bind the work session and the reviewer.</p></div><div class="bespoke-marp-note" data-index="6" tabindex="0"><p>Tell the rest: gates are authored by a session that
-cannot benefit from them, re-run on every iteration, and restored by the driver
-if a session edits one — the cheating is helpful, not malicious.</p></div><div class="bespoke-marp-note" data-index="7" tabindex="0"><p>Tell the rest: the driver runs a command and reads an exit code and a log. It has
-no model of Python, of pytest, of this program at all — that is why the core can
-be tech-agnostic. Swap the stack and the gates change; the loop does not.</p></div><div class="bespoke-marp-note" data-index="8" tabindex="0"><p>loop-review *may* run whatever it likes — but the driver already re-ran the gate
+see each other.</p></div><div class="bespoke-marp-note" data-index="2" tabindex="0"><p>loop-review *may* run whatever it likes — but the driver already re-ran the gate
 before waking it, so re-running commands is spending the session on the one
 question that is already answered. It is there for the test that asserts
 nothing and the function that hardcodes the fixture: &quot;read the evidence, not the
-summary&quot; is discipline, not a mechanism — proposal.json is still on disk.</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>Real verify commands are longer — they assert on the parse, never on the text of
+summary&quot; is discipline, not a mechanism — proposal.json is still on disk.</p></div><div class="bespoke-marp-note" data-index="3" tabindex="0"><p>Real verify commands are longer — they assert on the parse, never on the text of
 the output. `notes` is how a failed attempt talks to the next session: the only
-channel between two sessions that never meet.</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>Nothing here is opt-in telemetry: the driver writes it as it goes, in the same
+channel between two sessions that never meet.</p></div><div class="bespoke-marp-note" data-index="4" tabindex="0"><p>Bash, ~1000 lines, no framework. Every status transition belongs here. Note the
+gate runs for *every* done task, not just the current one — that is the
+regression check.</p></div><div class="bespoke-marp-note" data-index="5" tabindex="0"><p>Tell the rest: the driver runs a command and reads an exit code and a log. It has
+no model of Python, of pytest, of this program at all — that is why the core can
+be tech-agnostic. Swap the stack and the gates change; the loop does not.</p></div><div class="bespoke-marp-note" data-index="6" tabindex="0"><p>The map for the four slides that follow. Say each idea as a sentence; the slide
+only carries the word.</p></div><div class="bespoke-marp-note" data-index="7" tabindex="0"><p>Tell the rest: a long session degrades as the window
+fills; the loop never asks the model to hold the whole project at once.</p></div><div class="bespoke-marp-note" data-index="8" tabindex="0"><p>Tell the rest: no chat box ever gets the prompt
+right; a brief is argued with before a token is spent, and the same references
+bind the work session and the reviewer.</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>Tell the rest: gates are authored by a session that
+cannot benefit from them, re-run on every iteration, and restored by the driver
+if a session edits one — the cheating is helpful, not malicious.</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>Nothing here is opt-in telemetry: the driver writes it as it goes, in the same
 commit as the code. Failures get a pinned per-iteration copy because the plain
 gate log is overwritten by the next passing run of the same task.</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>runstat is the program the loop was pointed at first: summary, signals, compare,
 review. The loop built the tool that reads the loop. `compare` puts two runs
