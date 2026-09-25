@@ -1,0 +1,8 @@
+{
+  "task": "T4",
+  "outcome": "done",
+  "summary": "Fixed the review_fail cause recorded in T4's notes: amend.sh's HEAD-diff advisory regex matched only `git diff ... HEAD`, while SKILL.md documented it as covering `git diff`/`log`/`rev-list`. Broadened the jq regex in .loop/amend.sh's check() to match diff|log|rev-list, matching rule 4's own gate_diff_refs() scope, so the implementation now matches the doc it already shipped with.",
+  "files": [".loop/amend.sh"],
+  "verified": "bash .loop/tests/scenarios/38-head-diff-advisory.sh && .loop/tests/run-all.sh && uv run pytest -q — all green (41 scenarios passed, 40 pytest tests passed).",
+  "notes": "No other files needed changes: the T4 implementation, SKILL.md paragraph, scenario 38, and the five doc scenario-count bumps were already correct and complete from the prior (review_fail) iteration -- only amend.sh's detection regex was out of step with what SKILL.md already claimed it did. Chose to broaden the regex over narrowing the doc because (a) it costs nothing against the existing test matrix -- no scenario exercises a git log/rev-list HEAD case either way -- and (b) it makes the advisory actually cover the shape rule 4 permits (diff/log/rev-list against HEAD), which is what the goal and SKILL.md text describe; narrowing the doc would have left a real gap (a `git log HEAD` or `git rev-list HEAD` scope guard missing the two variables) undetected."
+}

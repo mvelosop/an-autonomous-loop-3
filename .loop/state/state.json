@@ -2,9 +2,9 @@
   "run_id": "B20260924-1947-gate-shape-and-driver-honesty",
   "brief": "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md",
   "status": "running",
-  "iteration": 5,
+  "iteration": 6,
   "created": "2026-09-24T21:26:56Z",
-  "updated": "2026-09-24T23:54:20Z",
+  "updated": "2026-09-25T00:05:59Z",
   "tasks": [
     {
       "id": "T1",
@@ -131,9 +131,9 @@
         "The whole offline suite (.loop/tests/run-all.sh) and uv run pytest -q stay green: existing scenarios keep asserting what they asserted before, and none is deleted or loosened to make room for this change."
       ],
       "verify": "( . .loop/tests/lib.sh; unset LOOP_ACTIVE_TASK LOOP_GATE_TASK; D=\"$(mktemp -d)\"; trap 'rm -rf \"$D\"' EXIT; mkdir -p \"$D/.loop/state\"; cp .loop/amend.sh .loop/render-plan.sh \"$D/.loop/\"; git -C \"$D\" init -q; git -C \"$D\" -c user.email=f@t -c user.name=f commit -q --allow-empty -m init; pj(){ jq -nc --arg v \"$1\" '{run_id:\"fx\",brief:\"docs/briefs/0003-runstat-cli.md\",status:\"running\",iteration:0,created:\"2026-08-15T00:00:00Z\",updated:\"2026-08-15T00:00:00Z\",tasks:[{id:\"T1\",title:\"t\",goal:\"g\",files:[],depends_on:[],acceptance:[\"a\"],verify:\"test -f .never\",status:\"pending\",attempts:0,notes:\"\"},{id:\"T2\",title:\"t\",goal:\"g\",files:[],depends_on:[],acceptance:[\"a\"],verify:$v,status:\"pending\",attempts:0,notes:\"\"}]}' > \"$D/.loop/state/state.json\"; }; chk(){ pj \"$2\"; bash \"$D/.loop/amend.sh\" check > \"$D/out\" 2>&1; rc=$?; [ $rc = 0 ] && ok \"check exits 0: $2\" || bad \"check exit $rc: $2\"; if [ \"$1\" = advise ]; then grep -q T2 \"$D/out\" && ok 'advised about T2' || bad \"not advised: $2\"; else grep -q T2 \"$D/out\" && bad \"advised wrongly: $2\" || ok 'no advisory'; fi; }; chk advise 'test -f .never && test -z \"$(git diff --name-only HEAD -- docs)\"'; chk advise 'test -f .never && git diff --quiet HEAD -- docs'; chk quiet 'test -f .never && { [ \"$LOOP_GATE_TASK\" != \"$LOOP_ACTIVE_TASK\" ] || test -z \"$(git diff --name-only HEAD -- docs)\"; }'; chk quiet 'test -f .never && test -n \"${LOOP_ACTIVE_TASK:-}\" && git diff --quiet HEAD -- docs'; chk quiet 'test -f .never && test -n \"${LOOP_GATE_TASK:-}\" && git diff --quiet HEAD -- docs'; chk quiet 'test -f .never'; finish ) && bash .loop/tests/scenarios/38-head-diff-advisory.sh && .loop/tests/run-all.sh && uv run pytest -q",
-      "status": "pending",
+      "status": "done",
       "attempts": 1,
-      "notes": "SKILL.md's new paragraph claims the advisory fires on a verify that diffs against HEAD via `git diff`/`log`/`rev-list`, but amend.sh's regex only matches `git diff ... HEAD` — a `git log HEAD` or `git rev-list HEAD` scope guard missing the two task-identity variables gets no advisory at all, silently reproducing the exact false-reversion failure mode this task exists to warn plan authors about. Either narrow the doc to 'git diff' or broaden the regex to match diff|log|rev-list as rule 4's own gate_diff_refs()/grep pattern in run.sh does."
+      "notes": ""
     },
     {
       "id": "T5",
