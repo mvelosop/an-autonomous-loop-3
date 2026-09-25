@@ -43,6 +43,17 @@ check_one() {
   warn() { printf '  \033[33m!\033[0m %s\n' "$*"; warnings=$((warnings+1)); }
   ok()   { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 
+  # Nothing retires a brief, so a spent one reads plannable forever. A run's
+  # journal is named for the brief's own stem -- the number-and-slug a
+  # planner writes as run_id -- so its existence is the check: no stamp, no
+  # new field. A `.loop-brief.md` brief's stem drops that suffix too, since
+  # that is the run id its planner actually wrote.
+  local stem; stem="$(basename "$f" .md)"; stem="${stem%.loop-brief}"
+  local journal=".loop/state/journals/$stem.md"
+  if [[ -f "$journal" ]]; then
+    bad "already run — $journal exists; this brief declares itself plannable and is not"
+  fi
+
   # A worked example is what arbitrates when two implementations disagree, and
   # what becomes the end-to-end acceptance test.
   if grep -qiE '^#+ .*(worked example|acceptance)' <<<"$body"; then ok "has a worked example"

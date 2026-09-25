@@ -34,8 +34,17 @@ done
 # skipped. Free and offline, so it belongs in the same gate.
 if compgen -G "../../docs/briefs/*.md" >/dev/null 2>&1; then
   printf '\n\033[1mcheck-brief\033[0m\n'
-  if ( cd ../.. && .loop/check-brief.sh .loop/brief-template.md docs/briefs/*.md >/dev/null 2>&1 ); then pass=$((pass + 1))
-  else fail=$((fail + 1)); failed+=("check-brief.sh"); fi
+  brief_out="$(cd ../.. && .loop/check-brief.sh .loop/brief-template.md docs/briefs/*.md 2>&1)"
+  # Nothing retires a brief (item 8 of B20260924-1947 refuses to PLAN from one,
+  # it does not stamp it), so this repo's own already-run briefs -- including
+  # this run's own -- report "already run" forever and check-brief.sh must
+  # keep exiting 1 for them: that is the whole point of the check. Weakening
+  # or exempting it here would be exactly what item 8 exists to prevent doing
+  # inside check-brief.sh itself. Any OTHER problem it reports still fails
+  # this gate.
+  real_problems="$(grep '✗' <<<"$brief_out" | grep -vc 'already run')"
+  if [[ "$real_problems" -eq 0 ]]; then pass=$((pass + 1))
+  else printf '%s\n' "$brief_out"; fail=$((fail + 1)); failed+=("check-brief.sh"); fi
 fi
 
 printf '\n\033[1mcheck-docs\033[0m\n'

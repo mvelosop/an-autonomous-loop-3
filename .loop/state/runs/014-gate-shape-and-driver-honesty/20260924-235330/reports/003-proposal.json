@@ -1,0 +1,17 @@
+{
+  "task": "T2",
+  "outcome": "done",
+  "summary": "Gate-shape lint rule 4 in .loop/run.sh refuses a plan whose verify diffs, logs or rev-lists against any fixed ref (commit, tag, branch, relative ref, range, merge-base) instead of HEAD, via a new gate_diff_refs() helper alongside rule 3's gate_inspected_paths(). Documented in loop-plan's SKILL.md, added scenario 36-gate-decaying-baseline.sh, and scenario/check counts (36/39) kept consistent across README.md, .loop/README.md, .loop/manual.md, B008-driver-in-python.md and this run's brief.",
+  "files": [
+    ".loop/run.sh",
+    ".claude/skills/loop-plan/SKILL.md",
+    ".loop/tests/scenarios/36-gate-decaying-baseline.sh",
+    "README.md",
+    ".loop/README.md",
+    ".loop/manual.md",
+    "docs/briefs/B008-driver-in-python.md",
+    "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md"
+  ],
+  "verified": "Ran T2's full verify command in the foreground: the 5 named-ref rejections + 2 HEAD acceptances, bash .loop/tests/scenarios/36-gate-decaying-baseline.sh, .loop/tests/run-all.sh (39 passed) and uv run pytest -q (40 passed in 1.01s) — exit 0 overall.",
+  "notes": "This task's implementation, docs and scenario were already present and correct in the working tree at session start (attempts:1, notes recorded a prior session had tampered with .loop/state/state.json directly, which the driver reverted, forcing that iteration to gate_fail regardless of what the gate itself reported -- see the run's loop.log: 'T2 failed on state tampering -- the work is reverted whatever the gate said'). state.json was clean (matched HEAD) at the start of this session. I did not change run.sh, SKILL.md, the scenario, or any doc: I re-verified each acceptance criterion by hand (die-block message shape, rule 3/existing rules untouched, gate_diff_refs' merge-base/range handling, scenario count consistency at 36/39) and re-ran the verify command myself rather than trust the prior claim, since the prior session's own 'done' claim was exactly what got overridden. Nothing needed fixing; this session made no code changes."
+}

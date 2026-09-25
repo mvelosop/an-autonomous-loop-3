@@ -1,0 +1,108 @@
+{
+  "duration_api_ms": 195110,
+  "stop_reason": "end_turn",
+  "session_id": "220cef4c-947e-4e23-8dfa-951959706f6f",
+  "total_cost_usd": 0.8951054000000002,
+  "usage": {
+    "input_tokens": 54,
+    "cache_creation_input_tokens": 78244,
+    "cache_read_input_tokens": 2203257,
+    "output_tokens": 14137,
+    "output_tokens_details": {
+      "thinking_tokens": 5160
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 78244,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 199,
+        "cache_read_input_tokens": 101048,
+        "cache_creation_input_tokens": 1199,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1199
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 54,
+      "outputTokens": 14137,
+      "cacheReadInputTokens": 2203257,
+      "cacheCreationInputTokens": 78244,
+      "webSearchRequests": 0,
+      "costUSD": 0.8951054000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 5160,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01A2ptyUQPw2oRgYbMcsFYRw",
+      "tool_input": {
+        "command": "tail -20 ~/.claude/projects/-Users-USER-source-personal-an-autonomous-loop-3/220cef4c-947e-4e23-8dfa-951959706f6f/tool-results/b8mp1846u.txt; echo \"EXIT_CHECK: $?\"",
+        "description": "Check tail of full verify output for pass/fail summary"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 27,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed T9's review_fail: `run.sh`'s already-run refusal was firing even when resuming an existing plan for the same brief (since it ran before the resume-vs-reset check). I scoped the fix to skip the refusal when `state.json`'s `.brief` already matches the requested brief, added a regression test case to scenario 43 that reproduces the bug, and verified the full gate (scenario 43, `.loop/tests/run-all.sh` — 46 passed, and `uv run pytest -q` — 40 passed) all exit 0. Proposal written; stopping here per the one-task rule.",
+  "ttft_ms": 2900,
+  "type": "result",
+  "duration_ms": 552512,
+  "uuid": "456bcaae-e9e6-4dbe-afb9-ccbfbc35ea32",
+  "ttft_stream_ms": 2068,
+  "time_to_request_ms": 38,
+  "first_content_frame_ms": 2068,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "work",
+  "iteration": 12
+}

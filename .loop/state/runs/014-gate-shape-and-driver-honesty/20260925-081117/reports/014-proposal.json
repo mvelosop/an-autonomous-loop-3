@@ -1,0 +1,8 @@
+{
+  "task": "T9",
+  "outcome": "done",
+  "summary": "No code changes needed: check-brief.sh's already-run detection, run.sh's plan-time refusal with the --replan override and resuming_same_brief guard, scenario 43-brief-already-run.sh, and run-all.sh's check-brief step (which excludes 'already run' findings from failing the gate) were all already correct and complete in the working tree from a prior attempt, which had been wrongly reverted by a since-fixed driver bug.",
+  "files": [],
+  "verified": "Ran the full T9 verify command (check-brief.sh direct checks, scenario 43-brief-already-run.sh, .loop/tests/run-all.sh, uv run pytest -q) myself in the foreground: all pass -- 46/46 scenarios green, 40/40 pytest tests pass, no gate-shape or check-docs regressions.",
+  "notes": "Confirmed via git log/diff that .loop/run.sh lines ~744-768 (resuming_same_brief computed from state.json's .brief vs $BRIEF, skipping the refusal when they match; the die block naming the journal and --replan) and .loop/check-brief.sh's journal-existence check were already present and unchanged since the operator's reset commit (08c2734), which only touched .loop/state/state.json to reset T9 to pending/attempts:0. I made zero edits. This confirms the T9 notes' account: the real defect (resume-vs-fresh-plan conflation) was correctly diagnosed and fixed in attempt 2 (commit fc5d7aa's predecessor work), and the subsequent gate_fail/blocked outcomes were purely driver-side collateral (gate_files_moved reverting T9's own scenario file across retries), now fixed separately. Nothing left to do for this task."
+}

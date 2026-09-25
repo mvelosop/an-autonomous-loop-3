@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 58704,
+  "stop_reason": "end_turn",
+  "session_id": "a16a29dd-7681-43be-9d72-ef40ce828e33",
+  "total_cost_usd": 0.48295299999999997,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 73177,
+    "cache_read_input_tokens": 694775,
+    "output_tokens": 5125,
+    "output_tokens_details": {
+      "thinking_tokens": 1448
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 73177,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 126,
+        "cache_read_input_tokens": 90568,
+        "cache_creation_input_tokens": 1248,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1248
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 20,
+      "outputTokens": 5125,
+      "cacheReadInputTokens": 694775,
+      "cacheCreationInputTokens": 73177,
+      "webSearchRequests": 0,
+      "costUSD": 0.48295299999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 1448,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 14,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T9 was already fully and correctly implemented — I verified the full gate passes (46/46 scenarios, 40/40 pytest tests) without making any changes, and reported `done` in `.loop/tmp/proposal.json`. The task's earlier `blocked`/`gate_fail` outcomes were driver-side collateral damage (now fixed), not a defect in T9's own work.",
+  "ttft_ms": 1346,
+  "type": "result",
+  "duration_ms": 175687,
+  "uuid": "f0284e6b-7cc4-4a56-a4eb-33c67a7c1477",
+  "ttft_stream_ms": 806,
+  "time_to_request_ms": 35,
+  "first_content_frame_ms": 806,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "work",
+  "iteration": 14
+}

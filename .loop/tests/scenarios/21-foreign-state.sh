@@ -19,6 +19,18 @@ assert_exit 0
 
 note "── a DIFFERENT brief: a different plan, so reset ──"
 ( cd "$FX/repo" && cp docs/briefs/0003-runstat-cli.md docs/briefs/0009-other.md )
+# Not PLAN_TWO again: the first run already committed its artifacts, T1.out and
+# T2.out, to HEAD -- so a second plan reusing PLAN_TWO's own verify commands
+# would now name a HEAD file neither of ITS tasks owns, which is gate-shape
+# rule 3, not what a reset-vs-resume test means to exercise. Swap in a plan
+# whose verify never names a path.
+fixture_plan '{"run_id":"fixture2","brief":"docs/briefs/0009-other.md","status":"running","iteration":0,
+ "created":"2026-08-15T00:00:00Z","updated":"2026-08-15T00:00:00Z","tasks":[
+ {"id":"T1","title":"First","goal":"g","files":[],"depends_on":[],
+  "acceptance":["ok"],"verify":"true","status":"pending","attempts":0,"notes":""},
+ {"id":"T2","title":"Second","goal":"g","files":[],"depends_on":["T1"],
+  "acceptance":["ok"],"verify":"true","status":"pending","attempts":0,"notes":""}]}'
+fixture_stub_default
 fixture_run docs/briefs/0009-other.md
 assert_exit 0
 assert_log "resetting and planning fresh"

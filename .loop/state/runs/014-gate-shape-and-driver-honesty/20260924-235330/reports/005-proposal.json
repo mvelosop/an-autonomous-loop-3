@@ -1,0 +1,17 @@
+{
+  "task": "T4",
+  "outcome": "done",
+  "summary": "check() in .loop/amend.sh gains a third advisory: it names any task whose verify diffs against HEAD (git diff/log/rev-list) without mentioning LOOP_ACTIVE_TASK or LOOP_GATE_TASK anywhere in the command, since during a regression re-run of that gate the only uncommitted work in the tree belongs to whichever task the driver is currently working, not to the gated task. Documented in loop-plan's SKILL.md beside the existing rule-3/rule-4/env-var paragraphs, added scenario 38-head-diff-advisory.sh, and bumped the scenario/check counts (38/41) across README.md, .loop/README.md, .loop/manual.md, B008-driver-in-python.md and this run's own brief.",
+  "files": [
+    ".loop/amend.sh",
+    ".claude/skills/loop-plan/SKILL.md",
+    ".loop/tests/scenarios/38-head-diff-advisory.sh",
+    "README.md",
+    ".loop/README.md",
+    ".loop/manual.md",
+    "docs/briefs/B008-driver-in-python.md",
+    "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md"
+  ],
+  "verified": "Ran the task's full verify command (the cheap direct gate against a throwaway repo, then bash .loop/tests/scenarios/38-head-diff-advisory.sh, .loop/tests/run-all.sh and uv run pytest -q) in the foreground: 41 passed in run-all.sh, 40 passed in pytest, no failures.",
+  "notes": "The detection is a single jq pass over .tasks[]: select(.verify matches the regex git[[:space:]]+diff[[:space:]]+(--[a-zA-Z-]+[[:space:]]+)*HEAD([[:space:]]|$)) and select(verify does not contain \"LOOP_ACTIVE_TASK\" or \"LOOP_GATE_TASK\"). Deliberately simpler than rule 4's gate_diff_refs() in run.sh: this only needs to recognize the one baseline (HEAD) that rule 4 already lets through, not extract/reassemble arbitrary refs, so a plain regex test() suffices and needed no new helper function. Mentioning either variable anywhere in the verify string clears the advisory even if the usage is wrong (e.g. checking it but ignoring the result) -- the acceptance criteria only ask that a verify \"mentions\" the variable, and amend.sh's other two advisories are similarly syntactic rather than semantic. amend.sh is not part of the fixture harness's throwaway repo (fixture_new in lib.sh copies run.sh/render-plan.sh/settings.json, not amend.sh, and lib.sh is not this task's to edit), so scenario 38 builds its own tiny git repo directly -- same shape as this task's own cheap direct gate in state.json -- rather than using fixture_run."
+}

@@ -1,0 +1,688 @@
+    ---- the session edited two files and died
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   notes name thing_one.txt
+    [32mok[0m   journal names thing_one.txt
+    [32mok[0m   run-end report names thing_one.txt
+    [32mok[0m   thing_one.txt was committed
+    [32mok[0m   notes name thing_two.txt
+    [32mok[0m   journal names thing_two.txt
+    [32mok[0m   run-end report names thing_two.txt
+    [32mok[0m   thing_two.txt was committed
+    [32mok[0m   notes leave out driver bookkeeping
+    ---- the session did nothing and died
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   the two cases read differently
+    [32mok[0m   notes: work session left no valid proposal; the working tree is unchanged
+  [32mPASS[0m bash
+    ---- the session edited two files and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   notes name thing_one.txt
+    [32mok[0m   journal names thing_one.txt
+    [32mok[0m   run-end report names thing_one.txt
+    [32mok[0m   thing_one.txt was committed
+    [32mok[0m   notes name thing_two.txt
+    [32mok[0m   journal names thing_two.txt
+    [32mok[0m   run-end report names thing_two.txt
+    [32mok[0m   thing_two.txt was committed
+    [32mok[0m   notes leave out driver bookkeeping
+    ---- the session did nothing and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   the two cases read differently
+    [32mok[0m   notes: work session left no valid proposal; the working tree is unchanged
+  [32mPASS[0m 40-no-proposal-tree
+
+[1m01-happy-path[0m
+    [32mok[0m   exit 0
+    [32mok[0m   run status=complete
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    [32mok[0m   2 iteration(s)
+    [32mok[0m   iteration 1 worked T1
+    [32mok[0m   iteration 2 worked T2
+    [32mok[0m   log: plan complete
+  [32mPASS[0m 01-happy-path
+
+[1m02-review-fail[0m
+    [32mok[0m   exit 0
+    [32mok[0m   2 iteration(s)
+    [32mok[0m   iteration 1 outcome=review_fail
+    [32mok[0m   iteration 2 outcome=done
+    [32mok[0m   T1 status=done
+    [32mok[0m   T1 attempts=1
+  [32mPASS[0m 02-review-fail
+
+[1m03-gate-regression[0m
+    [32mok[0m   exit 0
+    [32mok[0m   log: GATE REGRESSION T1
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    [32mok[0m   iteration 3 worked T1
+  [32mPASS[0m 03-gate-regression
+
+[1m04-attempt-ceiling[0m
+    [32mok[0m   exit 2
+    [32mok[0m   run status=blocked
+    [32mok[0m   T1 status=blocked
+    [32mok[0m   T1 attempts=2
+    [32mok[0m   log: attempt ceiling
+  [32mPASS[0m 04-attempt-ceiling
+
+[1m05-max-iterations-resumable[0m
+    [32mok[0m   exit 4
+    [32mok[0m   run status=max_iterations
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=pending
+    [32mok[0m   no tool errors leaked into the run
+    ---- re-running with no state edit
+    [32mok[0m   exit 0
+    [32mok[0m   no tool errors leaked into the run
+    [32mok[0m   run status=complete
+    [32mok[0m   T2 status=done
+  [32mPASS[0m 05-max-iterations-resumable
+
+[1m06-cost-ceiling-resumable[0m
+    [32mok[0m   exit 6
+    [32mok[0m   run status=cost_ceiling
+    [32mok[0m   log: cost ceiling
+    ---- raising the ceiling and re-running
+    [32mok[0m   exit 0
+    [32mok[0m   run status=complete
+  [32mPASS[0m 06-cost-ceiling-resumable
+
+[1m07-convergence-halt[0m
+    [32mok[0m   exit 5
+    [32mok[0m   run status=not_converging
+    [32mok[0m   log: not converging
+  [32mPASS[0m 07-convergence-halt
+
+[1m08-plan-validation[0m
+    [32mok[0m   exit 1
+    [32mok[0m   log: no verify command
+    [32mok[0m   0 iteration(s)
+  [32mPASS[0m 08-plan-validation
+
+[1m09-dependency-order[0m
+    [32mok[0m   exit 0
+    [32mok[0m   iteration 1 worked T2
+    [32mok[0m   iteration 2 worked T1
+  [32mPASS[0m 09-dependency-order
+
+[1m10-containment[0m
+    [32mok[0m   exit 0
+    [32mok[0m   no username in any tracked file
+    [32mok[0m   transient handoffs are gitignored
+    [32mok[0m   no absolute sandbox path in any tracked file
+    [32mok[0m   nothing written to fake HOME
+    [32mok[0m   absolute path was masked to ~ in the journal
+  [32mPASS[0m 10-containment
+
+[1m11-stall[0m
+    [32mok[0m   exit 3
+    [32mok[0m   run status=stalled
+    [32mok[0m   log: no recorded progress
+  [32mPASS[0m 11-stall
+
+[1m12-signals-fixture[0m
+    [32mok[0m   iterations = 3
+    [32mok[0m   tasks closed = 2/8
+    [32mok[0m   iterations per closed = 1.50
+    [32mok[0m   gate failures = 1
+    [32mok[0m   review rejections = 0
+    [32mok[0m   attempts burned = 1
+    [32mok[0m   no-progress streak = 0
+    [32mok[0m   estimated spend = 4.08
+  [32mPASS[0m 12-signals-fixture
+
+[1m13-empty-run-signals[0m
+    [32mok[0m   exit 4
+    [32mok[0m   0 iteration(s)
+    [32mok[0m   log: iterations:            0
+    [32mok[0m   log: tasks closed:          0/0
+    [32mok[0m   log: iterations per closed: n/a
+    [32mok[0m   log: no-progress streak:    0
+    [32mok[0m   log: gate failures:         0
+    [32mok[0m   log: attempts burned:       0
+  [32mPASS[0m 13-empty-run-signals
+
+[1m14-rendered-views[0m
+    [32mok[0m   exit 0
+    [32mok[0m   plan.md rendered
+    [32mok[0m   plan.md warns it is generated
+    [32mok[0m   plan.md tracks final state
+    [32mok[0m   T1 rendered as checked
+    [32mok[0m   T2 rendered as checked
+    [32mok[0m   verify commands are collapsible
+    [32mok[0m   journal opens with the plan report
+    [32mok[0m   journal closes with the outcome
+    [32mok[0m   journal carries the signals
+    [32mok[0m   journal has per-iteration entries
+    [32mok[0m   render-plan runs with no arguments
+    [32mok[0m   render is deterministic
+  [32mPASS[0m 14-rendered-views
+
+[1m15-telemetry-contract[0m
+    [32mok[0m   exit 0
+    [32mok[0m   5 session files (1 plan + 2x work/review)
+    [32mok[0m   session files are name-sortable in run order
+    [32mok[0m   every session stamped with a valid phase
+    [32mok[0m   every session stamped with a numeric iteration
+    [32mok[0m   plan session is iteration 0
+    [32mok[0m   work/review sessions pair per iteration
+    [32mok[0m   every session keeps the fields runstat reads
+    [32mok[0m   iterations.jsonl carries exactly the six contract keys
+    [32mok[0m   every outcome is one of the four contract values
+  [32mPASS[0m 15-telemetry-contract
+
+[1m16-review-fails-closed[0m
+    [32mok[0m   exit 2
+    [32mok[0m   T1 status=blocked
+    [32mok[0m   iteration 1 outcome=review_fail
+    [32mok[0m   log: no valid verdict
+    [32mok[0m   log clean of: T1 done
+  [32mPASS[0m 16-review-fails-closed
+
+[1m17-stale-handoff[0m
+    [32mok[0m   T1 status=done
+    [32mok[0m   iteration 2 outcome=blocked
+    [32mok[0m   log: no valid proposal
+    [32mok[0m   T1's report is in its own entry
+    [32mok[0m   T1's report was not reused for T2
+  [32mPASS[0m 17-stale-handoff
+
+[1m18-preflight-untrusted[0m
+    [32mok[0m   exit 1
+    [32mok[0m   log: workspace NOT trusted
+    [32mok[0m   log: preflight failed
+    [32mok[0m   no state.json written
+    [32mok[0m   no session was run
+  [32mPASS[0m 18-preflight-untrusted
+
+[1m19-session-error[0m
+    [32mok[0m   exit 7
+    [32mok[0m   run status=session_error
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=0
+  [32mPASS[0m 19-session-error
+
+[1m20-parallel-safe-layout[0m
+    [32mok[0m   exit 4
+    [32mok[0m   telemetry grouped by branch: .loop/state/runs/master/
+    [32mok[0m   journal is per plan: .loop/state/journals/fixture.md
+    [32mok[0m   no repo-wide .loop/journal.md
+    ---- resuming — the narrative must continue, not restart
+    [32mok[0m   exit 0
+    [32mok[0m   still one journal for the plan across both runs
+    [32mok[0m   resumed run appended to it (3 → 5 sections)
+    [32mok[0m   both runs' iterations are in one narrative
+    [32mok[0m   each run got its own telemetry dir, same second or not
+  [32mPASS[0m 20-parallel-safe-layout
+
+[1m21-foreign-state[0m
+    [32mok[0m   exit 0
+    [32mok[0m   state stamped with its owning branch
+    ---- ── a DIFFERENT brief: a different plan, so reset ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: resetting and planning fresh
+    [32mok[0m   a plan session ran — genuinely reset, not resumed
+    [32mok[0m   state now holds the plan that was asked for
+    ---- ── same brief, branch RENAMED: must resume, never destroy ──
+    [32mok[0m   exit 0
+    [32mok[0m   log clean of: resetting and planning fresh
+    [32mok[0m   the renamed branch's plan survived (fixture2)
+    [32mok[0m   no plan session — it resumed, as it should
+    ---- ── no brief, and the stamp disagrees: refuse, do not guess ──
+    [32mok[0m   exit 1
+    [32mok[0m   log: no way to tell an inherited plan
+    [32mok[0m   refusing left the state untouched
+  [32mPASS[0m 21-foreign-state
+
+[1m22-run-lock[0m
+    ---- ── a live lock must stop a second loop ──
+    [32mok[0m   exit 1
+    [32mok[0m   log: a loop is already running in this working tree
+    [32mok[0m   log: git worktree add
+    [32mok[0m   no state.json written
+    [32mok[0m   the live lock was left alone
+    ---- ── a dead pid must be cleared, not obeyed ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: clearing a stale lock
+    [32mok[0m   a crashed run does not brick the loop
+    ---- ── the lock is released on exit ──
+    [32mok[0m   lock cleared after a normal run
+    ---- ── and it is never committed ──
+    [32mok[0m   .loop/tmp/.running is gitignored
+  [32mPASS[0m 22-run-lock
+
+[1m23-git-identity[0m
+    ---- ── no identity configured: refuse before spending ──
+    [32mok[0m   exit 1
+    [32mok[0m   log: git user.name/user.email not set
+    [32mok[0m   log: preflight failed
+    [32mok[0m   no state.json written
+    [32mok[0m   nothing was spent
+    ---- ── identity restored: proceeds ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: git identity (fixture@test)
+    ---- ── a pre-commit hook is surfaced, not blocked on ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: a pre-commit hook is active
+    [32mok[0m   a passing hook does not stop the run
+  [32mPASS[0m 23-git-identity
+
+[1m24-state-tampering[0m
+    [32mok[0m   exit 0
+    [32mok[0m   log: STATE TAMPERING
+    [32mok[0m   iteration 1 worked T1
+    [32mok[0m   iteration 1 outcome=gate_fail
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   T1's authored verify survived the tampering
+    [32mok[0m   iteration 2 outcome=done
+    [32mok[0m   T1 status=done
+    [32mok[0m   iteration 3 worked T2
+    [32mok[0m   iteration 3 outcome=gate_fail
+    [32mok[0m   T2 attempts=1
+    [32mok[0m   both tampering shapes caught (verify and notes)
+    [32mok[0m   iteration 4 outcome=done
+    [32mok[0m   T2 status=done
+    [32mok[0m   run status=complete
+    [32mok[0m   no username in any tracked file
+    [32mok[0m   transient handoffs are gitignored
+    [32mok[0m   no absolute sandbox path in any tracked file
+    [32mok[0m   nothing written to fake HOME
+  [32mPASS[0m 24-state-tampering
+
+[1m25-gate-shape[0m
+    [32mok[0m   exit 1
+    [32mok[0m   log: gate shape rejected
+    [32mok[0m   log: T1
+    [32mok[0m   0 iteration(s)
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 25-gate-shape
+
+[1m26-install-boundary[0m
+    ---- ── install into a target that is mid-run ──
+    [32mok[0m   installer exited 0
+    [32mok[0m   state.json untouched
+    [32mok[0m   journals untouched
+    [32mok[0m   run telemetry untouched
+    [32mok[0m   tmp/ untouched
+    [32mok[0m   .claude/settings.json untouched — the fence ships separately
+    [32mok[0m   .loop/settings.json installed
+    [32mok[0m   .claude/loop-knowledge.md untouched — the repo's own knowledge
+    [32mok[0m   the fence carries its deny list
+    [32mok[0m   run.sh replaced
+    [32mok[0m   every mechanism file shipped
+    [32mok[0m   scripts are executable
+    [32mok[0m   tests shipped
+    [32mok[0m   calibration cases shipped
+    [32mok[0m   calibration results did not ship — that is our record, not theirs
+    [32mok[0m   worked example briefs shipped
+    [32mok[0m   all three skills shipped
+    [32mok[0m   the target's CLAUDE.md content survived
+    [32mok[0m   the loop section was added
+    [32mok[0m   the target's .gitignore survived
+    [32mok[0m   .gitignore got exactly one line
+    [32mok[0m   re-install adds no duplicate gitignore line
+    [32mok[0m   re-install adds no duplicate CLAUDE.md section
+    [32mok[0m   re-install still leaves state alone
+    ---- ── the loop's own bookkeeping is not shipped ──
+    [32mok[0m   the source repo has .loop/todo/ (so this asserts something)
+    [32mok[0m   .loop/todo/ was not installed
+    [32mok[0m   a pre-existing .loop/todo/ is left byte-for-byte alone
+    [32mok[0m   and the install says so once
+    ---- ── an installed copy installs onward ──
+    [32mok[0m   chained install exited 0
+    [32mok[0m   knowledge declaration seeded where absent
+    [32mok[0m   mechanism reached the second target
+    [32mok[0m   example briefs chained — they live in examples/ once installed
+    ---- ── provenance is propagated, not re-derived ──
+    [32mok[0m   the first install names a version (1.0.0-rc.1-22-g297fb2e-dirty)
+    [32mok[0m   the chained install carries the same version and commit
+    [32mok[0m   the stamp does not name the intermediate repo's commit
+  [32mPASS[0m 26-install-boundary
+
+[1m27-dangling-reference[0m
+    [32mok[0m   exit 1
+    [32mok[0m   log: do not resolve
+    [32mok[0m   log: docs/never-written.md
+    [32mok[0m   0 iteration(s)
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 27-dangling-reference
+
+[1m28-knowledge-roots[0m
+    ---- ── a root with neither an index nor descriptions is called out ──
+    [32mok[0m   log: no index and no descriptions
+    [32mok[0m   log: docs/domain/
+    [32mok[0m   exit 0
+    ---- ── an indexed root is scannable, and says so ──
+    [32mok[0m   log: knowledge root(s) scannable
+    [32mok[0m   exit 0
+    ---- ── a repo that declares nothing pays nothing ──
+    [32mok[0m   exit 0
+    [32mok[0m   silent about: knowledge root
+    [32mok[0m   silent about: declared root(s)
+    [32mok[0m   silent about: index does not name
+    [32mok[0m   silent about: loop-knowledge
+    ---- ── a root whose descriptions are one folder down is not blind ──
+    [32mok[0m   log: knowledge root(s) scannable
+    [32mok[0m   log: folder reference(s) with no index.md
+    [32mok[0m   log: docs/handoffs/spa87/
+    [32mok[0m   exit 0
+    ---- ── a folder with any of the three entry points is quiet ──
+    [32mok[0m   index.md accepted as an entry point
+    [32mok[0m   README.md accepted as an entry point
+    [32mok[0m   README-handoff.md accepted as an entry point
+    ---- ── a document its index does not name is reported ──
+    [32mok[0m   log: index does not name
+    [32mok[0m   log: 0002-currency.md
+    [32mok[0m   the listed document was not reported
+    [32mok[0m   exit 0
+    ---- ── an index is never reported as missing from itself ──
+    [32mok[0m   index.md is not reported as missing from itself
+    [32mok[0m   README.md is not reported as missing from itself
+    [32mok[0m   README-decisions.md is not reported as missing from itself
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 28-knowledge-roots
+
+[1m29-brief-typo[0m
+    ---- ── a mistyped brief path leaves the plan alone ──
+    [32mok[0m   exit 2
+    [32mok[0m   log: brief not found
+    [32mok[0m   log: the current plan is untouched
+    [32mok[0m   state.json still exists
+    [32mok[0m   the plan is byte-identical
+    [32mok[0m   plan.md survived
+    [32mok[0m   no lock was taken
+    [32mok[0m   no run directory was created
+    ---- ── --help prints usage and changes nothing ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: usage
+    [32mok[0m   --help left the plan alone
+    ---- ── an unknown option is refused, not read as a brief ──
+    [32mok[0m   exit 2
+    [32mok[0m   log: unknown option
+    [32mok[0m   an unknown option left the plan alone
+  [32mPASS[0m 29-brief-typo
+
+[1m30-plan-only[0m
+    ---- ── --plan-only plans, commits, and stops ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: plan only
+    [32mok[0m   log: 2 task(s)
+    [32mok[0m   log: T1
+    [32mok[0m   0 iteration(s)
+    [32mok[0m   exactly one session was paid for
+    [32mok[0m   every task is still pending
+    [32mok[0m   plan.md was rendered
+    [32mok[0m   the plan was committed
+    ---- ── the plan it left is resumable, which is the point ──
+    [32mok[0m   exit 0
+    [32mok[0m   the resumed run completed
+    [32mok[0m   both tasks done
+    ---- ── --plan-only on an already-planned run does nothing, cheaply ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: already planned
+    [32mok[0m   the finished plan was left alone
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 30-plan-only
+
+[1m31-preflight-only[0m
+    ---- ── a ready repo: exit 0, and nothing is created ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: preflight ok
+    [32mok[0m   log: nothing was run and nothing was changed
+    [32mok[0m   no state was written
+    [32mok[0m   no run directory was left behind
+    [32mok[0m   no lock was taken
+    ---- ── --preflight is the same thing ──
+    [32mok[0m   exit 0
+    [32mok[0m   log: preflight ok
+    ---- ── a check must not block, or be blocked by, a running loop ──
+    [32mok[0m   runs while a loop holds the lock
+    [32mok[0m   the live lock was left alone
+    ---- ── advisories exit non-zero, so it can gate a hook ──
+    [32mok[0m   exit 1 on advisories
+    [32mok[0m   log: no index and no descriptions
+    [32mok[0m   log: advisory finding(s)
+    ---- ── and it reports an index that has stopped naming its own folder ──
+    [32mok[0m   exit 1
+    [32mok[0m   log: index does not name
+    [32mok[0m   log: 0002-currency.md
+  [32mPASS[0m 31-preflight-only
+
+[1m32-doc-transients[0m
+    ---- ── a transient run.sh still produces is live ──
+    [32mok[0m   live transient passes
+    ---- ── rename it in run.sh and the reference is stale, decoy or no decoy ──
+    [32mok[0m   stale transient fails
+    [32mok[0m   log: dead path
+    [32mok[0m   log: names the stale path
+  [32mPASS[0m 32-doc-transients
+
+[1m33-gate-rewrite[0m
+    ---- -- modified, pre-existing, not assigned: the goalpost moved --
+    [32mok[0m   log: GATE REWRITE
+    [32mok[0m   the gate file was restored from HEAD
+    [32mok[0m   iteration 1 outcome=gate_fail
+    [32mok[0m   log clean of: review: PASS
+    [32mok[0m   T1 status=blocked
+    [32mok[0m   T1 attempts=3
+    [32mok[0m   no tool errors leaked into the run
+    ---- -- created by the task that ships it: the durable-artifact shape --
+    [32mok[0m   log clean of: GATE REWRITE
+    [32mok[0m   T1 status=done
+    ---- -- modified, pre-existing, but assigned: extending coverage it owns --
+    [32mok[0m   log clean of: GATE REWRITE
+    [32mok[0m   T1 status=done
+  [32mPASS[0m 33-gate-rewrite
+
+[1m34-todo-index-drift[0m
+    ---- ── a consistent directory passes ──
+    [32mok[0m   consistent index passes
+    ---- ── the drift that started this: the row paraphrases ──
+    [32mok[0m   paraphrased row fails
+    [32mok[0m   log: names the verbatim rule
+    [32mok[0m   log: names the entry
+    ---- ── an entry discharged but still marked open ──
+    [32mok[0m   status/section mismatch fails
+    [32mok[0m   log: names the missing section
+    ---- ── a closed entry that still says what it awaits ──
+    [32mok[0m   closed-with-waiting-on fails
+    [32mok[0m   log: says what a closed entry carries instead
+    ---- ── a closed entry with no record of what discharged it ──
+    [32mok[0m   closed without closed-by fails
+    ---- ── a file nobody indexed, and a row pointing at nothing ──
+    [32mok[0m   unindexed entry fails
+    [32mok[0m   dangling row fails
+    [32mok[0m   log: names the dangling row
+    ---- ── absence is not failure, and an installed copy is not ours to police ──
+    [32mok[0m   no .loop/todo/ skips cleanly
+    [32mok[0m   an installed copy is skipped despite a real defect
+  [32mPASS[0m 34-todo-index-drift
+
+[1m35-gate-unowned-file[0m
+    ---- -- rejected: inspects docs/todo.md, which the task does not own --
+    [32mok[0m   exit 1
+    [32mok[0m   log: gate shape rejected
+    [32mok[0m   log: T1 .*docs/todo.md
+    [32mok[0m   0 iteration(s)
+    ---- -- accepted: the same inspecting verify, with the path owned --
+    [32mok[0m   exit 0
+    [32mok[0m   log clean of: gate shape rejected
+    ---- -- accepted: the path is handed to a runner, not read --
+    [32mok[0m   exit 0
+    [32mok[0m   log clean of: gate shape rejected
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 35-gate-unowned-file
+
+[1m36-gate-decaying-baseline[0m
+    ---- -- rejected: diffs against 4c911d7 --
+    [32mok[0m   exit 1
+    [32mok[0m   log: gate shape rejected
+    [32mok[0m   log: T1 .*4c911d7
+    [32mok[0m   0 iteration(s)
+    ---- -- rejected: diffs against HEAD~1 --
+    [32mok[0m   exit 1
+    [32mok[0m   log: gate shape rejected
+    [32mok[0m   log: T1 .*HEAD~1
+    [32mok[0m   0 iteration(s)
+    ---- -- rejected: diffs against v1.0 --
+    [32mok[0m   exit 1
+    [32mok[0m   log: gate shape rejected
+    [32mok[0m   log: T1 .*v1.0
+    [32mok[0m   0 iteration(s)
+    ---- -- rejected: diffs against origin/main --
+    [32mok[0m   exit 1
+    [32mok[0m   log: gate shape rejected
+    [32mok[0m   log: T1 .*origin/main
+    [32mok[0m   0 iteration(s)
+    ---- -- rejected: diffs against  --
+    [32mok[0m   exit 1
+    [32mok[0m   log: gate shape rejected
+    [32mok[0m   log: T1 .*
+    [32mok[0m   0 iteration(s)
+    ---- -- accepted: diffs against HEAD --
+    [32mok[0m   exit 0
+    [32mok[0m   log clean of: gate shape rejected
+    ---- -- accepted: diffs against HEAD --
+    [32mok[0m   exit 0
+    [32mok[0m   log clean of: gate shape rejected
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 36-gate-decaying-baseline
+
+[1m37-gate-task-env[0m
+    [32mok[0m   exit 0
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    ---- recorded: work unset unset|T1 T1|review unset unset|work unset unset|T2 T1|T2 T2|review unset unset|
+    [32mok[0m   a gate saw active/gate = T1 T1
+    [32mok[0m   a gate saw active/gate = T2 T1
+    [32mok[0m   a gate saw active/gate = T2 T2
+    [32mok[0m   work sessions see neither variable
+    [32mok[0m   review sessions see neither variable
+    [32mok[0m   no tool errors leaked into the run
+  [32mPASS[0m 37-gate-task-env
+
+[1m38-head-diff-advisory[0m
+    ---- -- advised: diffs against HEAD, reads neither variable --
+    [32mok[0m   check exits 0: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
+    [32mok[0m   advised about T2: test -f .never && test -z "$(git diff --name-only HEAD -- docs)"
+    [32mok[0m   check exits 0: test -f .never && git diff --quiet HEAD -- docs
+    [32mok[0m   advised about T2: test -f .never && git diff --quiet HEAD -- docs
+    ---- -- quiet: diffs against HEAD, but reads one of the two variables --
+    [32mok[0m   check exits 0: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
+    [32mok[0m   no advisory: test -f .never && { [ "$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK" ] || test -z "$(git diff --name-only HEAD -- docs)"; }
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_ACTIVE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   check exits 0: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
+    [32mok[0m   no advisory: test -f .never && test -n "${LOOP_GATE_TASK:-}" && git diff --quiet HEAD -- docs
+    ---- -- quiet: no HEAD diff at all --
+    [32mok[0m   check exits 0: test -f .never
+    [32mok[0m   no advisory: test -f .never
+  [32mPASS[0m 38-head-diff-advisory
+
+[1m39-blocked-gate-passes[0m
+    ---- -- blocked, and the deliverable satisfies the gate --
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: review: PASS
+    [32mok[0m   notes say the gate passes: T1 GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else. Read the proposal. stub summary
+    [32mok[0m   the iteration warning says it
+    [32mok[0m   the run-end report says it
+    ---- -- blocked, and the gate fails: nothing to report --
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   log clean of: GATE REGRESSION
+    [32mok[0m   log clean of: GATE FAIL
+    [32mok[0m   notes make no gate claim
+    [32mok[0m   the log makes no gate claim
+  [32mPASS[0m 39-blocked-gate-passes
+
+[1m40-no-proposal-tree[0m
+    ---- the session edited two files and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   notes name thing_one.txt
+    [32mok[0m   journal names thing_one.txt
+    [32mok[0m   run-end report names thing_one.txt
+    [32mok[0m   thing_one.txt was committed
+    [32mok[0m   notes name thing_two.txt
+    [32mok[0m   journal names thing_two.txt
+    [32mok[0m   run-end report names thing_two.txt
+    [32mok[0m   thing_two.txt was committed
+    [32mok[0m   notes leave out driver bookkeeping
+    ---- the session did nothing and died without a proposal
+    [32mok[0m   iteration 1 outcome=blocked
+    [32mok[0m   the two cases read differently
+    [32mok[0m   notes: work session left no valid proposal; the working tree is unchanged
+  [32mPASS[0m 40-no-proposal-tree
+
+[1m41-regression-names-both[0m
+    [32mok[0m   exit 0
+    [32mok[0m   T1 attempts=1
+    [32mok[0m   T1 status=done
+    [32mok[0m   T2 status=done
+    [32mok[0m   regression line: [33m[loop][0m    GATE REGRESSION T1 — reverting to pending; detected during T2's iteration
+    [32mok[0m   it names T2, the task being worked
+  [32mPASS[0m 41-regression-names-both
+
+[1m42-repeat-blocked-halts[0m
+    ---- -- blocked twice on identical inputs: halts after the second, first diagnosis --
+    [32mok[0m   2 iteration(s)
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=2
+    [32mok[0m   halted non-zero (8)
+    [32mok[0m   the halt surfaces the first diagnosis
+    [32mok[0m   the second diagnosis is not what gets surfaced
+    ---- -- first attempt changes something: retry is allowed, re-evaluated on the next pair --
+    [32mok[0m   3 iteration(s)
+    [32mok[0m   T1 status=pending
+    [32mok[0m   T1 attempts=3
+    [32mok[0m   the halt surfaces the first diagnosis of the unchanged pair (iteration 2)
+  [32mPASS[0m 42-repeat-blocked-halts
+
+[1m43-brief-already-run[0m
+    ---- ── check-brief.sh: an already-run brief is reported ──
+    [32mok[0m   check-brief: an already-run brief exits 1
+    [32mok[0m   it names the journal
+    ---- ── check-brief.sh: a never-run plannable brief is unaffected ──
+    [32mok[0m   a never-run brief still passes
+    ---- ── run.sh: refuses to plan a brief whose journal already exists ──
+    [32mok[0m   exit 1
+    [32mok[0m   log: .loop/state/journals/0003-runstat-cli.md
+    [32mok[0m   no state.json written
+    [32mok[0m   log clean of: planning from
+    ---- ── run.sh: refuses before an existing plan for another brief is reset ──
+    [32mok[0m   exit 1
+    [32mok[0m   the existing plan is untouched
+    ---- ── run.sh --replan: the explicit override re-plans anyway ──
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
+    ---- ── run.sh: a plannable brief that was never run plans normally ──
+    [32mok[0m   exit 0
+    [32mok[0m   plan written
+  [32mPASS[0m 43-brief-already-run
+
+[1mcheck-brief[0m
+
+[1mcheck-docs[0m
+docs ok — every path resolves, no retired layout described
+
+[1mcheck-todo[0m
+todo ok — every entry matches its section, every row quotes its source
+
+────────────────────────
+[32m46 passed[0m
+
+reviewer calibration is separate and NOT run here — it calls a real
+model (~$1.50 for all nine): .loop/tests/reviewer-calibration/run-calibration.sh
+........................................                                 [100%]
+40 passed in 1.12s

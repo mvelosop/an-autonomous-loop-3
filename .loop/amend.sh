@@ -114,6 +114,35 @@ check() {
     say "    a gate that is green before the work exists proves nothing"
   fi
 
+  # Rule 4 (gate-shape lint) permits `git diff`/`log`/`rev-list` against HEAD
+  # because a work session cannot commit, so HEAD still separates that
+  # session's own edits from everything committed before it -- sound
+  # reasoning, but only for the iteration that IS that session. A finished
+  # task's gate re-runs for the life of the plan as a regression check of
+  # every later iteration too, and at that moment the only uncommitted work
+  # in the tree belongs to whichever task the driver is working NOW, not to
+  # the task whose gate is running. A `git diff`/`log`/`rev-list` HEAD guard
+  # that does not read LOOP_ACTIVE_TASK or LOOP_GATE_TASK (set for the
+  # duration of every gate, see run.sh) reads that other task's in-progress
+  # edits as its own regression -- failure E in the arc, six false
+  # reversions from exactly this.
+  #
+  # Advisory, not fatal: a HEAD diff on a task nothing ever gates behind (no
+  # dependents, a run that never resumes) is harmless in practice, and this
+  # loop does not let a mechanical rule reject a plan it cannot fully judge.
+  local headdiff
+  headdiff="$(jq -r '
+      .tasks[]
+      | select((.verify // "")
+          | test("git[[:space:]]+(diff|log|rev-list)[[:space:]]+(--[a-zA-Z-]+[[:space:]]+)*HEAD([[:space:]]|$)"))
+      | select((.verify // "") | (contains("LOOP_ACTIVE_TASK") or contains("LOOP_GATE_TASK")) | not)
+      | .id' "$STATE")"
+  if [[ -n "$headdiff" ]]; then
+    say "  ! task(s) diff against HEAD without reading LOOP_ACTIVE_TASK or LOOP_GATE_TASK: $(tr '\n' ' ' <<<"$headdiff")"
+    say "    during another task's iteration the only uncommitted work in the tree is"
+    say "    that task's, not this gate's — read the two variables to tell them apart"
+  fi
+
   [[ $problems -eq 0 ]] || die "plan is not valid — fix the above, the next run would fail on it"
   "$REPO/.loop/render-plan.sh" >/dev/null && say "  ✓ plan valid, .loop/state/plan.md re-rendered"
 }

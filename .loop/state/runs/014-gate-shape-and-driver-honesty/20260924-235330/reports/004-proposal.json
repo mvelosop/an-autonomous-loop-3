@@ -1,0 +1,17 @@
+{
+  "task": "T3",
+  "outcome": "done",
+  "summary": "The driver now exports LOOP_ACTIVE_TASK and LOOP_GATE_TASK for the duration of each gate's verify command in .loop/run.sh's gate_ids(), unset elsewhere so no work or review session and no inherited stale value ever sees them. Documented for planners in loop-plan's SKILL.md and for operators in .loop/manual.md, added scenario 37-gate-task-env.sh, and bumped the scenario/check counts (37/40) across README.md, .loop/README.md, .loop/manual.md, B008-driver-in-python.md and this run's own brief.",
+  "files": [
+    ".loop/run.sh",
+    ".claude/skills/loop-plan/SKILL.md",
+    ".loop/manual.md",
+    ".loop/tests/scenarios/37-gate-task-env.sh",
+    "README.md",
+    ".loop/README.md",
+    "docs/briefs/B008-driver-in-python.md",
+    "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md"
+  ],
+  "verified": "Ran T3's own verify command from state.json in full: bash .loop/tests/scenarios/37-gate-task-env.sh && .loop/tests/run-all.sh && uv run pytest -q -- exit 0 (40 offline checks passed, 40 pytest tests passed).",
+  "notes": "gate_ids() now takes the active task id as its first argument (call site: gate_ids \"$task\" \"${gate_targets[@]}\"); LOOP_ACTIVE_TASK/LOOP_GATE_TASK are set only as a prefix on the single `bash -c \"$cmd\"` that runs one gate's verify, never exported into run.sh's own shell -- so nothing later in the iteration (including run_session for work/review) can see them, and a top-of-script `unset LOOP_ACTIVE_TASK LOOP_GATE_TASK` strips any value inherited from whatever invoked run.sh (the leak scenario.sh 37 checks by exporting LOOP_ACTIVE_TASK=stale LOOP_GATE_TASK=stale onto fixture_run itself, mirroring what happens when run-all.sh executes inside an outer gate). No change was made to .loop/amend.sh's own gate-running code path in check() -- it does not use gate_ids() and reading/exporting these two vars there is T4's advisory, not this task's export. Did not touch the scenario-listing table in .loop/README.md (stops at 33-gate-rewrite, already missing 34-36) since T1 and T2 did not extend it either -- check-docs.sh only enforces the numeric counts, not table completeness, so that omission is pre-existing and out of this task's scope."
+}

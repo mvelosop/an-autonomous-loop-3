@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 211977,
+  "stop_reason": "end_turn",
+  "session_id": "7f3c142a-f0e1-4b60-ad6d-387d410bb536",
+  "total_cost_usd": 1.7425026,
+  "usage": {
+    "input_tokens": 114,
+    "cache_creation_input_tokens": 107086,
+    "cache_read_input_tokens": 5459453,
+    "output_tokens": 22204,
+    "output_tokens_details": {
+      "thinking_tokens": 7510
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 107086,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 142,
+        "cache_read_input_tokens": 129657,
+        "cache_creation_input_tokens": 1432,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1432
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 114,
+      "outputTokens": 22204,
+      "cacheReadInputTokens": 5459453,
+      "cacheCreationInputTokens": 107086,
+      "webSearchRequests": 0,
+      "costUSD": 1.7425026,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 7510,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 57,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T4 is done: added the third advisory in `.loop/amend.sh check()`, documented it in `loop-plan/SKILL.md`, added scenario 38, and updated the scenario/check counts across all five docs. The full verify command (direct gate + scenario 38 + 41-check `run-all.sh` + `uv run pytest -q`) passes, and `.loop/tmp/proposal.json` is written reporting `done`.",
+  "ttft_ms": 1471,
+  "type": "result",
+  "duration_ms": 317537,
+  "uuid": "da8fd9f0-159e-42d8-869b-3caef1759f82",
+  "ttft_stream_ms": 805,
+  "time_to_request_ms": 41,
+  "first_content_frame_ms": 805,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "work",
+  "iteration": 5
+}

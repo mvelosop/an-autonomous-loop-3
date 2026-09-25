@@ -73,6 +73,7 @@ pass. See the [manual](manual.md).
 | not converging | 5 | no — the run is going nowhere, look at it |
 | cost ceiling | 6 | yes — raise `LOOP_COST_CEILING` |
 | session error | 7 | no — a `claude` session failed |
+| repeat blocked | 8 | no — two identical `blocked` outcomes with nothing changed between them, a human decides |
 
 Budgets are checked **between** iterations and are **per-run**, so raising one
 and re-running needs no state edit. They are runaway backstops; the convergence
@@ -215,7 +216,7 @@ absolute paths and full file contents, and they never go inside the repo.
 ## Tests
 
 ```bash
-.loop/tests/run-all.sh          # all 37 checks
+.loop/tests/run-all.sh          # all 46 checks
 .loop/tests/run-all.sh 03 07    # just the ones matching
 ```
 

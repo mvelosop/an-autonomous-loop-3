@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 132995,
+  "stop_reason": "end_turn",
+  "session_id": "75bf3f9d-e8d0-4a1d-a8dd-1c292f41b235",
+  "total_cost_usd": 0.5271966,
+  "usage": {
+    "input_tokens": 42,
+    "cache_creation_input_tokens": 51519,
+    "cache_read_input_tokens": 1072833,
+    "output_tokens": 10647,
+    "output_tokens_details": {
+      "thinking_tokens": 5623
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 51519,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 258,
+        "cache_read_input_tokens": 73430,
+        "cache_creation_input_tokens": 2092,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2092
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 42,
+      "outputTokens": 10647,
+      "cacheReadInputTokens": 1072833,
+      "cacheCreationInputTokens": 51519,
+      "webSearchRequests": 0,
+      "costUSD": 0.5271966,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 5623,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 21,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: PASS** — T8's repeat-blocked halt logic checks out. I traced the `blocked_head`/`blocked_summary` chain by hand against the driver's actual commit sequence (the state is written pre-commit each iteration, so the diff window really is \"between the start of the two blocked sessions\"), confirmed both scenario branches (identical-inputs halts after iteration 2 surfacing diagnosis 1; changed-then-unchanged halts after iteration 3 surfacing diagnosis 2), and reran the full offline suite (45 passed), `pytest` (40 passed), and the exact verify string from `state.json` (exit 0). Docs were updated consistently, no absolute paths, no scope creep, no new `iterations.jsonl` outcome value.",
+  "ttft_ms": 1965,
+  "type": "result",
+  "duration_ms": 364732,
+  "uuid": "b95d5629-e241-4d0a-883d-c5000d39891f",
+  "ttft_stream_ms": 1283,
+  "time_to_request_ms": 37,
+  "first_content_frame_ms": 1283,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "review",
+  "iteration": 10
+}

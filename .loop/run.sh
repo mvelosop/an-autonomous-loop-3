@@ -21,6 +21,7 @@
 #   1  preflight / usage        5  not converging  (needs a human)
 #   2  blocked (needs a human)  6  cost ceiling    (resumable)
 #   3  stalled                  7  session error   (needs a human)
+#   8  repeat blocked, nothing changed since the first diagnosis (needs a human)
 #
 # Env
 #   LOOP_MAX_ITERATIONS   iterations this run may use          (default 30)
@@ -82,13 +83,23 @@ CONVERGENCE_MIN="${LOOP_CONVERGENCE_MIN:-6}"
 PLAN_MODEL="${LOOP_PLAN_MODEL:-opus}"
 WORK_MODEL="${LOOP_WORK_MODEL:-sonnet}"
 
+# LOOP_ACTIVE_TASK and LOOP_GATE_TASK are the driver's own, set only for the
+# duration of each verify command inside gate_ids() below. Unset here so a
+# value inherited from whatever invoked this script — including, as happens
+# when run-all.sh runs inside another gate, a stale one left by an outer
+# driver — never reaches a work or review session, which read the plain
+# environment via `claude -p`.
+unset LOOP_ACTIVE_TASK LOOP_GATE_TASK
+
 PLAN_ONLY=0
 CHECK_ONLY=0
+REPLAN=0
 BRIEF=""
 for a in "$@"; do
   case "$a" in
     --plan-only|--only-plan) PLAN_ONLY=1 ;;
     --check|--preflight)     CHECK_ONLY=1 ;;
+    --replan)                REPLAN=1 ;;
     *) BRIEF="$a" ;;
   esac
 done
@@ -106,12 +117,13 @@ done
 case "$BRIEF" in
   -h|--help)
     cat <<'USAGE'
-usage: .loop/run.sh [--check | --plan-only] [brief-path]
+usage: .loop/run.sh [--check | --plan-only] [--replan] [brief-path]
 
   .loop/run.sh docs/briefs/0003-runstat-cli.md   plan and run that brief
   .loop/run.sh                                   resume the plan in .loop/state/state.json
   .loop/run.sh --plan-only <brief>               plan, commit it, and stop
   .loop/run.sh --check                           run the checks and stop; spends nothing
+  .loop/run.sh --replan <brief>                  plan from a brief that has already run
 
 --check answers "is this repo ready?" — tools, workspace trust, the permission
 fence, git identity, and whether the knowledge roots you declared can actually
@@ -127,6 +139,11 @@ Related, and also free:
 stops so you can read the plan and its verify commands before committing to
 the rest. Review .loop/state/plan.md, adjust with .loop/amend.sh, then run
 .loop/run.sh with no argument to execute it.
+
+A brief's journal at .loop/state/journals/<brief-stem>.md is proof its run
+already happened; planning from it again would overwrite .loop/state/state.json
+and re-derive work already on main, so run.sh refuses unless you pass
+--replan — a deliberate re-plan after an aborted run.
 
 Naming a brief other than the one the current plan holds resets that plan and
 starts fresh. Docs: .loop/manual.md
@@ -276,7 +293,25 @@ archive_transcript() {
 #                            durable-artifact rule working as intended, so
 #                            creation is always allowed
 #   existed at HEAD          which makes the author an earlier session or the
-#                            planner, never this one
+#                            planner, never this one -- UNLESS that HEAD
+#                            content is itself this task's own, from an
+#                            earlier attempt: the driver commits every
+#                            iteration whatever its outcome, so a task whose
+#                            first attempt fails review still lands its new
+#                            file in HEAD, and a retry that keeps editing that
+#                            same file is still this task's own work, not a
+#                            rewrite of someone else's gate. The driver's own
+#                            commit subjects are "[loop] $task: $outcome"
+#                            (below), so the last commit to touch the file
+#                            says who actually wrote the HEAD version -- a
+#                            narrower test than "does `files` own it", which a
+#                            directory-style files entry (".loop/tests/
+#                            scenarios/", used throughout this plan) can never
+#                            satisfy by exact match, and which must stay
+#                            narrow: owning everything under a directory would
+#                            also excuse rewriting a FILE SOME OTHER TASK put
+#                            there, which is exactly the rewrite below still
+#                            has to catch
 #   named by THIS task's     the session rewrote the gate it is judged by. A
 #     verify                 file some OTHER task's gate names is deliberately
 #                            not this check's business: 03-gate-regression has
@@ -290,8 +325,16 @@ archive_transcript() {
 # the planner's. Three review sessions saw it and none objected; one cited the
 # rewritten test as evidence the criteria were met. The reviewer is built to
 # rule on substance and this is a question about process, so it belongs here.
+#
+# The retry carve-out is itself measured: B20260924-1947's own T9 hit this on
+# its second attempt. Its first attempt created a new scenario file (allowed,
+# per "modified, not created" above), but review failed it -- and the driver
+# commits every iteration regardless of outcome, so that file was in HEAD by
+# the second attempt. T9's `files` names the directory, not that exact path,
+# so the second attempt's legitimate fix to its own file was reverted as a
+# goalpost rewrite, and the task burned its last attempt on a false positive.
 gate_files_moved() {
-  local f
+  local f owner
   while IFS= read -r f; do
     [[ -n "$f" ]] || continue
     git cat-file -e "HEAD:$f" 2>/dev/null || continue
@@ -299,22 +342,115 @@ gate_files_moved() {
         (.tasks[] | select(.id == $t)) as $cur
         | (($cur.verify // "") | contains($f))
           and ((($cur.files // []) | index($f)) == null)
-      ' "$STATE" >/dev/null 2>&1 && printf '%s\n' "$f"
+      ' "$STATE" >/dev/null 2>&1 || continue
+    owner="$(git log -1 --format=%s -- "$f" 2>/dev/null)"
+    case "$owner" in
+      "[loop] $task:"*) continue ;;
+    esac
+    printf '%s\n' "$f"
   done < <(git diff --name-only HEAD 2>/dev/null)
 }
 
+# What a work session left in the tree when it died before writing a proposal --
+# the only account of "did it do anything" left once its own report is gone.
+# `git status --porcelain` (not `git diff HEAD`) because a session that died
+# after only creating new files leaves nothing for `diff` to see. One git
+# invocation; everything under .loop/state/ or .loop/tmp/ is the driver's own
+# bookkeeping (telemetry the session never touched) and is filtered in-shell,
+# not with a second git call.
+session_tree_changes() {
+  local line path
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line:3}"
+    path="${path#* -> }"
+    case "$path" in
+      .loop/state/*|.loop/tmp/*) continue ;;
+    esac
+    printf '%s\n' "$path"
+  done < <(git status --porcelain 2>/dev/null)
+}
+
+# Paths a verify command reads the BYTES of, as opposed to merely handing to a
+# runner. Used by the plan-time gate-shape lint (rule 3) to find, one phase
+# early, exactly the files gate_files_moved() above would revert at runtime --
+# grep, cat, test -f and a Python-level open(...) are inspecting; `uv run
+# pytest -q path` and `bash path` are executing and stay unflagged. Not a full
+# shell parse, on purpose: the four forms below are what the loop's own
+# scenarios and the arc's five stalled runs actually wrote.
+gate_inspected_paths() {
+  local cmd="$1"
+  { grep -oE 'grep[[:space:]]+(-[[:alnum:]]+[[:space:]]+)*[^[:space:]&|;-][^[:space:]&|;]*[[:space:]]+[^[:space:]&|;()"'"'"']+' <<<"$cmd" \
+      | awk '{print $NF}'
+    grep -oE 'cat[[:space:]]+[^[:space:]&|;]+' <<<"$cmd" | awk '{print $NF}'
+    grep -oE 'test[[:space:]]+-f[[:space:]]+[^[:space:]&|;)]+' <<<"$cmd" | awk '{print $NF}'
+    # \* rather than \?: this cmd may have come through jq's @tsv, which
+    # doubles a literal backslash, so a quote escaped once in the source
+    # (\") can arrive here escaped twice (\\").
+    grep -oE 'open\(\\*["'"'"'][^"'"'"']+\\*["'"'"']\)' <<<"$cmd" | sed -E 's/^open\(\\*.//; s/\\*.\)$//'
+  } | sort -u
+}
+
+# Refs a `git diff`/`log`/`rev-list` in a verify command is baselined against,
+# other than HEAD -- used by the plan-time gate-shape lint (rule 4) to catch a
+# baseline that decays the moment any other task commits. A range like
+# `origin/main..HEAD` still fails: the left side is the fixed part, so it is
+# what gets reported. Not a full shell parse, on purpose, same spirit as
+# gate_inspected_paths above: skips flags, stops at a `--` pathspec separator,
+# and reassembles a `$(...)` command-substitution ref that word-splitting would
+# otherwise cut at its first internal space.
+gate_diff_refs() {
+  local cmd="$1" rest tok ref
+  # Greedy to end of string, on purpose: a $(...) ref needs its closing paren
+  # still present to be reassembled below, and a verify is one line, so this
+  # loses nothing except a second, later diff/log/rev-list call in the same
+  # command -- a shape none of this rule's cases actually write.
+  rest="$(grep -oE 'git[[:space:]]+(diff|log|rev-list)[[:space:]]+.*' <<<"$cmd" \
+          | sed -E 's/^git[[:space:]]+(diff|log|rev-list)[[:space:]]+//')"
+  [[ -n "$rest" ]] || return 0
+  ref=""
+  for tok in $rest; do
+    case "$tok" in
+      --) break ;;
+      -*) continue ;;
+      *) ref="$tok"; break ;;
+    esac
+  done
+  [[ -n "$ref" ]] || return 0
+  case "$ref" in
+    \"\$\(*|\$\(*) ref="$(grep -oE '\$\([^)]*\)' <<<"$rest" | head -1)" ;;
+  esac
+  ref="${ref#\"}"; ref="${ref%\"}"; ref="${ref#\'}"; ref="${ref%\'}"
+  [[ -n "$ref" && "$ref" != "HEAD" ]] || return 0
+  if [[ "$ref" == *..* ]]; then
+    printf '%s\n' "${ref%%..*}"
+  else
+    printf '%s\n' "$ref"
+  fi
+}
 
 # Re-run the verify command of every task named. This is the whole point of the
 # external gate: "done" has to survive a command the session neither runs nor can
 # edit. Echoes the ids that failed.
+#
+# Each verify command runs with LOOP_ACTIVE_TASK (the task this iteration is
+# working, passed in as $1) and LOOP_GATE_TASK (the id currently being gated)
+# in its environment — set only on the `bash -c` that runs that one command,
+# never exported into this script's own environment, so nothing outside this
+# loop body can see them and a work or review session never does. The two
+# differ exactly when a gate is re-running as a regression check of a task
+# other than the one being worked — the case that used to have no session
+# whose scope it could speak to (brief B20260924-1947, failure E).
 gate_ids() {
+  local active="$1"; shift
   local id cmd rc failed=()
   mkdir -p "$RUN_DIR/gates"
   for id in "$@"; do
     cmd="$(state_get --arg id "$id" '.tasks[]|select(.id==$id)|.verify')"
     [[ -n "$cmd" && "$cmd" != "null" ]] || continue
     rc=0
-    bash -c "$cmd" >"$RUN_DIR/gates/$id.log.raw" 2>&1 || rc=$?
+    LOOP_ACTIVE_TASK="$active" LOOP_GATE_TASK="$id" \
+      bash -c "$cmd" >"$RUN_DIR/gates/$id.log.raw" 2>&1 || rc=$?
     mask <"$RUN_DIR/gates/$id.log.raw" >"$RUN_DIR/gates/$id.log"
     rm -f "$RUN_DIR/gates/$id.log.raw"
     [[ $rc -ne 0 ]] && failed+=("$id")
@@ -605,6 +741,34 @@ open_journal() {
     "$(state_get .run_id)" >"$JOURNAL"
 }
 
+# Item 8: nothing retires a brief, so a spent one reads plannable forever.
+# A run's journal is named for the brief's own stem -- the same name
+# check-brief.sh keys off -- so its existence is the check: no stamp, no new
+# field, nothing to keep in sync. Refused here, before the plan-reset logic
+# below touches an existing state.json and before any session runs, so
+# --plan-only cannot overwrite .loop/state/state.json and re-derive work this
+# brief already produced. --replan is the deliberate override for a genuine
+# re-plan after an aborted run.
+#
+# Resuming this same plan is not "planning from" the brief again -- state.json
+# already holds the work this brief produced, so re-deriving it is exactly
+# what does NOT happen. Skip the refusal whenever the brief asked for is the
+# one state.json is already stamped with.
+resuming_same_brief=0
+if [[ -f "$STATE" && -n "$BRIEF" ]] && [[ "$(state_get '.brief // ""')" == "$BRIEF" ]]; then
+  resuming_same_brief=1
+fi
+if [[ -n "$BRIEF" && "$REPLAN" -eq 0 && "$resuming_same_brief" -eq 0 ]]; then
+  brief_stem="$(basename "$BRIEF" .md)"
+  brief_stem="${brief_stem%.loop-brief}"
+  brief_journal="$STATE_DIR/journals/$brief_stem.md"
+  if [[ -f "$brief_journal" ]]; then
+    die "refusing to plan: ${brief_journal#$REPO/} already exists.
+  Planning would overwrite .loop/state/state.json and re-derive work this
+  brief already produced. Re-plan deliberately with --replan."
+  fi
+fi
+
 # A branch cut from main inherits whatever state.json the last squash left
 # there — another branch's plan. It must never be resumed as if it were this
 # branch's work.
@@ -715,6 +879,56 @@ $bad_gate
   fails on the idiomatic form -- exactly backwards. Matching on text that was
   never parsed (an HTML page, a log line) is fine and is not flagged."
 
+  # Gate-shape lint, rule 3. Not a heuristic: the condition is
+  # gate_files_moved() (above) evaluated one phase early. That function
+  # reverts any HEAD-existing file the current task's verify names and its
+  # files does not, and the revert runs before the gate does -- so a task in
+  # that shape is unpassable by construction, for any implementation, forever.
+  # Rule 2 already draws the inspect-vs-execute line for src/; this extends it
+  # to any HEAD-tracked file, task-relative rather than path-prefix-relative.
+  bad_gate3=""
+  while IFS=$'\t' read -r id cmd; do
+    [[ -n "$id" ]] || continue
+    while IFS= read -r f; do
+      [[ -n "$f" ]] || continue
+      git cat-file -e "HEAD:$f" 2>/dev/null || continue
+      jq -e --arg f "$f" --arg t "$id" '
+          (.tasks[] | select(.id == $t)) as $cur
+          | (($cur.files // []) | index($f)) == null
+        ' "$STATE" >/dev/null 2>&1 &&
+        bad_gate3+="    $id  inspects $f, which it does not own; the driver reverts that file before the gate runs, so no implementation can pass"$'\n'
+    done < <(gate_inspected_paths "$cmd")
+  done < <(state_get '.tasks[] | [.id, .verify] | @tsv')
+  [[ -z "$bad_gate3" ]] || die "gate shape rejected -- fix the plan:
+
+$bad_gate3
+  Two escape hatches, both correct outcomes: add the file to that task's
+  files, or move the claim to acceptance, where the review session can read
+  provenance instead of the gate re-asserting it. Handing the path to a
+  runner (uv run pytest -q path, bash path) rather than reading it is fine
+  and is not flagged."
+
+  # Gate-shape lint, rule 4. A gate re-runs for the life of the plan, so a
+  # baseline fixed at plan time decays the moment any other task commits --
+  # failure E in the brief this rule answers, twice over. git diff/log/rev-list
+  # against HEAD stays sound and unflagged: a work session cannot commit, so
+  # HEAD still discriminates a session's edits from committed history, which is
+  # exactly what the runtime gate-rewrite guard depends on.
+  bad_gate4=""
+  while IFS=$'\t' read -r id cmd; do
+    [[ -n "$id" ]] || continue
+    while IFS= read -r ref; do
+      [[ -n "$ref" ]] || continue
+      bad_gate4+="    $id  diffs against $ref rather than HEAD; a gate re-runs for the life of the plan and that baseline decays on the next commit"$'\n'
+    done < <(gate_diff_refs "$cmd")
+  done < <(state_get '.tasks[] | [.id, .verify] | @tsv')
+  [[ -z "$bad_gate4" ]] || die "gate shape rejected -- fix the plan:
+
+$bad_gate4
+  Diff against HEAD instead. It is the one baseline a gate can hold for the
+  life of the plan without decaying: a work session cannot commit, so HEAD
+  still separates a session's edits from everything committed before it."
+
   # The driver stamps both, rather than trusting the plan session to record
   # them: which branch and which brief a plan belongs to are facts the driver
   # already holds, and the brief is now what decides whether a later run
@@ -773,6 +987,8 @@ run_iters=0
 stalls=0
 status="max_iterations"
 exit_code=4
+blocked_gate_pass_tasks=()
+no_proposal_tasks=()
 
 while true; do
   pending="$(state_get '[.tasks[]|select(.status=="pending")]|length')"
@@ -833,7 +1049,16 @@ while true; do
 
   if [[ ! -f "$PROPOSAL" ]] || ! jq -e . "$PROPOSAL" >/dev/null 2>&1; then
     warn "work session left no valid proposal"
-    outcome="blocked"; summary="work session produced no proposal"; notes="none"
+    changed=()
+    while IFS= read -r f; do [[ -n "$f" ]] && changed+=("$f"); done < <(session_tree_changes)
+    if [[ ${#changed[@]} -gt 0 ]]; then
+      account="work session left no valid proposal; before dying it changed $(IFS=', '; echo "${changed[*]}") — the driver committed them under this iteration"
+    else
+      account="work session left no valid proposal; the working tree is unchanged"
+    fi
+    account="$(mask <<<"$account")"
+    [[ ${#changed[@]} -gt 0 ]] && no_proposal_tasks+=("$task — $account")
+    outcome="blocked"; summary="$account"; notes="none"
   else
     outcome="$(jq -r '.outcome // "blocked"' "$PROPOSAL")"
     summary="$(jq -r '.summary // ""' "$PROPOSAL" | mask)"
@@ -861,16 +1086,19 @@ while true; do
     warn "   GATE REWRITE $task — ${moved[*]} restored from HEAD; a gate is not a session's to rewrite"
   fi
 
-  # 2. gate — every done task, plus this one if it claims to be done
+  # 2. gate — every done task, plus this one if it claims to be done or
+  # reports blocked: a blocked outcome with a passing gate is a defect in the
+  # plan or the block itself, not in the work, and the only way to tell that
+  # from a genuine block is to run the gate rather than skip it.
   gate_targets=()
   while read -r id; do [[ -n "$id" ]] && gate_targets+=("$id"); done \
     < <(state_get '.tasks[]|select(.status=="done")|.id')
-  [[ "$outcome" == "done" ]] && gate_targets+=("$task")
+  [[ "$outcome" == "done" || "$outcome" == "blocked" ]] && gate_targets+=("$task")
 
   gate_failed=()
   if [[ ${#gate_targets[@]} -gt 0 ]]; then
     while read -r id; do [[ -n "$id" ]] && gate_failed+=("$id"); done \
-      < <(gate_ids "${gate_targets[@]}")
+      < <(gate_ids "$task" "${gate_targets[@]}")
   fi
 
   # Gate logs are keyed by task id and overwritten every iteration, so a failing
@@ -885,7 +1113,7 @@ while true; do
   # charge it an attempt. This is the check that per-task gates alone cannot do.
   for id in "${gate_failed[@]:-}"; do
     [[ -n "$id" && "$id" != "$task" ]] || continue
-    warn "   GATE REGRESSION $id — reverting to pending"
+    warn "   GATE REGRESSION $id — reverting to pending; detected during $task's iteration"
     state_edit --arg id "$id" --arg n "regressed: verify failed during $task — see .loop/state/runs/$RUN_PATH/gates/$id.log" \
       '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)'
   done
@@ -893,12 +1121,23 @@ while true; do
   candidate_failed=0
   for id in "${gate_failed[@]:-}"; do [[ "$id" == "$task" ]] && candidate_failed=1; done
 
+  # A blocked task whose own gate passes on this re-run is a signal, not a
+  # verdict: the work satisfies the gate, so whatever the session could not do
+  # is about something else. This never changes the status transition below.
+  blocked_gate_passed=0
+  gate_pass_line="$task GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else. Read the proposal."
+  [[ "$outcome" == "blocked" && $candidate_failed -eq 0 ]] && blocked_gate_passed=1
+
   verdict="skipped"
   if [[ -n "$tampered" ]]; then
     outcome="gate_fail"
     warn "   $task failed on state tampering — the work is reverted whatever the gate said"
   elif [[ "$outcome" == "blocked" ]]; then
     say "   work session reported blocked"
+    if [[ $blocked_gate_passed -eq 1 ]]; then
+      warn "   $gate_pass_line"
+      blocked_gate_pass_tasks+=("$task")
+    fi
   elif [[ $candidate_failed -eq 1 ]]; then
     outcome="gate_fail"
     warn "   GATE FAIL $task — review skipped, work that fails its own gate is not reviewable"
@@ -936,9 +1175,40 @@ while true; do
       state_edit --arg id "$task" --arg n "$reason" \
         '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)' ;;
     blocked)
-      state_edit --arg id "$task" --arg n "$summary" \
+      blocked_note="$summary"
+      [[ $blocked_gate_passed -eq 1 ]] && blocked_note="$gate_pass_line $summary"
+      state_edit --arg id "$task" --arg n "$blocked_note" \
         '(.tasks[]|select(.id==$id)) |= (.status="pending" | .attempts=(.attempts+1) | .notes=$n)' ;;
   esac
+
+  # Item 7: a second consecutive `blocked` outcome for the SAME task, with
+  # nothing outside the driver's own bookkeeping under .loop/state/ changed in
+  # the repo since the first, cannot carry new information -- a memoryless
+  # session given identical inputs reaches an identical conclusion. Kept on the
+  # task itself (not "the previous iteration of the run") so it still applies
+  # correctly when a different ready task was worked in between, and it
+  # survives a resumed run because state.json does. blocked_head is HEAD the
+  # last time this task ended blocked, captured before that iteration's own
+  # commit; HEAD now is still pre-commit too, so the diff between them is
+  # exactly what changed between the start of those two sessions.
+  repeat_blocked_halt=0
+  if [[ "$outcome" == "blocked" ]]; then
+    head_now="$(git rev-parse HEAD 2>/dev/null)"
+    prev_head="$(state_get --arg id "$task" '.tasks[]|select(.id==$id)|.blocked_head // empty')"
+    if [[ -n "$prev_head" ]]; then
+      changed="$(git diff --name-only "$prev_head" "$head_now" 2>/dev/null | grep -v '^\.loop/state/' || true)"
+      if [[ -z "$changed" ]]; then
+        prev_summary="$(state_get --arg id "$task" '.tasks[]|select(.id==$id)|.blocked_summary // empty')"
+        repeat_blocked_halt=1
+        repeat_blocked_msg="$task blocked twice with nothing changed since the first attempt — halting rather than spending a third identical session. First diagnosis: ${prev_summary:-none}"
+      fi
+    fi
+    state_edit --arg id "$task" --arg h "$head_now" --arg s "$summary" \
+      '(.tasks[]|select(.id==$id)) |= (.blocked_head=$h | .blocked_summary=$s)'
+  else
+    state_edit --arg id "$task" \
+      '(.tasks[]|select(.id==$id)) |= (del(.blocked_head) | del(.blocked_summary))'
+  fi
 
   # A task that has burned its attempts is blocked, not retried forever.
   n_new="$(state_get --argjson m "$MAX_ATTEMPTS" '[.tasks[]|select(.status=="pending" and .attempts>=$m)]|length')"
@@ -982,6 +1252,12 @@ while true; do
 
   print_signals
 
+  if [[ $repeat_blocked_halt -eq 1 ]]; then
+    warn "   $repeat_blocked_msg"
+    status="repeat_blocked"; exit_code=8
+    break
+  fi
+
   # Stall detection: an iteration that closed nothing and burned no attempt has
   # made no recorded progress at all.
   if [[ "$new_done" -le "$done_n" && "$outcome" != "gate_fail" && "$outcome" != "review_fail" ]]; then
@@ -1008,6 +1284,18 @@ for p in plan work review; do
   jq -s --arg p "$p" '[.[]|select(.phase==$p)] | "  \($p): \(length) session(s), $\([.[].total_cost_usd//0]|add//0|.*100|round/100), \([.[].num_turns//0]|add//0) turns"' \
     "$SESSIONS"/*.json 2>/dev/null | tr -d '"' | while read -r l; do say "$l"; done
 done
+if [[ ${#blocked_gate_pass_tasks[@]} -gt 0 ]]; then
+  say ""
+  for id in "${blocked_gate_pass_tasks[@]}"; do
+    say "$id GATE PASSES while the session reports blocked — the work satisfies its own gate; the block is about something else."
+  done
+fi
+if [[ ${#no_proposal_tasks[@]} -gt 0 ]]; then
+  say ""
+  for line in "${no_proposal_tasks[@]}"; do
+    say "$line"
+  done
+fi
 say ""
 case "$status" in
   complete)       say "plan complete. journal: ${JOURNAL#$REPO/}" ;;
@@ -1017,6 +1305,7 @@ case "$status" in
   cost_ceiling)   say "cost ceiling reached. resumable: raise LOOP_COST_CEILING and re-run" ;;
   not_converging) say "iterations-per-closed-task exceeded $CONVERGENCE_MAX — the run is not converging." ;;
   session_error)  say "a claude session failed. see .loop/state/runs/$RUN_PATH/" ;;
+  repeat_blocked) say "$repeat_blocked_msg" ;;
 esac
 render_plan
 

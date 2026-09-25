@@ -1,0 +1,107 @@
+{
+  "duration_api_ms": 701823,
+  "stop_reason": "end_turn",
+  "session_id": "726deaba-9fab-4048-b075-b067466cbe8c",
+  "total_cost_usd": 3.6979044000000014,
+  "usage": {
+    "input_tokens": 210,
+    "cache_creation_input_tokens": 160768,
+    "cache_read_input_tokens": 11681912,
+    "output_tokens": 71803,
+    "output_tokens_details": {
+      "thinking_tokens": 40086
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 160768,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 149,
+        "cache_read_input_tokens": 179222,
+        "cache_creation_input_tokens": 185,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 185
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 210,
+      "outputTokens": 71803,
+      "cacheReadInputTokens": 11681912,
+      "cacheCreationInputTokens": 160768,
+      "webSearchRequests": 0,
+      "costUSD": 3.6979044000000014,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 40086,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Read",
+      "tool_use_id": "toolu_019SqGtLmW1kchwZQgvjDTpD",
+      "tool_input": {
+        "file_path": "~/.claude/projects/-Users-USER-source-personal-an-autonomous-loop-3/726deaba-9fab-4048-b075-b067466cbe8c/tool-results/b652h4tum.txt"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 105,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "T1 is done: gate-shape lint rule 3 is implemented in `.loop/run.sh`, documented in the loop-plan SKILL, covered by new scenario 35, and the two existing scenarios it touched (33, 21) are fixed without weakening their assertions. Full verify command passes (own sub-cases, scenario 35, the 38-check offline suite, and pytest). Proposal written to `.loop/tmp/proposal.json`.",
+  "ttft_ms": 1538,
+  "type": "result",
+  "duration_ms": 1040544,
+  "uuid": "d7a16348-fff4-40cb-b479-4fb2138003ad",
+  "ttft_stream_ms": 806,
+  "time_to_request_ms": 41,
+  "first_content_frame_ms": 807,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "work",
+  "iteration": 1
+}

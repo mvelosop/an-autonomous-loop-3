@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 94829,
+  "stop_reason": "end_turn",
+  "session_id": "2fd25ee3-3c56-49a6-b75c-d24957117fbf",
+  "total_cost_usd": 0.43859299999999996,
+  "usage": {
+    "input_tokens": 50,
+    "cache_creation_input_tokens": 35601,
+    "cache_read_input_tokens": 1154445,
+    "output_tokens": 6520,
+    "output_tokens_details": {
+      "thinking_tokens": 1336
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 35601,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 104,
+        "cache_read_input_tokens": 57762,
+        "cache_creation_input_tokens": 1842,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1842
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 50,
+      "outputTokens": 6520,
+      "cacheReadInputTokens": 1154445,
+      "cacheCreationInputTokens": 35601,
+      "webSearchRequests": 0,
+      "costUSD": 0.43859299999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 1336,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 25,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**PASS** — T5 correctly extends the gate sweep to blocked outcomes, reports a passing gate in all three required places with the exact status-transition unchanged, ships scenario 39 covering both cases, and keeps every doc count and the full suite (42 checks + 40 pytest tests) green. No findings.",
+  "ttft_ms": 1745,
+  "type": "result",
+  "duration_ms": 97641,
+  "uuid": "4696e422-1be9-45e2-903d-35128298228f",
+  "ttft_stream_ms": 1125,
+  "time_to_request_ms": 33,
+  "first_content_frame_ms": 1125,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "review",
+  "iteration": 7
+}

@@ -1,0 +1,16 @@
+{
+  "task": "T7",
+  "outcome": "done",
+  "summary": "The GATE REGRESSION warning in .loop/run.sh now names both the reverted task and the task whose iteration caused the revert, so an operator no longer sees only the innocent party's id.",
+  "files": [
+    ".loop/run.sh",
+    ".loop/tests/scenarios/41-regression-names-both.sh",
+    "README.md",
+    ".loop/README.md",
+    ".loop/manual.md",
+    "docs/briefs/B008-driver-in-python.md",
+    "docs/briefs/B20260924-1947-gate-shape-and-driver-honesty.loop-brief.md"
+  ],
+  "verified": "bash .loop/tests/scenarios/41-regression-names-both.sh && .loop/tests/run-all.sh && uv run pytest -q — 44 checks passed, 40 pytest tests passed.",
+  "notes": "Changed only the single warn line at .loop/run.sh's GATE REGRESSION block (was line 1048): 'GATE REGRESSION $id — reverting to pending' became '... — reverting to pending; detected during $task's iteration'. $task is the outer loop's current-iteration variable, already in scope at that point (used two lines below in the state_edit notes string), so no new plumbing was needed — this is purely a message-text change. assert_log \"GATE REGRESSION T1\" in the pre-existing scenario 03-gate-regression.sh is a substring match, so appending text after the existing leading form does not break it. Scenario 41 reuses the same T1/T2-clobber fixture shape as 03 but asserts the appended task name too (via sed-stripping the fixed prefix and grepping for T2). Bumped scenario/check counts (40->41, 43->44) across the five documents check-docs.sh enforces, including two literal count mentions inside this run's own brief (the T1..T6 landed-so-far list became T1..T7, and the 'existing 40 scenarios already exercise' sentence in the Shape section)."
+}

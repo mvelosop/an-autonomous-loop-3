@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 98336,
+  "stop_reason": "end_turn",
+  "session_id": "f77045a1-b3d8-4c62-8e8f-93ec3fdf82b8",
+  "total_cost_usd": 0.4219142,
+  "usage": {
+    "input_tokens": 32,
+    "cache_creation_input_tokens": 49530,
+    "cache_read_input_tokens": 784051,
+    "output_tokens": 6692,
+    "output_tokens_details": {
+      "thinking_tokens": 1377
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 49530,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 225,
+        "cache_read_input_tokens": 71295,
+        "cache_creation_input_tokens": 2238,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2238
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-sonnet-5": {
+      "inputTokens": 32,
+      "outputTokens": 6692,
+      "cacheReadInputTokens": 784051,
+      "cacheCreationInputTokens": 49530,
+      "webSearchRequests": 0,
+      "costUSD": 0.4219142,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 1377,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 25,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Verdict: PASS.** Every acceptance criterion for T9 is independently verified as met — check-brief.sh's already-run detection, run.sh's `--replan` refusal (with correct message wording and the resuming-same-brief exemption), scenario 43, and all five doc updates for the 43-scenario/46-check count are all present and correct in the working tree, with the offline suite (46 passed) and pytest (40 passed) both green and no unassigned diffs. The work session made zero code changes and truthfully reported that the criteria were already satisfied by the prior attempt, which I confirmed rather than took on faith. Verdict written to `.loop/tmp/verdict.json`.",
+  "ttft_ms": 2768,
+  "type": "result",
+  "duration_ms": 114297,
+  "uuid": "9a0a5faf-6884-42a8-91e2-cc658b987492",
+  "ttft_stream_ms": 2154,
+  "time_to_request_ms": 34,
+  "first_content_frame_ms": 2155,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "phase": "review",
+  "iteration": 15
+}

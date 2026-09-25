@@ -1,0 +1,8 @@
+{
+  "task": "T9",
+  "outcome": "done",
+  "summary": "No code changes needed: check-brief.sh's already-run detection, run.sh's plan-time refusal with the --replan override and resuming_same_brief guard, scenario 43-brief-already-run.sh, and run-all.sh's check-brief step (which excludes 'already run' findings from failing the gate) are all already present and correct in the working tree.",
+  "files": [],
+  "verified": "Ran the full T9 verify command myself in the foreground via `bash /tmp/t9_verify.sh` (the exact string from state.json's verify field, run under bash rather than the interactive zsh shell since lib.sh's BASH_SOURCE[0] computation requires bash): exit 0, 46/46 scenarios green, 40/40 pytest tests pass.",
+  "notes": "Confirmed via `git status --porcelain` before and after running verify that .loop/state/state.json was untouched throughout this session -- I made zero edits to it or to any other file. The task's own notes field (from the prior attempt) recorded that a work session had modified state.json and the driver restored it from HEAD, failing that iteration as state tampering despite the session reporting 'done' with files:[]. That anomaly did not recur here: running the verify command's fixture scenarios (which build throwaway repos under $FX_REPO via lib.sh's fixture_new/fixture_run) does not touch the real repo's state.json -- verified this directly by diffing git status before/after. If GATE REWRITE fires again on this task despite files:[] and a clean git status at proposal time, the cause is not in this session's actions and may be in the driver's own handling of a zero-file-change 'done' outcome; worth the operator's attention if it repeats a third time."
+}

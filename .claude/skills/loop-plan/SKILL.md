@@ -69,6 +69,58 @@ The same applies to **source text**: a gate that greps a file under `src/` for a
 literal is checking how the code is written rather than what it does, and is
 rejected too.
 
+**A third shape is rejected for a different reason — not style, mechanics.**
+The driver's own revert rule (`gate_files_moved()`) restores any file that
+exists in `HEAD`, is named by a task's verify, and is absent from that task's
+`files` — and it does so *before every gate run*. So a verify command that
+reads the bytes of such a file (`grep`, `cat`, `test -f`, a language-level read
+like Python's `open(...).read()`) can never see anything but the file's
+pre-task content, whatever the session does: that shape is unpassable by any
+implementation, and the driver refuses the plan rather than let it burn
+attempts finding out. **Handing the same path to a runner is unaffected** —
+`uv run pytest -q tests/test_thing.py`, `bash tests/check.sh` — because
+running a file is not reading it, and a task that ships tests under `files`
+must be able to name them. Two escape hatches, both correct outcomes: put the
+file in that task's `files` if the task is meant to own it, or move the claim
+to the acceptance criteria, where the review session can read provenance
+directly instead of the gate re-asserting a file it doesn't control.
+
+**A fourth shape decays rather than starting broken.** A gate re-runs for the
+life of the plan, so `git diff`/`log`/`rev-list` against a baseline fixed at
+plan time — a commit, a tag, a branch, `HEAD~1`, `v1.0..HEAD`,
+`origin/main..HEAD`, `$(git merge-base HEAD main)` — is sound the moment the
+plan is written and unpassable the moment any other task commits, because that
+commit moves `HEAD` and the named baseline stays where it was. A range that
+merely *ends* in `HEAD` is still rejected: the left side is the fixed part, and
+it is what decays. `git diff`/`log`/`rev-list` against `HEAD` itself is the one
+baseline that stays sound for the whole plan and is not flagged — a work
+session cannot commit, so `HEAD` still separates that session's edits from
+everything committed before it, which is exactly what the driver's own
+gate-rewrite guard relies on.
+
+**A `git diff HEAD` guard can still misfire, for a reason rule four does not
+catch.** A gate re-runs for the life of the plan, so a finished task's own
+`verify` runs again on every later iteration as a regression check — and at
+that moment the only uncommitted work in the tree belongs to whichever task
+the driver is working *now*, not to the task whose gate is running. A `git
+diff HEAD` scope guard that does not account for that reads another task's
+in-progress edits as its own regression. The driver exports two environment
+variables for the duration of each verify command: `LOOP_ACTIVE_TASK`, the id
+of the task this iteration is working, and `LOOP_GATE_TASK`, the id of the
+task whose `verify` is currently running. They are equal when a task's own
+gate runs and differ exactly when a gate is running as a regression check of
+some other, already-done task. A `git diff HEAD` guard should compare them —
+skip or narrow the check when `"$LOOP_GATE_TASK" != "$LOOP_ACTIVE_TASK"` —
+rather than assume every uncommitted change in the tree is its own. Neither
+variable is set outside a gate run: a work or review session never sees them.
+
+`.loop/amend.sh check` advises — does not reject, since the driver cannot fully
+judge this shape mechanically — on exactly the gap above: any task whose
+`verify` diffs against `HEAD` (`git diff`/`log`/`rev-list`) without mentioning
+either `LOOP_ACTIVE_TASK` or `LOOP_GATE_TASK` anywhere in the command. Naming
+one of the two variables is enough to clear the advisory; using it correctly is
+still on you.
+
 Known trap: `uv run pytest` exits **5**, not 0, when it collects zero tests. A
 scaffolding task whose verify command is a bare test run can therefore never
 pass. Author around it — assert on the thing the task actually produces
