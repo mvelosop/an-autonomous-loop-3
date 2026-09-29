@@ -113,7 +113,7 @@ can say so.
 ### And one refusal that is upstream of all of it
 
 A brief is the input to everything above, and the loop has no way to tell a
-spent one from a live one. `.loop/brief-template.md` ships
+spent one from a live one. `.loop/loop-brief.template.md` (then .loop/brief-template.md) ships
 `- **Status:** ready to plan`, `.loop/check-brief.sh` keys its skip rule off
 exactly that line, and **nothing ever retires it** — so a brief reads plannable
 forever, including after its run has shipped and merged.

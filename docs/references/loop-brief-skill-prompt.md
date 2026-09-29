@@ -12,7 +12,7 @@ adapter between the two is a **consumer-side skill**, and this is the prompt
 that builds one.
 
 It stays consumer-side on purpose. The loop ships the contract
-(`.loop/brief-template.md`), the checker (`.loop/check-brief.sh`) and the
+(`.loop/loop-brief.template.md`), the checker (`.loop/check-brief.sh`) and the
 authoring rules (`.loop/manual.md`); how a given repo's design surfaces map onto
 them is that repo's business. The moment the loop names a tracker it stops being
 stack-independent — the same seam `.loop/settings.json` draws for permissions.
@@ -108,7 +108,7 @@ Linear sub-issues plus cited design artifacts — and the loop can read neither.
   lives in the brief / durable context is referenced by repo-relative path /
   tracker content must be inlined), plus strip-don't-inherit, declare-the-cut,
   and where out-of-scope comes from.
-- `.loop/brief-template.md` — the shape to fill.
+- `.loop/loop-brief.template.md` — the shape to fill.
 - `.loop/check-brief.sh` — the checks. Read the code, not just the output.
 - `.loop/examples/0003-runstat-cli.md` (greenfield) and `0004-runstat-review.md`
   (incremental) — worked briefs that drove real runs.

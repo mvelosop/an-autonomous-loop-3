@@ -35,7 +35,7 @@ deciding where files live and who owns them.
 
 **One directory, and one line through it.** The loop is `.loop/`. Above the
 line — `run.sh`, `settings.json`, `manual.md`, `README.md`,
-`brief-template.md`, `tests/` — is mechanism, replaced wholesale on upgrade.
+`loop-brief.template.md` (then brief-template.md), `tests/` — is mechanism, replaced wholesale on upgrade.
 Below it, `.loop/state/` (`state.json`, `plan.md`, journals, run telemetry) and
 `.loop/tmp/` (the per-iteration handoffs and the run lock) belong to the
 consumer repo and are never written by the installer.
@@ -100,7 +100,7 @@ widened past `.md` to diagrams, schemas and directories.
 
 The mapping from a repo's own design surfaces — its tracker, its decision
 records, its design handoffs — onto a brief. The loop ships the contract
-(`.loop/brief-template.md`) and the checker (`.loop/check-brief.sh`); a
+(`.loop/loop-brief.template.md`, then .loop/brief-template.md) and the checker (`.loop/check-brief.sh`); a
 consumer ships the skill that translates. The moment the loop names a tracker
 it stops being stack-independent, which is the same seam `.loop/settings.json`
 draws for permissions: the loop provides the slot, the consumer fills it.
